@@ -44,3 +44,15 @@ argument, multiplied with the composite as in Java2D, and `setColorOf(c)`.
 
 `viewer.html` draws any model with any effect on the Canvas2D Graphics: a
 developer page, not part of the game.
+
+## Racing
+
+```
+python3 web/tools/serve.py 8123
+http://localhost:8123/web/ext/main.html?mode=classic&stage=1&car=0   # or mode=career
+```
+or the launcher's Extended Edition -> Classic Race / Career Mode. The page
+preloads the archives and fonts (`ext/fonts/`, the two `.ttf` from
+`madness.jar`), then runs the jar's own `GameSparker.run()` with Extended's
+menus skipped (see `main.html` and WORK.md). `jgraphics.js` is the Graphics:
+`canvas-graphics.js` with Java's `drawImage`/`fillPolygon(Polygon)` shapes.

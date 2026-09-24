@@ -85,6 +85,13 @@ export async function preload(paths, read) {
   }
 }
 
+/** java.io.File as the music loader asks it: does a preloaded file exist? */
+export class File {
+  constructor(path) { this.path = path; }
+  exists() { return FILES.has(this.path); }
+  getName() { return this.path.slice(this.path.lastIndexOf('/') + 1); }
+}
+
 export class URL {
   constructor(base, path) { this.path = path ?? base; }
   openConnection() { const b = this.bytes(); return { getContentLength: () => b.length }; }
@@ -106,18 +113,24 @@ export class Image {
   }
   getWidth() { return this.width; }
   getHeight() { return this.height; }
-  /** Something CanvasRenderingContext2D.drawImage takes; built from the pixels once. */
+  /**
+   * Something CanvasRenderingContext2D.drawImage takes. A decoded image keeps its
+   * canvas; one made from pixels (the game makes a new 870x480 one per frame) is
+   * painted onto one shared scratch canvas each time, since a canvas per image
+   * exhausted the tab's memory within a race.
+   */
   source() {
-    if (!this.canvas) {
-      this.canvas = new OffscreenCanvas(Math.max(1, this.width), Math.max(1, this.height));
-      const data = new ImageData(this.width || 1, this.height || 1);
-      const p = this.pixels, d = data.data;
-      for (let i = 0; i < p.length; i++) { const v = p[i]; d[4 * i] = (v >> 16) & 255; d[4 * i + 1] = (v >> 8) & 255; d[4 * i + 2] = v & 255; d[4 * i + 3] = (v >>> 24) & 255; }
-      this.canvas.getContext('2d').putImageData(data, 0, 0);
-    }
-    return this.canvas;
+    if (this.canvas) return this.canvas;
+    const w = Math.max(1, this.width), h = Math.max(1, this.height);
+    if (!Image.scratch || Image.scratch.width !== w || Image.scratch.height !== h) Image.scratch = new OffscreenCanvas(w, h);
+    const data = new ImageData(w, h);
+    const p = this.pixels, d = data.data;
+    for (let i = 0; i < p.length; i++) { const v = p[i]; d[4 * i] = (v >> 16) & 255; d[4 * i + 1] = (v >> 8) & 255; d[4 * i + 2] = v & 255; d[4 * i + 3] = (v >>> 24) & 255; }
+    Image.scratch.getContext('2d').putImageData(data, 0, 0);
+    return Image.scratch;
   }
 }
+Image.scratch = null;
 
 async function decodeImage(bytes) {
   const bmp = await createImageBitmap(new Blob([bytes]));
@@ -171,8 +184,9 @@ export class MemoryImageSource {
 
 /** java.awt.Component's createImage(ImageProducer): a snapshot of the source's pixels. */
 export class Panel {
-  createImage(src) {
-    if (!(src instanceof MemoryImageSource)) throw new Error('jawt: createImage(width, height) is not ported');
+  createImage(src, height) {
+    if (typeof src === 'number') return Panel.offscreen(src, height);
+    if (!(src instanceof MemoryImageSource)) throw new Error('jawt: createImage of ' + src);
     const { w, h, pix, off, scan } = src;
     const out = new Int32Array(w * h);
     for (let r = 0; r < h; r++) for (let c = 0; c < w; c++) out[r * w + c] = pix[off + r * scan + c];
@@ -180,11 +194,42 @@ export class Panel {
   }
 }
 
+/**
+ * createImage(w, h): an offscreen Image whose getGraphics() draws on its canvas.
+ * The page sets Panel.graphicsFor (canvas, w, h) -> a Graphics (web/ext/jgraphics.js),
+ * so jawt stays free of the renderer.
+ */
+Panel.graphicsFor = null;
+Panel.offscreen = (w, h) => {
+  const img = new Image(w, h, new Int32Array(0), new OffscreenCanvas(w, h));
+  let g = null;
+  img.getGraphics = () => (g ??= Panel.graphicsFor(img.canvas, w, h));
+  return img;
+};
+
 /** What GameSparker inherits from java.applet.Applet; files resolve under ext/. */
 export class Applet extends Panel {
   getCodeBase() { return ''; }
   // ponytail: silent sound; BassoonTracker/WebAudio clips come after a race draws
   getAudioClip() { return { play() {}, loop() {}, stop() {} }; }
+  getAppletContext() { return { toString: () => 'browser', showDocument() {} }; }
+  /** The page sets `screen` (a Graphics on the visible canvas). */
+  repaint() { if (this.screen) this.update(this.screen); }
+  requestFocus() {}
+  showStatus() {}
+  /** The page sets `canvas`; Cursor.HAND_CURSOR (12) over a link, else the arrow. */
+  setCursor(c) { if (this.canvas) this.canvas.style.cursor = c?.type === 12 ? 'pointer' : 'default'; }
+}
+
+/** java.awt.Polygon: the menus build their buttons point by point. */
+export class Polygon {
+  constructor() { this.xpoints = []; this.ypoints = []; this.npoints = 0; }
+  addPoint(x, y) { this.xpoints.push(x); this.ypoints.push(y); this.npoints++; }
+  reset() { this.xpoints = []; this.ypoints = []; this.npoints = 0; }
+}
+
+export class Cursor {
+  constructor(type) { this.type = type; }
 }
 
 export class ZipEntry {
@@ -196,7 +241,7 @@ export class ZipEntry {
 /** Over an in-memory ZIP that preload() inflated; the current entry reads like a stream. */
 export class ZipInputStream {
   constructor(input) {
-    const entries = ZIPS.get(fingerprint(input.bytes));
+    const entries = ZIPS.get(fingerprint((input.in ?? input).bytes));   // over a ByteArrayInputStream or a DataInputStream on one
     if (!entries) throw new Error('jawt: ZipInputStream over an archive preload() has not seen');
     this.entries = entries; this.next = 0; this.bytes = new Uint8Array(0); this.pos = 0;
   }
@@ -285,11 +330,20 @@ export class StringBuilder {
 export const System = {
   out: { println: (...a) => console.log(...a) },
   gc() {},
-  // the game's clock; tests set `now` (ns) to replay a captured call
+  // the game's clock; tests set `now` (ns) to replay a captured call, the page sets `live`
   now: 0,
-  nanoTime() { return System.now; },
-  currentTimeMillis() { return Math.trunc(System.now / 1e6); },
+  live: false,
+  nanoTime() { return System.live ? Math.trunc(performance.now() * 1e6) : System.now; },
+  currentTimeMillis() { return Math.trunc(System.nanoTime() / 1e6); },
+  // as on the machine the jar was captured on (a non-Windows os.name sets xtGraphics.macn)
+  getProperty(k) { return { 'java.version': '1.8.0', 'os.name': 'Windows 10' }[k] ?? null; },
 };
+
+/** java.util.Date as the game loop uses it: the clock, in ms. */
+export class Date {
+  constructor() { this.t = System.currentTimeMillis(); }
+  getTime() { return this.t; }
+}
 
 /** Java's String.valueOf / concatenation of a float ('F') or double ('D'). */
 export function jstr(x, t = 'D') {
@@ -340,10 +394,6 @@ export class Thread {
 function unported(name) {
   return class { constructor() { throw new Error(`jawt: ${name} is not ported`); } static [Symbol.hasInstance]() { return false; } };
 }
-export const Cursor = unported('Cursor');
-export const File = unported('File');
-export const Polygon = unported('Polygon');
 export const RenderingHints = unported('RenderingHints');
-export const Date = unported('Date');
 export const FileOutputStream = unported('FileOutputStream');
 export const FileInputStream = unported('FileInputStream');

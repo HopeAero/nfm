@@ -185,8 +185,7 @@ $('gm-rows').innerHTML = GM.map((t, i) =>
   `<li class="item" role="menuitem" data-act="gm:${(i + 1) % 3}"><span class="label">${t}</span></li>`).join('');
 
 // Extended Edition: NFM2 Extended Mode v2.8's two race modes (its xtGraphics
-// menu's Classic Mode and career, opselect 2 and 1). Only the choice for now:
-// the Extended port lives on the extended-mode branch and is not playable yet.
+// menu's Classic Mode and career, opselect 2 and 1), raced by web/ext/main.html.
 const EXT = [['classic', 'Classic Race'], ['career', 'Career Mode']];
 $('ext-rows').innerHTML = EXT.map(([k, t]) =>
   `<li class="item" role="menuitem" data-act="ext:${k}"><span class="label">${t}</span></li>`).join('');
@@ -860,8 +859,8 @@ function fire() {
       if (+arg === 4) return void (location.href = './web/stagemaker.html');
       return goPage('set');
     case 'gm':    return void startCarSelect(+arg);
-    // ponytail: placeholder until the Extended race runs in the browser.
-    case 'ext':   return say('Extended Edition is coming soon');
+    // ponytail: straight into stage 1 with car 0; an Extended car/stage pick comes next
+    case 'ext':   return void (location.href = `./web/ext/main.html?mode=${arg}`);
     case 'opts':  return goPage('opts');
     case 'lang':  return applyLang();
     case 'back':  return goPage(BACK[pageName()]);

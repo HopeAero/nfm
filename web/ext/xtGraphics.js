@@ -1080,7 +1080,7 @@ export class xtGraphics extends Panel {
     } while (++i < 200);
   }
 
-  over(image, i, j, k, l) {
+  over$m(image, i, j, k, l) {
     let i2 = image.getHeight(this.ob);
     let j2 = image.getWidth(this.ob);
     return (((i > (i32(k - 5))) && (i < (i32((i32(k + j2)) + 5)))) && (j > (i32(l - 5)))) && (j < (i32((i32(l + i2)) + 5)));
@@ -1662,7 +1662,7 @@ export class xtGraphics extends Panel {
 
   cantgo(control, checkpoints) {
     this.pnext = 0;
-    this.trackbg(false);
+    this.trackbg$m(false);
     this.rd.setFont(new Font('SansSerif', 1, 13));
     this.ftm = this.rd.getFontMetrics();
     let mxstage = this.unlocked[0];
@@ -1702,7 +1702,7 @@ export class xtGraphics extends Panel {
   }
 
   loadingstage(i) {
-    this.trackbg(true);
+    this.trackbg$m(true);
     this.rd.drawImage(this.br, 100, 40, null);
     this.rd.setColor(0, 0, 0);
     this.rd.fillRect(0, 0, 100, 480);
@@ -2407,7 +2407,7 @@ export class xtGraphics extends Panel {
     }
   }
 
-  crash(f, i) {
+  crash$m(f, i) {
     if (this.bfcrash === 0) {
       if (i === 0) {
         if ((Math.abs(f) > 25.0) && (Math.abs(f) < 170.0)) {
@@ -3796,7 +3796,7 @@ export class xtGraphics extends Panel {
     return fr(Math.sqrt(i32((Math.imul(((i32(i - j))), (i32(i - j)))) + (Math.imul(((i32(k - l))), (i32(k - l)))))));
   }
 
-  stat(madness, checkpoints, control, conto, contva, flag) {
+  stat$m(madness, checkpoints, control, conto, contva, flag) {
     this.now = System.currentTimeMillis();
     this.framesCount = i32(this.framesCount + 1);
     if ((this.now - this.framesTimer) > 1000) {
@@ -7555,7 +7555,7 @@ export class xtGraphics extends Panel {
     }
   }
 
-  careermode(madness, checkpoints, control, conto, trackers, contva) {
+  careermode$m(madness, checkpoints, control, conto, trackers, contva) {
     this.viewbot = control[0].viewbot[0];
     this.makebot = control[0].viewbot[1];
     if (this.makebot) {
@@ -9726,7 +9726,7 @@ export class xtGraphics extends Panel {
       }
       this.setlevels = true;
     }
-    this.trackbg(true);
+    this.trackbg$m(true);
     this.rd.setColor(0, 0, 0);
     this.rd.fillRect(0, 0, 100, 480);
     this.rd.fillRect(770, 0, 100, 480);
@@ -13260,7 +13260,7 @@ export class xtGraphics extends Panel {
     return i32((Math.imul(((i32(i - j))), (i32(i - j)))) + (Math.imul(((i32(k - l))), (i32(k - l)))));
   }
 
-  trackbg(flag) {
+  trackbg$m(flag) {
     let i = 0;
     this.trkl = i32(this.trkl + 1);
     if (this.trkl > this.trklim) {
@@ -15068,7 +15068,7 @@ export class xtGraphics extends Panel {
       this.radpx = 247;
       this.pin = 0;
     }
-    this.trackbg(false);
+    this.trackbg$m(false);
     this.rd.setColor(0, 0, 0);
     this.rd.fillRect(100, 150, 670, 59);
     this.menu.loadMod(345, 7900, 125, this.sunny, this.macn);
@@ -15111,7 +15111,7 @@ export class xtGraphics extends Panel {
     this.rd.fillRect(100, 440, 670, 40);
   }
 
-  skid(i, f) {
+  skid$m(i, f) {
     if (((this.bfcrash === 0) && (this.bfskid === 0)) && (f > 150.0)) {
       if (i === 0) {
         if (!this.mutes) {
@@ -16843,13 +16843,13 @@ export class xtGraphics extends Panel {
   ctachm(i, j, k, control, checkpoints, madness) {
     if (this.fase === 205) {
       if (k === 1) {
-        if (this.over(this.next[0], i, j, 645, 120)) {
+        if (this.over$m(this.next[0], i, j, 645, 120)) {
           this.pnext = 1;
         }
-        if (this.over(this.back[0], i, j, 155, 120)) {
+        if (this.over$m(this.back[0], i, j, 155, 120)) {
           this.pback = 1;
         }
-        if (this.over(this.contin[0], i, j, 390, 435)) {
+        if (this.over$m(this.contin[0], i, j, 390, 435)) {
           this.pcontin = 1;
         }
       }
@@ -16871,13 +16871,13 @@ export class xtGraphics extends Panel {
         notcm = 40;
       }
       if (k === 1) {
-        if (this.over(this.next[0], i, j, 500, i32(400 + notcm)) && (checkpoints.stage < this.betalimit)) {
+        if (this.over$m(this.next[0], i, j, 500, i32(400 + notcm)) && (checkpoints.stage < this.betalimit)) {
           this.pnext = 1;
         }
-        if (this.over(this.back[0], i, j, 310, i32(400 + notcm))) {
+        if (this.over$m(this.back[0], i, j, 310, i32(400 + notcm))) {
           this.pback = 1;
         }
-        if (this.over(this.contin[0], i, j, 390, i32(400 + notcm)) && (checkpoints.stage < this.betalimit)) {
+        if (this.over$m(this.contin[0], i, j, 390, i32(400 + notcm)) && (checkpoints.stage < this.betalimit)) {
           this.pcontin = 1;
         }
       }
@@ -17096,7 +17096,7 @@ export class xtGraphics extends Panel {
       }
     }
     if (this.fase === 3) {
-      if ((k === 1) && this.over(this.contin[0], i, j, 390, 365)) {
+      if ((k === 1) && this.over$m(this.contin[0], i, j, 390, 365)) {
         this.pcontin = 1;
       }
       if ((k === 2) && (this.pcontin === 1)) {
@@ -17105,7 +17105,7 @@ export class xtGraphics extends Panel {
       }
     }
     if (this.fase === 4) {
-      if ((k === 1) && this.over(this.back[0], i, j, 405, 360)) {
+      if ((k === 1) && this.over$m(this.back[0], i, j, 405, 360)) {
         this.pback = 1;
       }
       if ((k === 2) && (this.pback === 1)) {
@@ -17114,7 +17114,7 @@ export class xtGraphics extends Panel {
       }
     }
     if (this.fase === 6) {
-      if ((k === 1) && ((this.over(this.star[0], i, j, 394, 400) || this.over(this.star[0], i, j, 394, 310)))) {
+      if ((k === 1) && ((this.over$m(this.star[0], i, j, 394, 400) || this.over$m(this.star[0], i, j, 394, 310)))) {
         this.pstar = 2;
       }
       if ((k === 2) && (this.pstar === 2)) {
@@ -17123,7 +17123,7 @@ export class xtGraphics extends Panel {
       }
     }
     if (this.fase === 500) {
-      if ((k === 1) && this.over(this.back[0], i, j, 405, 395)) {
+      if ((k === 1) && this.over$m(this.back[0], i, j, 405, 395)) {
         this.pback = 1;
       }
       if ((k === 2) && (this.pback === 1)) {
@@ -17198,10 +17198,10 @@ export class xtGraphics extends Panel {
             }
           }
         }
-        if (this.over(this.next[0], i, j, 780, 290)) {
+        if (this.over$m(this.next[0], i, j, 780, 290)) {
           this.pnext = 1;
         }
-        if (this.over(this.back[0], i, j, 30, 290)) {
+        if (this.over$m(this.back[0], i, j, 30, 290)) {
           this.pback = 1;
         }
       }
@@ -17365,7 +17365,7 @@ export class xtGraphics extends Panel {
     if (this.fase === -5) {
       this.lxm = i;
       this.lym = j;
-      if ((k === 1) && this.over(this.contin[0], i, j, 390, i32(390 - this.pin))) {
+      if ((k === 1) && this.over$m(this.contin[0], i, j, 390, i32(390 - this.pin))) {
         this.pcontin = 1;
       }
       if ((k === 2) && (this.pcontin === 1)) {
@@ -17437,7 +17437,7 @@ export class xtGraphics extends Panel {
         }
       }
       if (this.aprogress) {
-        if ((k === 1) && this.over(this.next[0], i, j, 787, 447)) {
+        if ((k === 1) && this.over$m(this.next[0], i, j, 787, 447)) {
           this.pnext = 1;
         }
         if ((k === 2) && (this.pnext === 1)) {
@@ -17460,7 +17460,7 @@ export class xtGraphics extends Panel {
         }
       }
       if ((this.showopstage === 180) || (((this.showopstage === 0) && (((((this.ptmatch === 2) || (this.ptmatch === 3)) || (this.ptmatch === 4)) || (this.ptmatch === 5)))))) {
-        if ((k === 1) && this.over(this.contin[0], i, j, 390, 447)) {
+        if ((k === 1) && this.over$m(this.contin[0], i, j, 390, 447)) {
           this.pcontin = 1;
         }
         if ((k === 2) && (this.pcontin === 1)) {
@@ -17470,7 +17470,7 @@ export class xtGraphics extends Panel {
       }
     }
     if ((this.fase === 51) && (this.flipo >= 465)) {
-      if ((k === 1) && this.over(this.contin[0], i, j, 390, 447)) {
+      if ((k === 1) && this.over$m(this.contin[0], i, j, 390, 447)) {
         this.pcontin = 1;
       }
       if ((k === 2) && (this.pcontin === 1)) {
@@ -17526,13 +17526,13 @@ export class xtGraphics extends Panel {
         }
       } else {
         if (k === 1) {
-          if (((((this.cred && (this.flipo === 2))) || ((this.inst && (this.flipo === 9))))) && this.over(this.contin[0], i, j, 437, 420)) {
+          if (((((this.cred && (this.flipo === 2))) || ((this.inst && (this.flipo === 9))))) && this.over$m(this.contin[0], i, j, 437, 420)) {
             this.pcontin = 1;
           }
-          if (((((this.cred && (this.flipo < 2))) || ((this.inst && (this.flipo < 9))))) && this.over(this.next[0], i, j, 590, 422)) {
+          if (((((this.cred && (this.flipo < 2))) || ((this.inst && (this.flipo < 9))))) && this.over$m(this.next[0], i, j, 590, 422)) {
             this.pnext = 1;
           }
-          if ((this.flipo > 0) && this.over(this.back[0], i, j, 319, 422)) {
+          if ((this.flipo > 0) && this.over$m(this.back[0], i, j, 319, 422)) {
             this.pback = 1;
           }
         }
@@ -17554,13 +17554,13 @@ export class xtGraphics extends Panel {
     }
     if (this.triggerinst) {
       if (k === 1) {
-        if ((this.flipo === 9) && this.over(this.contin[0], i, j, 437, 420)) {
+        if ((this.flipo === 9) && this.over$m(this.contin[0], i, j, 437, 420)) {
           this.pcontin = 1;
         }
-        if ((this.flipo < 9) && this.over(this.next[0], i, j, 590, 422)) {
+        if ((this.flipo < 9) && this.over$m(this.next[0], i, j, 590, 422)) {
           this.pnext = 1;
         }
-        if ((this.flipo > 0) && this.over(this.back[0], i, j, 319, 422)) {
+        if ((this.flipo > 0) && this.over$m(this.back[0], i, j, 319, 422)) {
           this.pback = 1;
         }
       }
@@ -17581,16 +17581,16 @@ export class xtGraphics extends Panel {
     }
     if (this.fase === 301) {
       if (k === 1) {
-        if (this.over(this.normalmode, i, j, 333, 80)) {
+        if (this.over$m(this.normalmode, i, j, 333, 80)) {
           control.normalmode = true;
         }
-        if (this.over(this.rpgmode, i, j, 333, 160)) {
+        if (this.over$m(this.rpgmode, i, j, 333, 160)) {
           control.career = true;
         }
-        if (this.over(this.practice, i, j, 333, 240)) {
+        if (this.over$m(this.practice, i, j, 333, 240)) {
           control.classic = true;
         }
-        if (this.over(this.back[0], i, j, 405, 405)) {
+        if (this.over$m(this.back[0], i, j, 405, 405)) {
           this.pback = 1;
         }
       }
@@ -17605,7 +17605,7 @@ export class xtGraphics extends Panel {
     }
     if (this.fase === 11) {
       if (this.flipo === 0) {
-        if ((k === 1) && this.over(this.next[0], i, j, 700, 410)) {
+        if ((k === 1) && this.over$m(this.next[0], i, j, 700, 410)) {
           this.pnext = 1;
         }
         if ((k === 2) && (this.pnext === 1)) {
@@ -17614,14 +17614,14 @@ export class xtGraphics extends Panel {
         }
       }
       if (this.flipo === 1) {
-        if ((k === 1) && this.over(this.back[0], i, j, 110, 410)) {
+        if ((k === 1) && this.over$m(this.back[0], i, j, 110, 410)) {
           this.pback = 1;
         }
         if ((k === 2) && (this.pback === 1)) {
           control.left = true;
           this.pback = 0;
         }
-        if ((k === 1) && this.over(this.contin[0], i, j, 390, 410)) {
+        if ((k === 1) && this.over$m(this.contin[0], i, j, 390, 410)) {
           this.pcontin = 1;
         }
         if ((k === 2) && (this.pcontin === 1)) {
@@ -17630,7 +17630,7 @@ export class xtGraphics extends Panel {
         }
       }
       if (this.flipo === 16) {
-        if ((k === 1) && this.over(this.contin[0], i, j, 600, 410)) {
+        if ((k === 1) && this.over$m(this.contin[0], i, j, 600, 410)) {
           this.pcontin = 1;
         }
         if ((k === 2) && (this.pcontin === 1)) {
@@ -17640,7 +17640,7 @@ export class xtGraphics extends Panel {
       }
     }
     if (this.fase === 8) {
-      if ((k === 1) && this.over(this.back[0], i, j, 20, 445)) {
+      if ((k === 1) && this.over$m(this.back[0], i, j, 20, 445)) {
         this.pback = 1;
       }
       if ((k === 2) && (this.pback === 1)) {
@@ -17674,7 +17674,7 @@ export class xtGraphics extends Panel {
   }
 
   loadingfailed(i, control) {
-    this.trackbg(false);
+    this.trackbg$m(false);
     this.rd.setFont(new Font('SansSerif', 1, 13));
     this.ftm = this.rd.getFontMetrics();
     this.drawcs(140, 'Error Loading Stage ' + i, 200, 0, 0, 3);

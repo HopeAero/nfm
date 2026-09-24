@@ -1002,12 +1002,47 @@ there is no backend of ours anywhere in this design.
         fields are authoritative per car, and how the receive side folds them
         back into `Mad`/`ContO`, is real game logic.
 
-## Future: Extended Mode v2.8 (after the original port)
+## Extended Mode v2.8 (branch `extended-mode`, `web/ext/`)
+
+Classes are transpiled from Extended's own repaired source by
+`decompilation/extended/j2js/J2JS.java` (not patched from `web/*.js`: see
+`web/ext/README.md` for why). Verified against `madness.jar` by captured-call
+replay (`web/tools/ext-trace.mjs`, DiffRun `-Ddiffrun.trace=Class.method`).
+
+- [x] **Step 1, archives:** `radq.js`, every entry's CRC in all 15 archives.
+- [x] **Step 2, models and drawing:** `ContO`/`Plane` bit for bit on 129 models;
+      `ContO.d`/`Plane.d` call for call (170k pose calls, ~3M effect calls).
+- [x] **Step 3, physics:** `Madness.drive` identical on 21 captured race calls,
+      `Control.preform` (AI) on 12. `trace-drive`/`trace-preform` fixtures.
+- [~] **Step 3, AI coverage:** the 12 preform calls run ~4% of its 9,520 lines
+      (most calls take the `stcnt <= statusque` short path). Capture calls where
+      the AI re-decides (`stcnt > statusque`) to cover the rest.
+- [ ] **Step 3, rest:** `Madness.colide`, `CheckPoints.checkstat` replays.
+- [x] **Step 4, stage loading:** `GameSparker.loadstage` identical on the menu's
+      stage 16 and the race's stage 9 (`game-L`). Fixture is 4.2 MB, kept in
+      `D:\platica\.nfm-ext-work\` rather than the repo.
+- [ ] **Step 4, backdrop:** `Medium.d` (sky, ground, clouds, mountains) is drawn
+      but not verified call for call; do it on real stages like `draw.test.js`.
+- [x] **A race in the browser (2026-09-24):** `web/ext/main.html?mode=classic|career&stage=N&car=M`
+      runs the jar's own `GameSparker.run()` loop (a generator, see WORK.md),
+      skipping Extended's menus: it sets the stage, car and mode where
+      `readdata` hands over `xtGraphics`/`CheckPoints`, then `fase = 6476` as
+      stage select's START does. The launcher's Extended Edition -> Classic
+      Race / Career Mode opens it. 7-car race on stage 1 with the full HUD.
+- [ ] **Launcher car and stage pick for Extended** (it opens stage 1, car 0).
+- [ ] **Sound and music:** `getAudioClip` is silent; `ext/` has no `sounds/`
+      or `music/` yet. The base port's BassoonTracker/WebAudio path is the model.
+- [ ] **Saving:** `writedata` is a no-op (needs `ZipOutputStream`); `localStorage`.
+- [ ] **Renderer:** the race draws on Canvas2D (`web/ext/jgraphics.js` over
+      `canvas-graphics.js`). Move the 3D to `graphics.js` (WebGL) as the base
+      race does, keeping the submission order.
+- [ ] **Deploy:** `deploy.sh` needs `rsync`, which this Windows machine lacks.
+- [ ] **Extended's own menus, last** (as in the base port, the launcher stands
+      in for them). They already run from the transpiled `xtGraphics`; images
+      decode, but the menu backdrop draws black.
 
 - [x] **Validated and repaired (2026-09-23):** procyon's raw output was wrong in 129 places (126 compound casts, 3 infinite loops); `java-src/` is the repaired copy. 1,924/1,950 methods equivalent by operations, the other 26 read and benign; a side-by-side run (`decompilation/extended/diffrun/`) matches the jar bit for bit through menus and ~650 frames of a 6-car race. Modes not yet run side by side: career/RPG, tourney, specials. See `decompilation/extended/README.md`.
 - [x] **Decompiled (2026-09-23):** `decompilation/extended/java-src/`, 26 classes, 97.6% opcode match on recompile (base game 98.7% by the same measure); `Control.preform` is too large to recompile. `research/extended-mode/radq.py` unpacks all 78 `.radq`. See `decompilation/extended/README.md`.
-- [ ] Complete and verify the original Java-to-browser port first. Keep Extended Mode changes out of the active `web/` work until that baseline is ready.
-- [ ] Then assess and port Extended Mode gameplay, cars, tracks, and UI incrementally. The source location, verified differences, archive encoding, and limitations of the Java runtime check are documented in [`research/extended-mode/README.md`](research/extended-mode/README.md).
 
 ## Known gaps / risks
 

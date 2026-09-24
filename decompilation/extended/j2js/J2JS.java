@@ -145,7 +145,7 @@ public class J2JS {
                 }
                 String n = mt.getName().toString();
                 int k = seen.merge(n, 1, Integer::sum) - 1;
-                methodNames.put(s, k == 0 ? n : n + "$" + k);
+                methodNames.put(s, fieldClash((Symbol.ClassSymbol) s.owner, k == 0 ? n : n + "$" + k));
             }
             StringBuilder body = new StringBuilder();
             body.append("export class ").append(name);
@@ -551,7 +551,15 @@ public class J2JS {
                 if (m == ms) break;
                 if (m instanceof Symbol.MethodSymbol x && x.getSimpleName().equals(ms.getSimpleName()) && x.getKind() == ElementKind.METHOD) k++;
             }
-            return k == 0 ? ms.getSimpleName().toString() : ms.getSimpleName() + "$" + k;
+            return fieldClash(oc, k == 0 ? ms.getSimpleName().toString() : ms.getSimpleName() + "$" + k);
+        }
+
+        // Java keeps fields and methods apart; in JS an instance field hides the
+        // prototype method (xtGraphics has both `Image[][] trackbg` and trackbg()).
+        static String fieldClash(Symbol.ClassSymbol oc, String n) {
+            for (Symbol m : oc.getEnclosedElements())
+                if (m instanceof Symbol.VarSymbol && m.getSimpleName().contentEquals(n)) return n + "$m";
+            return n;
         }
 
         String newClass(NewClassTree nc) {

@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Need for Madness 2 Extended</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; }
+  body { display: flex; align-items: center; justify-content: center; }
+  canvas { width: min(100vw, calc(100vh * 870 / 480)); aspect-ratio: 870 / 480; image-rendering: auto; outline: none; }
+  #status { position: fixed; left: 8px; bottom: 6px; color: #aaa; font: 12px sans-serif; }
+</style>
+</head>
+<body>
+<canvas id="game" width="870" height="480" tabindex="0"></canvas>
+<div id="status">cargando…</div>
+<script type="module">
+// Extended Mode v2.8 as the applet ran: GameSparker.init() + start(), its own
+// run() loop (a generator stepped by jawt.Thread), Java 1.0 key/mouse events.
+import { detectFpath, readBytes } from '../vfs.js';
+import { Panel, System, preload } from './jawt.js';
+import { JGraphics } from './jgraphics.js';
+import { GameSparker } from './GameSparker.js';
+
+const status = document.getElementById('status');
+const canvas = document.getElementById('game');
+try {
+  await detectFpath('../../');   // this page is one level below web/
+  const BOTS = [5, 9, 10, 11, 13, 14, 18, 20, 21].map((n) => `data/Files/Bots/stage${n}.radq`);
+  await preload(['data/models.radq', 'data/images.radq', 'data/Files/tracks.radq', 'data/Files/careertracks.radq',
+    'data/Files/classictracks.radq', 'data/Files/matchtracks.radq', ...BOTS], (p) => readBytes('ext/' + p));
+  for (const [family, file] of [['Adventure', 'Adventure.ttf'], ['fifawelcome1.3', 'fifawelcome1.3.ttf']]) {
+    const face = new FontFace(family, `url(../../ext/fonts/${file})`);
+    document.fonts.add(await face.load());
+  }
+} catch (e) {
+  status.textContent = 'error: ' + e.message;
+  throw e;
+}
+status.remove();
+
+System.live = true;
+Panel.graphicsFor = (c, w, h) => new JGraphics(c, w, h);
+const gs = new GameSparker();
+// Straight into a race, as web/main.html?car=&stage= does for the base game:
+// the launcher picks, the Extended menus are skipped (they come last).
+// ?mode=classic|career&stage=N&car=M. run() hands readdata its xtGraphics and
+// CheckPoints; from there this does what stage select's START does (fase 6476:
+// randomno sets the field size, then fase 2 loads the stage).
+const q = new URLSearchParams(location.search);
+gs.readdata = function (xt, madness, checkpoints) {
+  GameSparker.prototype.readdata.call(this, xt, madness, checkpoints);
+  // the debug setup the jar captures use (diffrun.debug): every stage open, no beta wall
+  xt.unlocked[0] = xt.realunlocked[0] = 27;
+  xt.unlocked[1] = xt.realunlocked[1] = 30;
+  xt.betalimit = 100;
+  xt.statpoints.fill(999);
+  xt.carpoints = 999;
+  xt.careermode = q.get('mode') === 'career';
+  xt.classicmode = !xt.careermode;
+  checkpoints.stage = +(q.get('stage') ?? 1);
+  xt.sc[0] = +(q.get('car') ?? 0);
+  xt.fase = 6476;
+  window.xt = xt; window.checkpoints = checkpoints;   // for the console
+};
+// ponytail: no saving yet (writedata needs ZipOutputStream); localStorage when careers matter
+gs.writedata = () => {};
+gs.screen = new JGraphics(canvas, 870, 480);
+gs.canvas = canvas;
+gs.init();
+gs.start();
+
+// Java 1.0 key codes: arrows 1004-1007, Enter 10, Esc 27, else the character.
+const KEYS = { ArrowUp: 1004, ArrowDown: 1005, ArrowLeft: 1006, ArrowRight: 1007, Enter: 10, Escape: 27, Backspace: 8, Tab: 9,
+  Home: 1000, End: 1001, PageUp: 1002, PageDown: 1003, F1: 1008, F2: 1009, F3: 1010, F4: 1011, F5: 1012, F6: 1013, F7: 1014, F8: 1015, F9: 1016, F10: 1017, F11: 1018, F12: 1019 };
+const code = (e) => KEYS[e.key] ?? (e.key.length === 1 ? e.key.charCodeAt(0) : 0);
+addEventListener('keydown', (e) => { const k = code(e); if (k) { gs.keyDown({}, k); e.preventDefault(); } });
+addEventListener('keyup', (e) => { const k = code(e); if (k) { gs.keyUp({}, k); e.preventDefault(); } });
+const at = (e) => { const r = canvas.getBoundingClientRect(); return [Math.round((e.clientX - r.left) * 870 / r.width), Math.round((e.clientY - r.top) * 480 / r.height)]; };
+canvas.addEventListener('mousedown', (e) => { gs.mouseDown({}, ...at(e)); canvas.focus(); });
+canvas.addEventListener('mousemove', (e) => gs.mouseMove({}, ...at(e)));
+canvas.focus();
+window.gs = gs;   // for the console
+</script>
+</body>
+</html>

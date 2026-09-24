@@ -1809,7 +1809,7 @@ export class GameSparker extends Applet {
         }
       }
       if (xtgraphics.fase === 1) {
-        xtgraphics.trackbg(bots.resetonce = false);
+        xtgraphics.trackbg$m(bots.resetonce = false);
         medium.d(this.rd);
         if (medium.effect[4]) {
           medium.redrawpolys(this.rd);
@@ -2460,14 +2460,14 @@ export class GameSparker extends Applet {
           if (!xtgraphics.ghosttele) {
             if (this.view === 0) {
               medium.follow(aconto2[whichfol], amadness[whichfol].cxz, this.u[0].lookback, viewboost);
-              xtgraphics.stat(amadness, checkpoints, this.u[0], aconto2, contva, true);
+              xtgraphics.stat$m(amadness, checkpoints, this.u[0], aconto2, contva, true);
             } else {
               medium.watch(aconto2[whichfol], amadness[whichfol].cxz / 15.0, viewboost);
-              xtgraphics.stat(amadness, checkpoints, this.u[0], aconto2, contva, true);
+              xtgraphics.stat$m(amadness, checkpoints, this.u[0], aconto2, contva, true);
             }
           } else {
             medium.follow(aconto2[whichfol], 0, 0, viewboost);
-            xtgraphics.stat(amadness, checkpoints, this.u[0], aconto2, contva, true);
+            xtgraphics.stat$m(amadness, checkpoints, this.u[0], aconto2, contva, true);
           }
           if (xtgraphics.starcnt === 36) {
             this.repaint();
@@ -2477,7 +2477,7 @@ export class GameSparker extends Applet {
             xtgraphics.realwalls(aconto2, amadness, checkpoints.stage);
           }
           if (xtgraphics.careermode) {
-            xtgraphics.careermode(amadness, checkpoints, this.u, aconto2, trackers, contva);
+            xtgraphics.careermode$m(amadness, checkpoints, this.u, aconto2, trackers, contva);
           }
         } else {
           let cararound = 5;
@@ -2497,7 +2497,7 @@ export class GameSparker extends Applet {
             medium.vxz = 180;
             checkpoints.checkstat(amadness, aconto2, record, xtgraphics);
             medium.follow(aconto2[0], amadness[0].cxz, 0, 0);
-            xtgraphics.stat(amadness, checkpoints, this.u[0], aconto2, contva, true);
+            xtgraphics.stat$m(amadness, checkpoints, this.u[0], aconto2, contva, true);
             this.rd.setColor(255, 255, 255);
             this.rd.fillRect(0, 0, 870, 480);
           }

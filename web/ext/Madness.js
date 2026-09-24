@@ -403,7 +403,7 @@ export class Madness {
         byte2 = 1;
       }
       if ((this.im === 0) || this.colidim) {
-        this.xt.crash(f, Math.imul(byte2, byte0));
+        this.xt.crash$m(f, Math.imul(byte2, byte0));
       }
       if (((Math.imul(byte2, byte0)) === 0) || this.mtouch) {
         for (let l = 0; l < conto.npl; l = i32(l + 1)) {
@@ -576,7 +576,7 @@ export class Madness {
         f = fr(f + 100.0);
       }
       if ((this.im === 0) || this.colidim) {
-        this.xt.crash(f, 0);
+        this.xt.crash$m(f, 0);
       }
       for (let j = 0; j < conto.npl; j = i32(j + 1)) {
         let f2 = 0.0;
@@ -1168,7 +1168,7 @@ export class Madness {
         f = fr(f + 100.0);
       }
       if ((this.im === 0) || this.colidim) {
-        this.xt.crash(f, 0);
+        this.xt.crash$m(f, 0);
       }
       for (let j = 0; j < conto.npl; j = i32(j + 1)) {
         let f2 = 0.0;
@@ -2076,7 +2076,7 @@ export class Madness {
             if (this.m.random() > 0.075) {
               conto.dust(l5, af[l5], af3[l5], af2[l5], this.scx[l5], this.scz[l5], fr(f10 * this.simag[this.cn]), true, trunc(this.tilt));
               if ((this.im === 0) && !this.capsized) {
-                this.xt.skid(this.roadtyp, fr(Math.sqrt(fr((fr(this.scx[l5] * this.scx[l5])) + (fr(this.scz[l5] * this.scz[l5]))))));
+                this.xt.skid$m(this.roadtyp, fr(Math.sqrt(fr((fr(this.scx[l5] * this.scx[l5])) + (fr(this.scz[l5] * this.scz[l5]))))));
               }
             }
           } else {
