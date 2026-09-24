@@ -25,6 +25,16 @@ Los archivos originales siguen en `D:\platica\Need for Madness 2 - Extended Mode
 
 El código fuente descompilado de las 26 clases del juego está en [`decompilation/extended/`](../../decompilation/extended/README.md), verificado por bytecode: 97,6 % de coincidencia de opcodes, frente al 98,7 % del juego base con la misma medida. `radq.py`, en esta carpeta, desempaqueta los 78 `.radq` (64 normales, 14 con intercambio de bytes) sin modificar los originales.
 
+## Datos en el navegador (paso 1, 2026-09-23, rama `extended-mode`)
+
+Los 15 `.radq` que necesitan modelos, pistas e imágenes están copiados **sin modificar** en `ext/data/` (misma estructura que la instalación; hashes verificados). `web/ext/radq.js` los lee en el navegador y `web/ext/radq.test.js` comprueba el CRC de cada entrada. La música (`careermusic/`, 67 MB) todavía no se copió.
+
+[`inventory.md`](inventory.md) (lo genera `web/tools/ext-inventory.mjs`) cruza cada directiva de los 129 modelos y las 84 pistas con lo que lee el port y lo que lee el jar:
+
+- **Modelos:** solo falta `firedam`. `glass`, `noOutline` y el resto ya los lee el port.
+- **Extended no tiene `CarDefine`:** las estadísticas de sus 39 autos están fijas en el constructor de `Madness` (`acelf`, `swits`, `handb`…); las líneas `physics(...)` de sus modelos no las lee nadie. El port no puede sacar las estadísticas del modelo como en el juego base.
+- **Pistas:** faltan 20 directivas: `switch`, `specialchk`, `teleset`/`telechk` (teletransporte), `fakewall*`, `noseew*`, `flame*w`, `igmax*`.
+
 ## Límite de la comprobación
 
 Con Java 8, `java -jar madness.jar` abrió una ventana que respondía pero permaneció negra durante las pruebas. La consola mostró errores de formato de audio y la ausencia inicial de archivos de guardado. El ejecutable envoltorio de 64 bits salió enseguida. Se detuvieron los procesos y se eliminó el respaldo de guardado que generó la prueba. **La jugabilidad no quedó verificada visualmente**; las conclusiones anteriores proceden del JAR y de los recursos.
