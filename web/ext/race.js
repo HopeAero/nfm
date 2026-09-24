@@ -22,8 +22,9 @@ import { Panel, System, knownFiles, preload } from './jawt.js';
 import { MUSIC_FILES } from './musicfiles.js';
 import { JGraphics, JGraphics2D } from './jgraphics.js';
 import { GameSparker } from './GameSparker.js';
-import { makeInterp } from './interp.js';
-import { random } from '../java.js';
+import { RaceTick } from './racetick.js';
+import { Madness } from './Madness.js';
+import { random, setDrawPhase } from '../java.js';
 
 const W = 870, H = 480;   // Extended's game space (the base game's is 800x450)
 const BOTS = [5, 9, 10, 11, 13, 14, 18, 20, 21].map((n) => `data/Files/Bots/stage${n}.radq`);
@@ -125,11 +126,18 @@ export async function bootExtended(params, log, onExit) {
   };
   // ponytail: no saving yet (writedata needs ZipOutputStream); localStorage when careers matter
   gs.writedata = () => {};
-  // run()'s placed objects (aconto2) are a local; loadstage gets them first
-  let placed = null, medium = null, record = null;
-  gs.loadstage = function (aconto, ...rest) {
-    placed = aconto; medium = rest[1]; record = rest[6];
-    return GameSparker.prototype.loadstage.call(this, aconto, ...rest);
+  // run()'s locals are what the race tick works on; loadstage is handed all of
+  // them but Bots, which the first drive() of the race is.
+  const w = {};
+  gs.loadstage = function (aconto, aconto1, medium, trackers, cp, xtg, amadness, record, contva) {
+    Object.assign(w, { aconto2: aconto, aconto: aconto1, medium, trackers, checkpoints: cp, xtgraphics: xtg, amadness, record, contva });
+    return GameSparker.prototype.loadstage.call(this, aconto, aconto1, medium, trackers, cp, xtg, amadness, record, contva);
+  };
+  const drive = Madness.prototype.drive;
+  Madness.prototype.drive = function (u, conto, trackers, cp, contva, bots) {
+    w.bots = bots;
+    Madness.prototype.drive = drive;
+    return drive.call(this, u, conto, trackers, cp, contva, bots);
   };
   window.gs = gs;                  // for the console
 
@@ -138,145 +146,273 @@ export async function bootExtended(params, log, onExit) {
   // ---- to the start line, unseen --------------------------------------------
   // Stage preview (fase 1) and "press start" (fase 6) wait for Enter; fase 176
   // counts down run()'s music wait. Nothing here is presented: rd.end() is not
-  // called until the race.
-  log(`loading ${mode} stage ${params.get('stage') || '(the jar\'s pick)'}...`);
-  for (let n = 0; !(xt && xt.fase === 0); n++) {
+  // called until the race. The next() that reaches fase 0 runs one jar race
+  // frame, which is where drive() hands over Bots.
+  log(`loading ${mode} stage ${params.get('stage') || "(the jar's pick)"}...`);
+  for (let n = 0; !(xt && xt.fase === 0 && w.bots); n++) {
     if (n > 5000) throw new Error(`Extended never reached the race (fase ${xt?.fase})`);
     if (xt && (xt.fase === 1 || xt.fase === 6)) gs.u[0].enter = true;
     rd.begin();
     frame.next();
     if (n % 20 === 19) await new Promise((r) => setTimeout(r, 0));   // let the page breathe
   }
+  const { medium } = w;
+  const race = new RaceTick(gs, w);
   log(`stage ${checkpoints.stage}: ${checkpoints.name}`);
   window.xt = xt; window.checkpoints = checkpoints;
-  window.ext = { get placed() { return placed; }, get medium() { return medium; }, get record() { return record; } };   // for the console
+  window.ext = { w, race };        // for the console
 
   // ---- input ------------------------------------------------------------------
+  // GameSparker.keyDown is Extended's own map (arrows, handbrake, V for the view, ...).
   addEventListener('keydown', (e) => { const k = javaKey(e); if (k) { gs.keyDown({}, k); e.preventDefault(); } });
   addEventListener('keyup', (e) => { const k = javaKey(e); if (k) { gs.keyUp({}, k); e.preventDefault(); } });
   const at = (e) => { const r = glCanvas.getBoundingClientRect(); return [Math.round((e.clientX - r.left) * W / r.width), Math.round((e.clientY - r.top) * H / r.height)]; };
   stage.addEventListener('mousedown', (e) => gs.mouseDown({}, ...at(e)));
   stage.addEventListener('mousemove', (e) => gs.mouseMove({}, ...at(e)));
 
-  // ---- the race loop: the base race's fixed tick ------------------------------
-  // 53 ms is the jar's own budget (GameSparker.run: 530 ms per 10 frames on a
-  // modern JVM). Between ticks the scene is redrawn at display rate from
-  // blended positions (interp.js); ?interp=0 draws only on a tick, as the jar.
+  // ---- the race loop: the base race's (web/main.js frameBody) -------------------
+  // Fixed 53 ms tick (the jar's budget: 530 ms per 10 frames); physics never at
+  // display rate. A tick is rebuildNewCars() + simulate(); the frame draws ONCE,
+  // after its ticks, from positions and camera blended between the last two tick
+  // states (t = acc / TICK_MS). That draw is authoritative when a tick ran --
+  // effects advance, ContO.dist is produced for the next tick's sort -- and a
+  // redraw otherwise: medium.interpolating holds every draw-time advance still
+  // and Medium.random() replays the tick draw's sequence (ContO/Plane/Medium).
+  // The HUD simulate() emitted is replayed on top; its text stays on the overlay.
+  // Outside the race (the jar's pause, finish and replay screens) the jar's own
+  // frame runs, one per tick.
   const TICK_MS = parseFloat(params.get('tickms') || '53');
-  const INTERPOLATE = params.get('interp') !== '0';
-  const interp = makeInterp({ rd, gs, xt, medium, get placed() { return placed; } });
   const MAX_CATCHUP = 3;
-  // How near a tick's own picture must be to the blend position to be shown as is (?tickeps=)
-  const TICK_EPS = parseFloat(params.get('tickeps') || '0.1');
+  const INTERPOLATE = params.get('interp') !== '0';
   const SHOW_STATS = params.get('stats') === '1';
-  // ?spike=MS: log every frame whose JS work exceeds MS, with what it did (the base race's ?spike=)
-  const SPIKE_MS = parseFloat(params.get('spike') || '0');
+  const SPIKE_MS = parseFloat(params.get('spike') || '0');   // ?spike=MS logs slow frames
   window.spikes = [];
-  let acc = 0, last = performance.now(), frames = 0, ticks = 0, lastFpsAt = last, tickMs = 0, redrawMs = 0, ticksDone = 0;
-  // ?stats=1: where a frame's time goes, split by frames with a tick and without
-  const st = { tickFrames: 0, tickWork: 0, plainFrames: 0, plainWork: 0, worst: 0, over: 0 };
+
+  // What is blended (main.js's FIELDS / CAM) and what the draw produces that must
+  // survive a redraw's restore (dist; the draw bank of Medium's PRNG).
+  const FIELDS = ['x', 'y', 'z', 'xz', 'xy', 'zy'];
+  const CAM = ['x', 'y', 'z', 'xz', 'zy'];
+  const MED_STATE = ['dcntrn', 'dtrn'];
+  const snapPrev = { obj: [], cam: {} }, snapCurr = { obj: [], cam: {} };
+  const capture = (into) => {
+    const a2 = w.aconto2;
+    for (let i = 0; i < gs.nob; i++) {
+      const o = a2[i];
+      if (!o) continue;
+      const d = into.obj[i] || (into.obj[i] = {});
+      d.o = o;
+      for (const f of FIELDS) d[f] = o[f];
+      d.dist = o.dist;
+    }
+    for (const f of CAM) into.cam[f] = medium[f];
+    for (const f of MED_STATE) into.cam[f] = medium[f];
+    if (!into.rand) into.rand = new Int32Array(3);
+    into.rand.set(medium.drand);
+    into.diup = medium.ddiup.slice();
+  };
+  const blend = (a, b, t, isAngle) => {
+    if (!isAngle) return a + (b - a) * t;
+    let d = b - a;
+    while (d > 180) d -= 360;
+    while (d < -180) d += 360;
+    return a + d * t;
+  };
+  const applyBlend = (t) => {
+    const a2 = w.aconto2;
+    for (let i = 0; i < gs.nob; i++) {
+      const o = a2[i], p = snapPrev.obj[i], c = snapCurr.obj[i];
+      if (!o || !p || !c || p.o !== o || c.o !== o) continue;   // a car rebuilt this tick is drawn where it is
+      o.x = Math.round(blend(p.x, c.x, t, false));
+      o.y = Math.round(blend(p.y, c.y, t, false));
+      o.z = Math.round(blend(p.z, c.z, t, false));
+      o.xz = blend(p.xz, c.xz, t, true);
+      o.xy = blend(p.xy, c.xy, t, true);
+      o.zy = blend(p.zy, c.zy, t, true);
+    }
+    medium.x = Math.round(blend(snapPrev.cam.x, snapCurr.cam.x, t, false));
+    medium.y = Math.round(blend(snapPrev.cam.y, snapCurr.cam.y, t, false));
+    medium.z = Math.round(blend(snapPrev.cam.z, snapCurr.cam.z, t, false));
+    medium.xz = blend(snapPrev.cam.xz, snapCurr.cam.xz, t, true);
+    medium.zy = blend(snapPrev.cam.zy, snapCurr.cam.zy, t, true);
+  };
+  const restoreCurr = () => {
+    const a2 = w.aconto2;
+    for (let i = 0; i < gs.nob; i++) {
+      const o = a2[i], c = snapCurr.obj[i];
+      if (!o || !c || c.o !== o) continue;
+      for (const f of FIELDS) o[f] = c[f];
+      o.dist = c.dist;
+    }
+    for (const f of CAM) medium[f] = snapCurr.cam[f];
+    for (const f of MED_STATE) medium[f] = snapCurr.cam[f];
+    medium.drand.set(snapCurr.rand);
+    for (let i = 0; i < 3; i++) medium.ddiup[i] = snapCurr.diup[i];
+    restoreCarFaces();
+  };
+  // Also a draw output the simulation reads, which the base port's Mad does not
+  // have: Plane.d sets a master face's vertex count n from its depth av (8 far,
+  // 16 near), and Extended's Madness deforms `p[j].n` vertices on a hit. A redraw
+  // from a blended camera must not leave either for the next tick; the cars'
+  // faces are the ones a hit reaches.
+  let carFaces = [], carAv = new Float64Array(0), carN = new Int32Array(0);
+  const saveCarFaces = () => {
+    carFaces = [];
+    for (let i = 0; i < xt.nplayers; i++) { const o = w.aconto2[i]; for (let j = 0; j < o.npl; j++) carFaces.push(o.p[j]); }
+    if (carAv.length < carFaces.length) { carAv = new Float64Array(carFaces.length); carN = new Int32Array(carFaces.length); }
+    for (let k = 0; k < carFaces.length; k++) { carAv[k] = carFaces[k].av; carN[k] = carFaces[k].n; }
+  };
+  const restoreCarFaces = () => {
+    for (let k = 0; k < carFaces.length; k++) { carFaces[k].av = carAv[k]; carFaces[k].n = carN[k]; }
+  };
+  const recaptureDrawOutputs = () => {
+    const a2 = w.aconto2;
+    for (let i = 0; i < gs.nob; i++) {
+      const o = a2[i], c = snapCurr.obj[i];
+      if (o && c && c.o === o) c.dist = o.dist;
+    }
+    saveCarFaces();
+    for (const f of MED_STATE) snapCurr.cam[f] = medium[f];
+    snapCurr.rand.set(medium.drand);
+    snapCurr.diup = medium.ddiup.slice();
+  };
+  // The scene, on the draw bank of the random streams (the base's GameSparker.draw).
+  const drawScene = () => {
+    setDrawPhase(true);
+    try { race.draw(rd); } finally { setDrawPhase(false); }
+  };
+
+  capture(snapPrev);
+  capture(snapCurr);
+  let hudVerts = null;
+  let acc = 0, last = performance.now(), frames = 0, ticks = 0, lastFpsAt = last, simMs = 0, drawMs = 0, worst = 0, over = 0;
+
   const loop = (now) => {
     requestAnimationFrame(loop);
     const w0 = performance.now();
-    acc = Math.min(acc + (now - last), TICK_MS * MAX_CATCHUP);
+    acc += now - last;
     last = now;
-    let stepped = false, ticked = false;
+    if (acc > TICK_MS * MAX_CATCHUP) acc = TICK_MS * MAX_CATCHUP;
+
+    // the jar's own screens (pause, finish, replays): its frame, once per tick
+    if (xt.fase !== 0) {
+      let ran = false;
+      while (acc >= TICK_MS) { acc -= TICK_MS; rd.begin(); frame.next(); ran = true; }
+      if (ran) rd.end();
+      if (xt.fase === 0) { capture(snapPrev); capture(snapCurr); }   // back in the race: blend from here
+      return;
+    }
+
+    let stepped = false, sim = 0, drew = 0;
     while (acc >= TICK_MS) {
+      capture(snapPrev);
+      rd.begin();
+      const t0 = performance.now();
+      // Without interpolation the last tick's draw IS the frame (catch-up ticks never draw).
+      if (!INTERPOLATE && acc - TICK_MS < TICK_MS) drawScene();
+      const t1 = performance.now();
+      race.rebuildNewCars();
+      const hudStart = rd.vertexCount;
+      race.simulate();
+      hudVerts = rd.snapshotFrom(hudStart);
+      sim += performance.now() - t1;
+      drew += t1 - t0;
       acc -= TICK_MS;
-      rd.begin();                  // a catch-up tick's picture is replaced by the next one's
-      // Only the last tick of the frame can be shown, and only if the blend position is
-      // near enough t = 0 (see below); any other runs its scene drawing without emitting it.
-      const shownAsIs = acc < TICK_MS && (!INTERPOLATE || xt.fase !== 0 || acc / TICK_MS < TICK_EPS);
-      interp.beforeTick(!shownAsIs);
-      const t0 = performance.now();
-      frame.next();
-      tickMs += performance.now() - t0;
-      interp.afterTick();
       ticks++;
-      ticksDone++;
-      stepped = ticked = true;
+      stepped = true;
+      if (xt.fase !== 0) break;      // paused, finished: the jar's screens take the next frame
     }
-    // The blend position is the accumulator's, as in the base race: t = acc / TICK_MS,
-    // so every frame advances by its own duration. A tick's own picture is the jar's
-    // frame drawn from the state the tick started from -- t = 0 of the new blend --
-    // so a frame with a tick shows it only when t is that close (under TICK_EPS);
-    // otherwise it redraws at t. Showing it regardless (one draw per frame, always)
-    // made frames step 0.31/0.31/0.37/0.06 of a tick: a stall then a jump, felt as
-    // the screen shaking in turns.
-    let shown = null;               // the blend position this frame shows, in ticks
-    const t = acc / TICK_MS;
-    if (ticked && (!INTERPOLATE || t < TICK_EPS || xt.fase !== 0)) {
-      shown = ticksDone - 1;   // the jar's picture
-      if (window.flog && placed[0]) { const p0 = interp.prevState?.(); if (p0) window.flog.push(['jar', ...p0]); }
+    if (stepped) capture(snapCurr);
+
+    if (INTERPOLATE && xt.fase === 0) {
+      const t1 = performance.now();
+      applyBlend(Math.min(1, acc / TICK_MS));
+      const redraw = !stepped;       // a tick ran: this is its one, authoritative, draw
+      medium.interpolating = redraw;
+      rd.begin(true);
+      drawScene();
+      rd.replay(hudVerts);
+      medium.interpolating = false;
+      if (!redraw) recaptureDrawOutputs();
+      restoreCurr();
+      drew += performance.now() - t1;
     }
-    else if (INTERPOLATE && xt.fase === 0) {    // racing only: the jar's other screens draw once per frame
-      const t0 = performance.now();
-      if (interp.redraw(t)) { stepped = true; shown = ticksDone - 1 + t; }
-      redrawMs += performance.now() - t0;
-    }
-    if (shown !== null && window.tlog) { window.tlog.push(shown); if (window.tlog.length > 2000) window.tlog.shift(); }
-    if (!stepped) return;
+    if (!stepped && !INTERPOLATE) return;
     rd.end();
+
     const work = performance.now() - w0;
-    if (ticked) { st.tickFrames++; st.tickWork += work; } else { st.plainFrames++; st.plainWork += work; }
-    if (work > st.worst) st.worst = work;
+    simMs += sim; drawMs += drew;
+    if (work > worst) worst = work;
+    if (work > 16.7) over++;
     if (SPIKE_MS && work > SPIKE_MS) {
-      const e = { at: Math.round(now), work: +work.toFixed(1), ticked, cntf: record?.cntf, verts: rd.inputVerts, heap: performance.memory ? Math.round(performance.memory.usedJSHeapSize / 1048576) : undefined };
+      const e = { at: Math.round(now), work: +work.toFixed(1), stepped, sim: +sim.toFixed(1), draw: +drew.toFixed(1), verts: rd.inputVerts };
       window.spikes.push(e);
       console.log('spike', JSON.stringify(e));
     }
-    if (work > 16.7) st.over++;
     if (++frames >= 5 && now - lastFpsAt >= 500) {
       const dt = now - lastFpsAt;
       const buf = `${rd.gl.drawingBufferWidth}x${rd.gl.drawingBufferHeight}`;
       let line = `${(frames * 1000 / dt).toFixed(0)} fps  ${(ticks * 1000 / dt).toFixed(1)} tick/s  ${rd.inputVerts}/${rd.vertexCount} verts`
-        + `  fan=${rd.fanPolys} concave=${rd.concavePolys}/${rd.concaveVerts}v  ${buf}  fase=${xt.fase}`;
+        + `  fan=${rd.fanPolys} concave=${rd.concavePolys}/${rd.concaveVerts}v  ${buf}  view=${gs.view}`;
       if (SHOW_STATS) {
-        line += `
-  tick ${(tickMs / Math.max(1, ticks)).toFixed(1)}ms (the jar's frame: draw+sim)`
-          + `  redraw ${(redrawMs / Math.max(1, frames)).toFixed(1)}ms = draw ${(interp.prof.draw / Math.max(1, frames)).toFixed(1)} + restore ${(interp.prof.restore / Math.max(1, frames)).toFixed(1)}`
-          + `
-  frame work: with a tick ${(st.tickWork / Math.max(1, st.tickFrames)).toFixed(1)}ms, without ${(st.plainWork / Math.max(1, st.plainFrames)).toFixed(1)}ms`
-          + `, worst ${st.worst.toFixed(1)}ms, over 16.7ms: ${st.over}/${frames}  [interp=${INTERPOLATE ? 1 : 0}]`;
+        line += `\n  sim ${(simMs / Math.max(1, ticks)).toFixed(1)}ms/tick  draw ${(drawMs / Math.max(1, frames)).toFixed(1)}ms/frame`
+          + `  worst ${worst.toFixed(1)}ms  over 16.7ms: ${over}/${frames}  [interp=${INTERPOLATE ? 1 : 0}]`;
       }
       log(line);
-      frames = 0; ticks = 0; lastFpsAt = now; tickMs = 0; redrawMs = 0;
-      interp.prof.draw = interp.prof.restore = 0;
-      Object.assign(st, { tickFrames: 0, tickWork: 0, plainFrames: 0, plainWork: 0, worst: 0, over: 0 });
+      frames = 0; ticks = 0; lastFpsAt = now; simMs = 0; drawMs = 0; worst = 0; over = 0;
     }
   };
-  // ?selftest=N: N ticks flat out, with two redraws between ticks unless interp=0,
-  // then a hash of every car and of the random stream. Equal hashes with and
-  // without interp mean the redraws leave the simulation alone.
+
+  // ?selftest=N: N ticks flat out and turning, with two redraws between ticks unless
+  // interp=0, then a hash of every car and of the random streams. Equal hashes with
+  // and without interp mean the redraws leave the simulation alone.
   const selftest = +params.get('selftest') || 0;
   if (selftest) {
     gs.u[0].up = true;
-    let bad = 0, redraws = 0;
     for (let k = 0; k < selftest; k++) {
-      gs.u[0].left = k % 60 < 20;           // turns, so headings blend across frames
+      gs.u[0].left = k % 60 < 20;
       gs.u[0].right = k % 60 >= 40;
+      capture(snapPrev);
       rd.begin();
-      interp.beforeTick();
-      frame.next();
-      interp.afterTick();
+      race.rebuildNewCars();
+      race.simulate();
+      capture(snapCurr);
+      // the tick's authoritative draw, then (interp) two redraws of it
+      medium.interpolating = false;
+      drawScene();
+      recaptureDrawOutputs();
       if (INTERPOLATE) for (const t of [0.33, 0.66]) {
-        interp.redraw(t);
-        redraws++;
-        // an object that vanishes from a redraw submits nothing: compare with the tick's scene
-        if (interp.sceneVerts > 0 && rd.inputVerts < interp.sceneVerts * 0.8) bad++;
+        applyBlend(t);
+        medium.interpolating = true;
+        rd.begin(true);
+        drawScene();
+        medium.interpolating = false;
+        restoreCurr();
       }
     }
     const state = [];
     for (let i = 0; i < xt.nplayers; i++) {
-      const o = placed[i];
+      const o = w.aconto2[i];
       state.push(o.x, o.y, o.z, o.xz, o.xy, o.zy, o.dist);
     }
+    // ...and the effect state drawing advances, so a redraw that steps an effect shows
+    const labels = state.map((_, k) => `car${(k / 7) | 0}.pos${k % 7}`);
+    const put = (label, ...v) => { for (let k = 0; k < v.length; k++) { state.push(v[k]); labels.push(v.length > 1 ? `${label}[${k}]` : label); } };
+    for (let i = 0; i < xt.nplayers; i++) {
+      const o = w.aconto2[i];
+      put(`car${i}.fcnt`, o.fcnt); put(`car${i}.fix`, +o.fix); put(`car${i}.stg`, ...o.stg); put(`car${i}.dov`, ...o.dov);
+      if (o.elc) put(`car${i}.elc`, ...o.elc);
+      let emb = 0, chip = 0;
+      for (let j = 0; j < o.npl; j++) { emb += o.p[j].embos; chip += o.p[j].chip; }
+      put(`car${i}.embos`, emb); put(`car${i}.chip`, chip);
+    }
+    window.selfLabels = labels;
+    state.push(medium.lightn, medium.lilo, medium.makefase, medium.effecttime, medium.switchfase, +medium.cpflik);
     state.push(random(), medium.trn, medium.cntrn, ...medium.rand);
+    window.selfState = state;
     const text = state.join(',');
     let h = 0x811c9dc5;
     for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 0x01000193);
-    log(`selftest ${selftest} ticks interp=${INTERPOLATE ? 1 : 0}: ${(h >>> 0).toString(16)}  car0 ${placed[0].x},${placed[0].z}`
-      + `  redraws missing >20% of the tick's scene: ${bad}/${redraws}`);
+    log(`selftest ${selftest} ticks interp=${INTERPOLATE ? 1 : 0}: ${(h >>> 0).toString(16)}  car0 ${w.aconto2[0].x},${w.aconto2[0].z}`);
     return;
   }
   requestAnimationFrame(loop);

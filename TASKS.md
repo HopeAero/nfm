@@ -1057,12 +1057,16 @@ replay (`web/tools/ext-trace.mjs`, DiffRun `-Ddiffrun.trace=Class.method`).
       steps the generated `GameSparker.run()` one frame per tick and fast-forwards
       the jar's pre-race screens unseen (see WORK.md). `web/ext/main.html` stays as
       the dev page with Extended's own car select until the launcher has one.
-- [x] **Interpolation for Extended (2026-09-24):** 60 fps at 18-20 ticks/s, as the
-      base race. `web/ext/interp.js` redraws the scene from blended transforms
-      between ticks, saving and restoring what the drawing writes (lists checked
-      against the generated source by `interp.test.js`), randoms from the draw
-      bank. `?selftest=N` proves it: the same hash with and without redraws.
-      `?res=` now gives the base race's pixel width (1600 at 2).
+- [x] **Interpolation for Extended, the base port's way (2026-09-24):** ContO/Plane/
+      Medium carry the base's `interpolating` guards and random replay at the
+      same sites (hand-maintained from here); `web/ext/racetick.js` is the race
+      frame split like the base harness (rebuildNewCars + simulate per tick,
+      draw once per frame, authoritative when a tick ran); `web/ext/race.js` runs
+      main.js's frameBody logic. The first attempt (`interp.js`, save/restore
+      around a redraw plus a tick-picture shortcut) is gone: it juddered in
+      turns and cost double on tick frames. `?selftest=N` hashes cars AND
+      effect state; interp=0 and 1 must agree (stage 4, car 30, 400 ticks:
+      `8215cdd7`). 60 fps, worst frame 6-14 ms, 0 over budget on stage 4.
 - [ ] **The base shell's race features** for Extended: pause menu, finish
       screen, highlights, Spanish HUD sprites. Today the jar's own finish runs.
 - [ ] **Deploy:** `deploy.sh` needs `rsync`, which this Windows machine lacks.
