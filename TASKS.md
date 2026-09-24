@@ -1073,6 +1073,44 @@ replay (`web/tools/ext-trace.mjs`, DiffRun `-Ddiffrun.trace=Class.method`).
 - [ ] **The base shell's race features** for Extended: pause menu, finish
       screen, highlights, Spanish HUD sprites. Today the jar's own finish runs.
 - [ ] **Deploy:** `deploy.sh` needs `rsync`, which this Windows machine lacks.
+### Priorities (the user, 2026-09-24)
+
+In this order of importance; content creation (below) waits behind them.
+
+- [ ] **Car select** for Extended from the launcher, keeping Extended's way of
+      listing cars and its special/health readout when arrowing through them.
+- [ ] **Career mode** working end to end.
+- [ ] **Music on every stage** (modules through BassoonTracker, career `.ogg`).
+- [ ] **Stage select** working.
+- [ ] **The base port's UI on Extended, keeping Extended's own pieces:** the
+      special bar, the car list, health/special on car select, Extended's
+      speedometer; the base's screen effects on pause and race end.
+- [ ] **Extended's own cars in Extended's free mode** (today classic races the
+      original cars with powers on the original stages).
+- [ ] **Spanish** (HUD sprites, strings).
+
+### Content from the base game's editors
+
+Gameplay stays separate; Extended learns to read what the editors make.
+
+- [x] **NFM2 / Stage Maker stages in Extended (2026-09-24):**
+      `web/main.html?ext=classic&nfm2stage=N` (the base game's stages/N.txt) or
+      `&mystage=NAME` (Stage Maker store / mystages/) races it with Extended's
+      gameplay (`web/ext/stagecompat.js`, hooked in race.js). Ids translated by
+      object name (38 agree, 10 moved, 20 base-only models appended from the
+      base `data/models.zip`, thewall re-appended); checked on NFM2 stage 30
+      (cacti, slider, launchpad) and the Stage Maker example stage.
+- [ ] **Pick them from the launcher** for Extended: part of the stage select work.
+- [ ] **Car Maker cars in Extended** (estimated 1-2 sessions): Extended has no
+      CarDefine -- its 39 cars' physics are literal tables in Madness (46 per-car
+      arrays) and xtGraphics (11 more, ~50 index-38 checks; Control ~28 `cn ===`
+      special cases). Plan: load the .rad geometry at index 39+; one hand-written
+      helper grows every 39-long table after construction (a test walks them all
+      and fails on a short one -- a missed table reads undefined -> NaN); physics
+      from the base port's `web/CarDefine.js` `loadstat`; Extended-only values
+      (level, special, nitro, damage cut) copied from a stock car of the same
+      class; mycars/ in the launcher for Extended. Stock cars must not change
+      (selftest, jar tests).
 ### Base-port parity audit (2026-09-24)
 
 The base port is not just the Java transcribed: it carries port-level fixes and

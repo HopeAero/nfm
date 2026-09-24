@@ -18,12 +18,13 @@
 // ?ext=classic|career  [&stage=N] [&car=M]  [&tickms=53] [&res=2] [&textres=1] [&aa=0|1]
 
 import { detectFpath, readBytes } from '../vfs.js';
-import { Panel, System, knownFiles, preload } from './jawt.js';
+import { Panel, System, ZipInputStream, knownFiles, preload } from './jawt.js';
 import { MUSIC_FILES } from './musicfiles.js';
 import { JGraphics, JGraphics2D } from './jgraphics.js';
 import { GameSparker } from './GameSparker.js';
 import { RaceTick } from './racetick.js';
 import { Madness } from './Madness.js';
+import { appendModels, prepareBaseStage, translateStage } from './stagecompat.js';
 import { random, setDrawPhase } from '../java.js';
 
 const W = 870, H = 480;   // Extended's game space (the base game's is 800x450)
@@ -69,6 +70,9 @@ export async function bootExtended(params, log, onExit) {
   await preload(ARCHIVES, (p) => readBytes('ext/' + p));
   for (const [family, file] of FONTS) document.fonts.add(await new FontFace(family, `url(${base}ext/fonts/${file})`).load());
   knownFiles(MUSIC_FILES);
+  // ?nfm2stage=N / ?mystage=NAME: an NFM2 or Stage Maker stage, translated for
+  // Extended (stagecompat.js); it stands in for the stage the jar loads
+  const baseStage = await prepareBaseStage(params);
   System.live = true;
   Panel.graphicsFor = (c, w, h) => new JGraphics(c, w, h);
 
@@ -108,7 +112,7 @@ export async function bootExtended(params, log, onExit) {
     // what the menu does on Career / Classic Mode (xtGraphics.java:15198), then the
     // car select's Enter (xtGraphics.java:17538): classic races Extended's cars 23-38
     if (params.has('car')) xt.lastcar = +params.get('car');
-    xt.laststage = params.has('stage') ? +params.get('stage') : (xt.laststage || cp.stage);
+    xt.laststage = params.has('stage') ? +params.get('stage') : baseStage ? 1 : (xt.laststage || cp.stage);
     xt.careermode = mode === 'career';
     xt.classicmode = !xt.careermode;
     if (xt.classicmode && xt.lastcar < 23) xt.lastcar = 38;
@@ -131,8 +135,30 @@ export async function bootExtended(params, log, onExit) {
   const w = {};
   gs.loadstage = function (aconto, aconto1, medium, trackers, cp, xtg, amadness, record, contva) {
     Object.assign(w, { aconto2: aconto, aconto: aconto1, medium, trackers, checkpoints: cp, xtgraphics: xtg, amadness, record, contva });
-    return GameSparker.prototype.loadstage.call(this, aconto, aconto1, medium, trackers, cp, xtg, amadness, record, contva);
+    if (!baseStage) return GameSparker.prototype.loadstage.call(this, aconto, aconto1, medium, trackers, cp, xtg, amadness, record, contva);
+    // the base stage's text in place of the jar's stage file, while loadstage reads it
+    const text = translateStage(baseStage.text, (i) => aconto1[i].grat);
+    const bytes = Uint8Array.from(text, (c) => c.charCodeAt(0) & 255);
+    const next = ZipInputStream.prototype.getNextEntry;
+    ZipInputStream.prototype.getNextEntry = function () {
+      const e = next.call(this);
+      if (e && e.getName() === `${cp.stage}.txt`) { this.bytes = bytes; this.pos = 0; }
+      return e;
+    };
+    try {
+      return GameSparker.prototype.loadstage.call(this, aconto, aconto1, medium, trackers, cp, xtg, amadness, record, contva);
+    } finally {
+      ZipInputStream.prototype.getNextEntry = next;
+      if (baseStage.name) cp.name = baseStage.name;   // a Stage Maker stage is named by its file, as in the base
+    }
   };
+  if (baseStage) {
+    gs.loadbase = function (aconto, medium, trackers, xtg) {
+      const r = GameSparker.prototype.loadbase.call(this, aconto, medium, trackers, xtg);
+      appendModels(aconto, baseStage.zip, medium, trackers, xtg);
+      return r;
+    };
+  }
   const drive = Madness.prototype.drive;
   Madness.prototype.drive = function (u, conto, trackers, cp, contva, bots) {
     w.bots = bots;
