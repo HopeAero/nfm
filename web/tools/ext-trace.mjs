@@ -89,7 +89,8 @@ export function rebuild(pre, track = true) {
       has(tg, k) { touched.add(+id); return k in tg; },
     }));
   }
-  const ref = (id) => proxied.get(id) ?? missing(id);
+  // one stub per id: a reference reached by two paths must stay one object
+  const ref = (id) => proxied.get(id) ?? proxied.set(id, missing(id)).get(id);
   for (const [id, o] of Object.entries(pre)) {
     const t = raw.get(+id);
     if ('a' in o) o.v.forEach((v, i) => { t[i] = decode(v, ref); });

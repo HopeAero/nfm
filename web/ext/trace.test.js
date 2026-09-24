@@ -15,7 +15,7 @@ import { run } from '../tools/ext-trace.mjs';
 
 const HERE = new URL('./', import.meta.url);
 
-for (const [file, method] of [['trace-drive.json.gz', 'drive']]) {
+for (const [file, method] of [['trace-drive.json.gz', 'drive'], ['trace-preform.json.gz', 'preform']]) {
   const url = new URL(file, HERE);
   if (!fs.existsSync(url)) continue;
   const calls = JSON.parse(zlib.gunzipSync(fs.readFileSync(url)));
