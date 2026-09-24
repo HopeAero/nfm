@@ -15,7 +15,8 @@ const JS_GLOBALS = new Set(['Math', 'Number', 'Object', 'Array', 'String', 'JSON
 const AUDIO = new Set(['LoadMod', 'FOURCC', 'PausablePlayer', 'MidiSystem', 'BufferedInputStream',
   'AudioPlayer', 'DataLine', 'SourceDataLine', 'AudioFormat', 'Encoding', 'AudioSystem']);
 
-const generated = fs.readdirSync(HERE).filter((f) => f.endsWith('.js') && fs.readFileSync(new URL(f, HERE), 'utf8').startsWith('// GENERATED'));
+// generated, or transpiled and now hand-maintained (ContO, Plane, Medium)
+const generated = fs.readdirSync(HERE).filter((f) => f.endsWith('.js') && /^\/\/ (GENERATED|Transpiled by)/.test(fs.readFileSync(new URL(f, HERE), 'utf8')));
 
 test('generated classes import every Java class they name', () => {
   const missing = [];

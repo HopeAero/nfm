@@ -149,6 +149,7 @@ export async function bootExtended(params, log, onExit) {
   }
   log(`stage ${checkpoints.stage}: ${checkpoints.name}`);
   window.xt = xt; window.checkpoints = checkpoints;
+  window.ext = { get placed() { return placed; }, get medium() { return medium; }, get record() { return record; } };   // for the console
 
   // ---- input ------------------------------------------------------------------
   addEventListener('keydown', (e) => { const k = javaKey(e); if (k) { gs.keyDown({}, k); e.preventDefault(); } });
@@ -204,7 +205,10 @@ export async function bootExtended(params, log, onExit) {
     // the screen shaking in turns.
     let shown = null;               // the blend position this frame shows, in ticks
     const t = acc / TICK_MS;
-    if (ticked && (!INTERPOLATE || t < TICK_EPS || xt.fase !== 0)) shown = ticksDone - 1;   // the jar's picture
+    if (ticked && (!INTERPOLATE || t < TICK_EPS || xt.fase !== 0)) {
+      shown = ticksDone - 1;   // the jar's picture
+      if (window.flog && placed[0]) { const p0 = interp.prevState?.(); if (p0) window.flog.push(['jar', ...p0]); }
+    }
     else if (INTERPOLATE && xt.fase === 0) {    // racing only: the jar's other screens draw once per frame
       const t0 = performance.now();
       if (interp.redraw(t)) { stepped = true; shown = ticksDone - 1 + t; }

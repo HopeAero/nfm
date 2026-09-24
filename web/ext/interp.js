@@ -252,6 +252,11 @@ export function makeInterp(w) {
 
   return {
     prof,
+    /** For window.flog: the state the jar's picture of this tick was drawn from. */
+    prevState() {
+      const c = prev && prev.objs[0], m = prev && prev.cam;
+      return c ? [c.x - m.x, c.z - m.z, c.xz + m.xz, m.xz, c.xz] : null;
+    },
     /** Polygon vertices the last tick's scene submitted (before its HUD). */
     get sceneVerts() { return sceneVerts; },
     /** Before a tick: mark where its HUD will start; `hidden`: its scene will not be shown. */
@@ -288,6 +293,7 @@ export function makeInterp(w) {
       medium.xz = blend(prev.cam.xz, curr.cam.xz, t, true);
       medium.zy = blend(prev.cam.zy, curr.cam.zy, t, true);
 
+      if (window.flog && placed[0]) window.flog.push([t, placed[0].x - medium.x, placed[0].z - medium.z, placed[0].xz + medium.xz, medium.xz, placed[0].xz]);
       rd.begin(true);             // the tick's HUD text and images stay on the overlay
       setDrawPhase(true);
       medium.sin = sin; medium.cos = cos;
