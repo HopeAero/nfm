@@ -42,7 +42,9 @@ import jdk.internal.org.objectweb.asm.commons.Remapper;
  *        -cp <diffrun-classes> DiffRun <A-classes> <B-classes> <jar-classes> <frames> [script]
  *
  * script: comma-separated `frame:key[:hold]` or `frame:click:x:y`, e.g. `200:10,260:1004:120` presses
- * Enter at frame 200 and holds Up from 260 for 120 frames. Keys are AWT Event
+ * Enter at frame 200 and holds Up from 260 for 120 frames.
+ *
+ * -Ddiffrun.debug=true: everything unlocked and 999 stat/car points (see Inst.debug). Keys are AWT Event
  * codes (Enter 10, Up 1004, Down 1005, Left 1006, Right 1007, Space 32).
  */
 public class DiffRun {
@@ -196,6 +198,32 @@ public class DiffRun {
             return Arrays.hashCode(px);
         }
 
+        /**
+         * Test setup (-Ddiffrun.debug=true), applied to both copies at the same
+         * frame so they stay comparable: every stage open in both modes, no
+         * "END OF BETA" wall, and 999 stat and car points, refilled each frame.
+         * Caveat: career rules keyed on the frontier stage (stage == unlocked[1]:
+         * the stage-23 boss, the hard 8/9/12/13, the level cap) then only
+         * apply on stage 30.
+         */
+        void debug() throws Exception {
+            for (Object o : objects()) {
+                if (!o.getClass().getName().equals("xtGraphics")) continue;
+                int[] u = (int[]) field(o, "unlocked"), ru = (int[]) field(o, "realunlocked");
+                u[0] = ru[0] = 27;   // tracks.radq: 27 stages
+                u[1] = ru[1] = 30;   // maxlevel[] has 31 entries, indexed by unlocked[1]
+                set(o, "betalimit", 100);
+                Arrays.fill((int[]) field(o, "statpoints"), 999);
+                set(o, "carpoints", 999);
+            }
+        }
+
+        void set(Object o, String f, int v) throws Exception {
+            Field fl = o.getClass().getDeclaredField(f);
+            fl.setAccessible(true);
+            fl.setInt(o, v);
+        }
+
         void stop() throws Exception {
             det.getField("stopped").set(null, true);
             frame.dispose();
@@ -335,6 +363,7 @@ public class DiffRun {
         if (args.length > 5 && !args[5].isEmpty()) ignore.addAll(Arrays.asList(args[5].split(",")));
         boolean pixelsCheck = !Boolean.getBoolean("diffrun.nopixels");
         int every = Integer.getInteger("diffrun.every", 1);
+        boolean debugSetup = Boolean.getBoolean("diffrun.debug");
         // -Ddiffrun.shots=100,200: save both frames as diffrun-<n>A.png / <n>B.png (to script menus)
         Set<Integer> shots = new HashSet<>();
         for (String x : System.getProperty("diffrun.shots", "").split(",")) if (!x.isEmpty()) shots.add(Integer.parseInt(x));
@@ -390,6 +419,7 @@ public class DiffRun {
                 }
             }
             if (f % 100 == 0) System.out.println("frame " + f + " fase " + fa + "  objects " + A.objects().size() + "  state diffs " + c.diffs.size() + "  pixels " + (pa == pb ? "same" : loading ? "differ (loading screen)" : "DIFFER"));
+            if (debugSetup) { A.debug(); B.debug(); }
             A.release(); B.release();
         }
         System.out.println("RESULT frames=" + frames + " stateDivergentFrames=" + stateFrames + " (first " + firstState + ")"
