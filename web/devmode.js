@@ -10,7 +10,9 @@
 
 const STORE_KEY = 'nfm.launcher';   // launcher.js's settings
 
+/** The setting, or the local dev server (web/tools/serve.py sets the cookie; the deployed site does not). */
 export function devMode() {
+  try { if (globalThis.document?.cookie.split('; ').includes('nfm-devserver=1')) return true; } catch { /* no document */ }
   try { return !!JSON.parse(localStorage.getItem(STORE_KEY) || '{}').devmode; } catch { return false; }
 }
 

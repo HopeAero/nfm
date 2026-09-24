@@ -24,3 +24,13 @@ test('developer mode on: everything', () => {
   assert.deepStrictEqual(p, { ext: 'classic', nfm2stage: '30', stats: '1' });
   assert.deepStrictEqual(warned, []);
 });
+
+test('the local dev server (serve.py\'s cookie) counts as developer mode', () => {
+  globalThis.document = { cookie: 'other=1; nfm-devserver=1' };
+  try {
+    const { p } = at('?selftest=400', false);
+    assert.deepStrictEqual(p, { selftest: '400' });
+  } finally {
+    delete globalThis.document;
+  }
+});
