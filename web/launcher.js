@@ -155,7 +155,7 @@ function applyLang() {
 }
 
 /* ---- pages -------------------------------------------------------------- */
-const MENU = ['Single Player', 'Multiplayer', 'Car Maker', 'Stage Maker', 'Settings'];
+const MENU = ['Single Player', 'Extended Edition', 'Multiplayer', 'Car Maker', 'Stage Maker', 'Settings'];
 const OPT_ROWS = [['players', 'Cars on track'], ['opponents', 'Opponents']];
 const SET_ROWS = [['sfxvol', 'Sound'], ['musicvol', 'Music'],
                   ['res', 'Resolution'], ['interp', 'Smooth frames'],
@@ -184,12 +184,19 @@ const GM = ['NFM 1', 'NFM 2', 'Free Play'];
 $('gm-rows').innerHTML = GM.map((t, i) =>
   `<li class="item" role="menuitem" data-act="gm:${(i + 1) % 3}"><span class="label">${t}</span></li>`).join('');
 
+// Extended Edition: NFM2 Extended Mode v2.8's two race modes (its xtGraphics
+// menu's Classic Mode and career, opselect 2 and 1). Only the choice for now:
+// the Extended port lives on the extended-mode branch and is not playable yet.
+const EXT = [['classic', 'Classic Race'], ['career', 'Career Mode']];
+$('ext-rows').innerHTML = EXT.map(([k, t]) =>
+  `<li class="item" role="menuitem" data-act="ext:${k}"><span class="label">${t}</span></li>`).join('');
+
 // Spanish, when chosen: everything above wrote the pages' English; this
 // translates it and whatever is written later.
 translateDocument();
 
-const PAGE_IDS = ['menu', 'gm', 'sp', 'opts', 'mp', 'lobby', 'set'];
-const BACK = { gm: 'menu', sp: 'menu', opts: 'sp', mp: 'menu', lobby: 'mp', set: 'menu' };
+const PAGE_IDS = ['menu', 'gm', 'ext', 'sp', 'opts', 'mp', 'lobby', 'set'];
+const BACK = { gm: 'menu', ext: 'menu', sp: 'menu', opts: 'sp', mp: 'menu', lobby: 'mp', set: 'menu' };
 const PAGES = {};
 for (const id of PAGE_IDS) refreshItems(id);
 
@@ -206,6 +213,7 @@ const page = () => PAGES[pageName()];
 const HINTS = {
   menu:  '<kbd>↑</kbd><kbd>↓</kbd> move · <kbd>Enter</kbd> select',
   gm:    '<kbd>↑</kbd><kbd>↓</kbd> move · <kbd>Enter</kbd> select · <kbd>Esc</kbd> back',
+  ext:   '<kbd>↑</kbd><kbd>↓</kbd> move · <kbd>Enter</kbd> select · <kbd>Esc</kbd> back',
   sp:    '<kbd>↑</kbd><kbd>↓</kbd> move · <kbd>←</kbd><kbd>→</kbd> change · <kbd>Enter</kbd> open / start · <kbd>Esc</kbd> back',
   opts:  '<kbd>↑</kbd><kbd>↓</kbd> move · <kbd>←</kbd><kbd>→</kbd> change · <kbd>Esc</kbd> back',
   mp:    '<kbd>↑</kbd><kbd>↓</kbd> move · <kbd>Enter</kbd> join / host · <kbd>←</kbd><kbd>→</kbd> public–private · <kbd>Esc</kbd> back',
@@ -846,11 +854,14 @@ function fire() {
       // Single player opens the game's own car select, as the Java's menu
       // does. The 'sp' page stays for its race options but nothing links it.
       if (+arg === 0) return goPage('gm');
-      if (+arg === 1) return goPage('mp');
-      if (+arg === 2) return void (location.href = './web/careditor.html');
-      if (+arg === 3) return void (location.href = './web/stagemaker.html');
+      if (+arg === 1) return goPage('ext');
+      if (+arg === 2) return goPage('mp');
+      if (+arg === 3) return void (location.href = './web/careditor.html');
+      if (+arg === 4) return void (location.href = './web/stagemaker.html');
       return goPage('set');
     case 'gm':    return void startCarSelect(+arg);
+    // ponytail: placeholder until the Extended race runs in the browser.
+    case 'ext':   return say('Extended Edition is coming soon');
     case 'opts':  return goPage('opts');
     case 'lang':  return applyLang();
     case 'back':  return goPage(BACK[pageName()]);

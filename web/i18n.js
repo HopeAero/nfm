@@ -50,6 +50,8 @@ const ES = {
   'on — every stage and car': 'sí — todas las pistas y autos',
   'off — win races to unlock': 'no — gana carreras para desbloquear',
   'Single Player': 'Un jugador', 'Multiplayer': 'Multijugador', 'Car Maker': 'Creador de autos', 'Stage Maker': 'Creador de pistas',
+  'Extended Edition': 'Edición Extendida', 'Classic Race': 'Carrera clásica', 'Career Mode': 'Modo carrera',
+  'Extended Edition is coming soon': 'La Edición Extendida llegará pronto',
   'Settings': 'Ajustes', 'Main menu': 'Menú principal',
   'press enter to race': 'presiona enter para correr', 'loading…': 'cargando…',
   'failed to load game data': 'no se pudieron cargar los datos del juego',
