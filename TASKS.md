@@ -1097,8 +1097,8 @@ Gameplay stays separate; Extended learns to read what the editors make.
       `web/main.html?ext=classic&nfm2stage=N` (the base game's stages/N.txt) or
       `&mystage=NAME` (Stage Maker store / mystages/) races it with Extended's
       gameplay (`web/ext/stagecompat.js`, hooked in race.js). Ids translated by
-      object name (38 agree, 10 moved, 20 base-only models appended from the
-      base `data/models.zip`, thewall re-appended); checked on NFM2 stage 30
+      the base models: all 68 appended from the base `data/models.zip` after
+      Extended's 129 (Extended reshapes some, e.g. giant trees); checked on NFM2 stage 30
       (cacti, slider, launchpad) and the Stage Maker example stage.
 - [ ] **Pick them from the launcher** for Extended: part of the stage select work.
 - [ ] **Car Maker cars in Extended** (estimated 1-2 sessions): Extended has no

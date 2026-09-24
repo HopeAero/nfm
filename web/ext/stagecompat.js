@@ -1,16 +1,14 @@
 // NFM2 stages (the base game's, and the Stage Maker's) raced in Extended.
 //
-// Gameplay stays Extended's; only the stage file is translated. The two games
-// number stage objects differently -- a stage line's id is TRACK_NAMES[id - 10]
-// in the base, Extended's model list index id + 29 (35 -> 68, sofframp) -- so
-// every set()/chk()/fix() id is rewritten by object NAME:
-//   - 38 ids name the same object in both;
-//   - offhill, roll1-5, tree4, tree6 exist in Extended under other ids;
-//   - 20 objects exist only in the base (palms, cacti, rocks, hills, launchpad,
-//     speedramp, the aerial checkpoint, ...): their models are read from the
-//     base's data/models.zip (untouched) and appended to Extended's list;
-//   - thewall is appended too: Extended's own (index 64) would need id 35,
-//     which set() reads as sofframp.
+// Gameplay stays Extended's; the stage and its pieces are the base game's. All
+// 68 base stage models are read from the base's data/models.zip (untouched)
+// and appended after Extended's own 129 models, and every set()/chk()/fix() id
+// is rewritten to its base model there -- not to Extended's model of the same
+// name: Extended reshapes some (its giant trees, its checkpoint), and 20 base
+// pieces it does not have at all (palms, cacti, rocks, hills, launchpad, the
+// aerial checkpoint, ...). The two games number ids differently anyway: base
+// TRACK_NAMES[id - 10], Extended model id + 29 (set()'s 35 -> 68); appended
+// ids start at 100, clear of that 35.
 // A base model with <track> blocks but no tracks(N) line (the palms and cacti:
 // `//tracks(4)`) has its blocks ignored by the base, so no collision; Extended's
 // ContO reads them unconditionally and fails on arrays tracks() never made.
@@ -41,20 +39,12 @@ export const EXT_MODELS = [
   'roll3', 'roll4', 'roll5', 'roll6',
 ];
 
-/** Base objects appended to Extended's list, with the model code ContO gets
- *  (it decides sfactor and isacar): Extended's own for thewall, the new index
- *  for the rest (>= 129: a stage piece). */
-const REUSE_UNREACHABLE = { thewall: 64 };
-export const APPENDED = [
-  ...TRACK_NAMES.filter((n) => !EXT_MODELS.includes(n)),
-  ...Object.keys(REUSE_UNREACHABLE),
-];
+/** The base stage models, appended in TRACK_NAMES order after EXT_MODELS. */
+export const APPENDED = TRACK_NAMES;
 
 /** Where each base object lives in Extended's (grown) model list. */
 export function extIndex(name) {
-  const a = APPENDED.indexOf(name);
-  if (a >= 0) return EXT_MODELS.length + a;
-  return EXT_MODELS.indexOf(name);
+  return EXT_MODELS.length + TRACK_NAMES.indexOf(name);
 }
 
 /**
@@ -70,7 +60,7 @@ export function translateStage(text, grat) {
     const name = TRACK_NAMES[+id - 10];
     if (!name) return line;
     const idx = extIndex(name);
-    const eid = idx - 29;   // Extended: model = id + 29 (sofframp -> 39: set() also reads 35 as it, chk/fix do not)
+    const eid = idx - 29;   // Extended: model = id + 29
     if (cmd === 'chk' && name === 'aircheckpoint') {
       const a = /^,(-?\d+),(-?\d+),(-?\d+),(-?\d+)(.*)$/.exec(rest);
       if (a) return `${pad}chkfloat(${eid},${a[1]},${a[2]},${a[3]},${+a[4] + grat(idx)}${a[5]}`;
@@ -110,6 +100,6 @@ export function appendModels(aconto, zip, medium, trackers, xtgraphics) {
     let src = Array.from(bytes, (b) => String.fromCharCode(b)).join('').replace(/^(\s*)newstone\(\)/m, '$1stonecold()');
     if (!/^\s*tracks\(/m.test(src)) src = src.replace(/<track>[\s\S]*?<\/track>/g, '');
     const buf = Int8Array.from(src, (c) => c.charCodeAt(0));
-    aconto[idx] = new ContO(0, buf, medium, trackers, xtgraphics, REUSE_UNREACHABLE[name] ?? idx);
+    aconto[idx] = new ContO(0, buf, medium, trackers, xtgraphics, idx);   // code >= 129: a stage piece
   }
 }
