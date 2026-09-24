@@ -443,7 +443,7 @@ public class J2JS {
                 "Integer", "Float", "Double", "Long", "Boolean", "Character", "StringBuilder", "System", "Thread",
                 "Random", "Date", "File", "FileInputStream", "FileOutputStream", "ZipInputStream", "ZipEntry", "URL", "Toolkit", "Image",
                 "Graphics", "Graphics2D", "RenderingHints", "Event", "Applet", "Panel", "Dimension", "MediaTracker",
-                "PixelGrabber", "MemoryImageSource", "Arrays", "BigDecimal", "BufferedWriter", "FileWriter", "ZipOutputStream");
+                "PixelGrabber", "MemoryImageSource", "Arrays", "BigDecimal", "BufferedWriter", "FileWriter", "ZipOutputStream", "OggClip");
 
         String member(MemberSelectTree ms) {
             Symbol s = (Symbol) TreeInfo.symbol((JCTree) ms);

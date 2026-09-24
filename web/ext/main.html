@@ -17,7 +17,8 @@
 // Extended Mode v2.8 as the applet ran: GameSparker.init() + start(), its own
 // run() loop (a generator stepped by jawt.Thread), Java 1.0 key/mouse events.
 import { detectFpath, readBytes } from '../vfs.js';
-import { Panel, System, preload } from './jawt.js';
+import { Panel, System, knownFiles, preload } from './jawt.js';
+import { MUSIC_FILES } from './musicfiles.js';
 import { JGraphics } from './jgraphics.js';
 import { GameSparker } from './GameSparker.js';
 
@@ -38,6 +39,7 @@ try {
 }
 status.remove();
 
+knownFiles(MUSIC_FILES);
 System.live = true;
 Panel.graphicsFor = (c, w, h) => new JGraphics(c, w, h);
 const gs = new GameSparker();

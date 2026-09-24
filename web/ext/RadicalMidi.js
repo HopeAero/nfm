@@ -3,7 +3,7 @@
 // fix the transpiler or the source and regenerate.
 
 import { fr, i32, trunc } from '../java.js';
-import { File, FileInputStream, System, jstr } from './jawt.js';
+import { File, FileInputStream, OggClip, System, jstr } from './jawt.js';
 
 export class RadicalMidi {
   constructor(fn) {

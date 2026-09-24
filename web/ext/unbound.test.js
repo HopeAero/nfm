@@ -12,7 +12,7 @@ const JS_GLOBALS = new Set(['Math', 'Number', 'Object', 'Array', 'String', 'JSON
   'Boolean', 'Infinity', 'NaN', 'Map', 'Set', 'Reflect', 'ArrayBuffer',
   'Int8Array', 'Int16Array', 'Uint16Array', 'Int32Array', 'Uint8Array', 'Float32Array', 'Float64Array']);
 // ponytail: sound is not ported yet; these are reached only by the audio classes' own paths
-const AUDIO = new Set(['LoadMod', 'FOURCC', 'PausablePlayer', 'OggClip', 'MidiSystem', 'BufferedInputStream',
+const AUDIO = new Set(['LoadMod', 'FOURCC', 'PausablePlayer', 'MidiSystem', 'BufferedInputStream',
   'AudioPlayer', 'DataLine', 'SourceDataLine', 'AudioFormat', 'Encoding', 'AudioSystem']);
 
 const generated = fs.readdirSync(HERE).filter((f) => f.endsWith('.js') && fs.readFileSync(new URL(f, HERE), 'utf8').startsWith('// GENERATED'));

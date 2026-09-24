@@ -85,10 +85,20 @@ export async function preload(paths, read) {
   }
 }
 
-/** java.io.File as the music loader asks it: does a preloaded file exist? */
+const KNOWN = new Set();   // files the real game has but ext/ does not serve (its music)
+
+/** Name files that exist beside madness.jar though ext/ lacks them (web/ext/musicfiles.js). */
+export function knownFiles(paths) { for (const p of paths) KNOWN.add(p); }
+
+/**
+ * java.io.File as the music loader asks it. loadmusic trusts what it finds: a
+ * career stage up to 15 points lastload at its .ogg slot whether or not that
+ * loaded, so exists() must answer as beside the real jar or the race loop reads
+ * a null track (stage 14 in career did).
+ */
 export class File {
   constructor(path) { this.path = path; }
-  exists() { return FILES.has(this.path); }
+  exists() { return FILES.has(this.path) || KNOWN.has(this.path); }
   getName() { return this.path.slice(this.path.lastIndexOf('/') + 1); }
 }
 
@@ -428,4 +438,22 @@ export const BufferedWriter = unported('BufferedWriter');
 export const FileWriter = unported('FileWriter');
 export const ZipOutputStream = unported('ZipOutputStream');
 export const FileOutputStream = unported('FileOutputStream');
-export const FileInputStream = unported('FileInputStream');
+/** A handle on a named file; only OggClip reads one, and it is silent for now. */
+export class FileInputStream {
+  constructor(file) { this.path = file.path; }
+  close() {}
+}
+
+/**
+ * RadicalMidi's .ogg player. ponytail: silent until the music is shipped in ext/;
+ * then an HTMLAudioElement on this.path covers play/loop/pause/resume/stop.
+ */
+export class OggClip {
+  constructor(input) { this.path = input.path; }
+  play() {}
+  loop() {}
+  pause() {}
+  resume() {}
+  stop() {}
+  close() {}
+}

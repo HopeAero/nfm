@@ -1044,8 +1044,11 @@ replay (`web/tools/ext-trace.mjs`, DiffRun `-Ddiffrun.trace=Class.method`).
 - [ ] **Stage pick for Extended:** classic mode rolls a stage 1-17 on Enter,
       as the jar does; career takes `?stage=` or its unlocked stage. The
       launcher has no Extended stage list yet.
-- [ ] **Sound and music:** `getAudioClip` is silent; `ext/` has no `sounds/`
-      or `music/` yet. The base port's BassoonTracker/WebAudio path is the model.
+- [ ] **Sound and music:** `getAudioClip` and `OggClip` are silent; `ext/` has
+      no `sounds/` or music yet (117 files: 63 `.radq` modules, 54 `.ogg`, the
+      career `.ogg` pairs 67 MB). `File.exists` already answers from
+      `web/ext/musicfiles.js` so `loadmusic` takes the jar's path. The base
+      port's BassoonTracker (modules) and an `HTMLAudioElement` (ogg) are the model.
 - [ ] **Saving:** `writedata` is a no-op (needs `ZipOutputStream`); `localStorage`.
 - [ ] **Renderer:** the race draws on Canvas2D (`web/ext/jgraphics.js` over
       `canvas-graphics.js`). Move the 3D to `graphics.js` (WebGL) as the base
