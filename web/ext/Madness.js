@@ -2080,6 +2080,7 @@ export class Madness {
               f10 = 1.2000000476837158;
             }
             if (this.m.random() > 0.075) {
+              conto.dustkeep = 0.35 / 0.925;   // ext-patch dust-rate-skid: the base Mad's odds for the ring
               conto.dust(l5, af[l5], af3[l5], af2[l5], this.scx[l5], this.scz[l5], fr(f10 * this.simag[this.cn]), true, trunc(this.tilt));
               if ((this.im === 0) && !this.capsized) {
                 this.xt.skid$m(this.roadtyp, fr(Math.sqrt(fr((fr(this.scx[l5] * this.scx[l5])) + (fr(this.scz[l5] * this.scz[l5]))))));
@@ -2087,9 +2088,11 @@ export class Madness {
             }
           } else {
             if ((this.roadtyp === 1) && (this.m.random() > 0.08499999999999999)) {
+              conto.dustkeep = 0.2 / 0.915;   // ext-patch dust-rate-road1: the base Mad's odds for the ring
               conto.dust(l5, af[l5], af3[l5], af2[l5], this.scx[l5], this.scz[l5], fr(1.100000023841858 * this.simag[this.cn]), false, trunc(this.tilt));
             }
             if ((((this.roadtyp === 2) || (this.roadtyp === 3))) && (this.m.random() > 0.06999999999999999)) {
+              conto.dustkeep = 0.4 / 0.93;   // ext-patch dust-rate-road23: the base Mad's odds for the ring
               conto.dust(l5, af[l5], af3[l5], af2[l5], this.scx[l5], this.scz[l5], fr(1.149999976158142 * this.simag[this.cn]), false, trunc(this.tilt));
             }
           }

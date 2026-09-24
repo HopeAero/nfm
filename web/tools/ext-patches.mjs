@@ -177,12 +177,32 @@ const SPARK_PATCHES = [
     '              }\n')),
 ];
 
+
+/**
+ * Skid dust thinned to the base's rate for the base dust ring (basedust.js).
+ * Extended rolls its skid puffs at 92.5/91.5/93%, where the base Mad rolls
+ * 35/20/40%: its own four slots only took a puff when one was free, but every
+ * call is a puff in the base's ring, which then drew ~3 a tick against the
+ * base's ~1. The sim roll stays; ContO.dust keeps the puff with the ratio on a
+ * draw-bank roll.
+ */
+const DUST_RATE = [
+  ['skid', 'fr(f10 * this.simag[this.cn]), true', '0.35 / 0.925'],
+  ['road1', 'fr(1.100000023841858 * this.simag[this.cn]), false', '0.2 / 0.915'],
+  ['road23', 'fr(1.149999976158142 * this.simag[this.cn]), false', '0.4 / 0.93'],
+].map(([name, args, keep]) => {
+  const call = `conto.dust(l5, af[l5], af3[l5], af2[l5], this.scx[l5], this.scz[l5], ${args}, trunc(this.tilt));\n`;
+  return { name: `dust-rate-${name}`, file: 'Madness.js', find: call,
+    replace: `conto.dustkeep = ${keep};   // ext-patch dust-rate-${name}: the base Mad's odds for the ring\n              ` + call };
+});
+
 export const PATCHES = [
   { name: 'face-order', file: 'ContO.js', find: FACE_ORDER_FIND, replace: FACE_ORDER_REPLACE },
   { name: 'rot-hoist', file: 'ContO.js', ...rotHoist('this.m') },
   { name: 'rot-hoist', file: 'Plane.js', ...rotHoist('this.m') },
   { name: 'rot-hoist', file: 'Medium.js', ...rotHoist('this') },
   ...SPARK_PATCHES,
+  ...DUST_RATE,
 ];
 
 /** 'applied' | 'pending' | throws when neither form is there exactly once. */

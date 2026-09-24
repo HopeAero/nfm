@@ -46,6 +46,7 @@ export class ContO {
     this.rcy = 0.0;
     this.rcz = 0.0;
     this.bdust = null;
+    this.dustkeep = 1;   // the odds the base ring keeps the next dust() at (ext-patch dust-rate-*)
     this.srgb = null;
     this.grat = 0;
     this.osmag = null;
@@ -1258,7 +1259,9 @@ export class ContO {
 
   dust(i, f, f1, f2, f3, f4, f5, flag, j) {
     // the base port's dust ring: a puff per wheel per tick (basedust.js)
-    (this.bdust ??= new BaseDust(this)).dust(i, f, f1, f2, trunc(f3), trunc(f4), f5, j, false);
+    const keep = this.dustkeep;
+    this.dustkeep = 1;
+    (this.bdust ??= new BaseDust(this)).dust(i, f, f1, f2, trunc(f3), trunc(f4), f5, j, false, keep);
     let flag2 = false;
     if ((j > 5) && (((i === 0) || (i === 2)))) {
       flag2 = true;

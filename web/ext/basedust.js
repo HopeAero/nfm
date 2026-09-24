@@ -31,9 +31,14 @@ export class BaseDust {
 
   // n: wheel, n2/n3/n4: its x/y/z, n5/n6: its scx/scz, n7: size, n8: tilt,
   // b: capsized && mtouch. Particles only -- on the draw streams, as the base.
-  dust(n, n2, n3, n4, n5, n6, n7, n8, b) {
+  // keep: the odds this call makes a puff at all -- Extended's skid calls roll
+  // far likelier than the base Mad's, so they are thinned to its rate here.
+  dust(n, n2, n3, n4, n5, n6, n7, n8, b, keep = 1) {
     setDrawPhase(true);
-    try { this.#dust(n, n2, n3, n4, n5, n6, n7, n8, b); } finally { setDrawPhase(false); }
+    try {
+      if (keep < 1 && this.c.m.random() >= keep) return;
+      this.#dust(n, n2, n3, n4, n5, n6, n7, n8, b);
+    } finally { setDrawPhase(false); }
   }
 
   #dust(n, n2, n3, n4, n5, n6, n7, n8, b) {
