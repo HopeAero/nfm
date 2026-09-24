@@ -80,18 +80,17 @@ function restoreFields(obj, fields, s) {
  * base port's Medium.sin, which lerps between entries and is exact on an
  * integer; it is installed on the Medium only for the length of a redraw.
  */
-function trig(table) {
-  return function (i) {
+function trig(t) {
+  return (i) => {
+    if (i === (i | 0) && i >= 0 && i < 360) return t[i];   // the common case: an unblended angle
     while (i >= 360) i -= 360;
     while (i < 0) i += 360;
     const i0 = i | 0;
-    const t = this[table];
     if (i0 === i) return t[i0];
     const a = t[i0], b = t[i0 + 1 === 360 ? 0 : i0 + 1];
     return fr(a + (b - a) * (i - i0));
   };
 }
-const SIN = trig('tsin'), COS = trig('tcos');
 
 /** Shortest-path lerp for angles in degrees; plain lerp otherwise (main.js's `blend`). */
 function blend(a, b, t, isAngle) {
@@ -103,43 +102,76 @@ function blend(a, b, t, isAngle) {
 }
 
 /**
+ * Specialised save/restore for one class's written fields, compiled once from
+ * the field lists and the types seen on the first object: scalars (booleans
+ * as 0/1) and the fixed 3-element arrays (Plane.hsb, Plane.c) go straight into
+ * the Float64Array; other arrays (ContO's effect state, mostly null on track
+ * pieces) are copied.
+ */
+function compile(sample, scalars, arrays) {
+  const small = arrays.filter((f) => ArrayBuffer.isView(sample[f]) && sample[f].length === 3);
+  const other = arrays.filter((f) => !small.includes(f));
+  const bool = new Set(scalars.filter((f) => typeof sample[f] === 'boolean'));
+  let sv = '', rs = '';
+  for (const f of scalars) {
+    sv += `n[i++] = +o.${f};\n`;
+    rs += bool.has(f) ? `o.${f} = n[i++] !== 0;\n` : `o.${f} = n[i++];\n`;
+  }
+  for (const f of small) {
+    sv += `{ const a = o.${f}; if (a) { n[i++] = 1; n[i++] = a[0]; n[i++] = a[1]; n[i++] = a[2]; } else { n[i++] = 0; i += 3; } }\n`;
+    rs += `{ const a = o.${f}; if (n[i++] === 1 && a) { a[0] = n[i]; a[1] = n[i + 1]; a[2] = n[i + 2]; } i += 3; }\n`;
+  }
+  return {
+    width: scalars.length + 4 * small.length,
+    other,
+    save: new Function('o', 'n', 'i', `${sv}return i;`),
+    restore: new Function('o', 'n', 'i', `${rs}return i;`),
+  };
+}
+
+/**
  * While started, the first d() on each ContO and Plane saves what drawing may
  * write on it; restore() puts all of it back. Only what is actually drawn is
  * saved -- most of a stage's planes are culled before Plane.d is reached.
  */
 function makeGuard() {
   const cD = ContO.prototype.d, pD = Plane.prototype.d;
-  const seen = new Set();
-  const objs = [], planes = [];
-  let num = new Float64Array(1 << 16), nn = 0;
+  let stamp = 0;
+  const kinds = [
+    { scalars: CONTO_SCALARS, arrays: CONTO_ARRAYS, c: null, list: [] },
+    { scalars: PLANE_SCALARS, arrays: PLANE_ARRAYS, c: null, list: [] },
+  ];
+  let num = new Float64Array(1 << 17), nn = 0;
   const arrs = [];
-  const put = (v) => {
-    if (nn >= num.length) { const b = new Float64Array(num.length * 2); b.set(num); num = b; }
-    num[nn++] = typeof v === 'boolean' ? (v ? 1 : 0) : v;
+  const snap = (o, k) => {
+    if (o.$interp === stamp) return;
+    o.$interp = stamp;
+    const c = k.c || (k.c = compile(o, k.scalars, k.arrays));
+    if (nn + c.width > num.length) { const b = new Float64Array(num.length * 2); b.set(num); num = b; }
+    k.list.push(o, nn, arrs.length);
+    nn = c.save(o, num, nn);
+    for (const f of c.other) arrs.push(o[f] == null ? o[f] : save(o[f]));
   };
-  const snap = (o, scalars, arrays, list) => {
-    if (seen.has(o)) return;
-    seen.add(o);
-    list.push(o, nn, arrs.length);
-    for (const f of scalars) put(o[f]);
-    for (const f of arrays) arrs.push(o[f] == null ? o[f] : save(o[f]));
-  };
-  const back = (list, scalars, arrays) => {
-    for (let k = 0; k < list.length; k += 3) {
-      const o = list[k];
-      let i = list[k + 1], a = list[k + 2];
-      for (const f of scalars) { const v = num[i++]; o[f] = typeof o[f] === 'boolean' ? v !== 0 : v; }
-      for (const f of arrays) { const v = arrs[a++]; if (v == null) o[f] = v; else restore(o, f, v); }
+  const back = (k) => {
+    const c = k.c, list = k.list;
+    if (!c) return;
+    for (let j = 0; j < list.length; j += 3) {
+      const o = list[j];
+      c.restore(o, num, list[j + 1]);
+      let a = list[j + 2];
+      for (const f of c.other) { const v = arrs[a++]; if (v == null) o[f] = v; else restore(o, f, v); }
     }
   };
+  const [objs, planes] = kinds;
   return {
     start() {
-      seen.clear(); objs.length = 0; planes.length = 0; arrs.length = 0; nn = 0;
-      ContO.prototype.d = function (...a) { snap(this, CONTO_SCALARS, CONTO_ARRAYS, objs); return cD.apply(this, a); };
-      Plane.prototype.d = function (...a) { snap(this, PLANE_SCALARS, PLANE_ARRAYS, planes); return pD.apply(this, a); };
+      stamp++;
+      objs.list.length = 0; planes.list.length = 0; arrs.length = 0; nn = 0;
+      ContO.prototype.d = function (...a) { snap(this, objs); return cD.apply(this, a); };
+      Plane.prototype.d = function (...a) { snap(this, planes); return pD.apply(this, a); };
     },
     stop() { ContO.prototype.d = cD; Plane.prototype.d = pD; },
-    restore() { back(planes, PLANE_SCALARS, PLANE_ARRAYS); back(objs, CONTO_SCALARS, CONTO_ARRAYS); },
+    restore() { back(planes); back(objs); },
   };
 }
 
@@ -150,6 +182,8 @@ export function makeInterp(w) {
   const { rd, gs, xt, medium } = w;
   let prev = null, curr = null, hud = null, hudStart = -1, sceneVerts = 0;
   const guard = makeGuard();
+  const sin = trig(medium.tsin), cos = trig(medium.tcos);
+  const prof = { draw: 0, restore: 0 };   // ms, for ?stats=1
 
   // The HUD's vector part starts where the scene ends: at the first of
   // nitroandspecials() and stat() in the race frame. (xtGraphics also has a
@@ -199,6 +233,7 @@ export function makeInterp(w) {
   };
 
   return {
+    prof,
     /** Polygon vertices the last tick's scene submitted (before its HUD). */
     get sceneVerts() { return sceneVerts; },
     /** Before a tick: mark where its HUD will start. */
@@ -236,10 +271,12 @@ export function makeInterp(w) {
 
       rd.begin(true);             // the tick's HUD text and images stay on the overlay
       setDrawPhase(true);
-      medium.sin = SIN; medium.cos = COS;
+      medium.sin = sin; medium.cos = cos;
       guard.start();
+      const tDraw = performance.now();
       try {
         drawScene();
+        prof.draw += performance.now() - tDraw;
       } finally {
         guard.stop();
         delete medium.sin; delete medium.cos;   // back to the prototype's, the jar's
@@ -248,7 +285,9 @@ export function makeInterp(w) {
         // ...and everything put back as the tick left it
         restoreFields(medium, MEDIUM_WRITES, med);
         for (const f of CAM) medium[f] = curr.cam[f];
+        const tRest = performance.now();
         guard.restore();
+        prof.restore += performance.now() - tRest;
         for (let i = 0; i < nob; i++) { const o = placed[i]; if (o && trans[i]) [o.x, o.y, o.z, o.xz, o.xy, o.zy] = trans[i]; }
       }
       return true;

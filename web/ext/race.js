@@ -166,12 +166,15 @@ export async function bootExtended(params, log, onExit) {
   const interp = makeInterp({ rd, gs, xt, medium, get placed() { return placed; } });
   const MAX_CATCHUP = 3;
   const SHOW_STATS = params.get('stats') === '1';
-  let acc = 0, last = performance.now(), frames = 0, ticks = 0, lastFpsAt = last, tickMs = 0, redrawMs = 0;
+  let acc = 0, last = performance.now(), frames = 0, ticks = 0, lastFpsAt = last, tickMs = 0, redrawMs = 0, tickAt = last;
+  // ?stats=1: where a frame's time goes, split by frames with a tick and without
+  const st = { tickFrames: 0, tickWork: 0, plainFrames: 0, plainWork: 0, worst: 0, over: 0 };
   const loop = (now) => {
     requestAnimationFrame(loop);
+    const w0 = performance.now();
     acc = Math.min(acc + (now - last), TICK_MS * MAX_CATCHUP);
     last = now;
-    let stepped = false;
+    let stepped = false, ticked = false;
     while (acc >= TICK_MS) {
       acc -= TICK_MS;
       rd.begin();                  // a catch-up tick's picture is replaced by the next one's
@@ -181,25 +184,42 @@ export async function bootExtended(params, log, onExit) {
       tickMs += performance.now() - t0;
       interp.afterTick();
       ticks++;
-      stepped = true;
+      stepped = ticked = true;
     }
-    // Racing only: the jar's other screens (its finish, a replay's fades) draw once per frame.
-    if (INTERPOLATE && xt.fase === 0) {
+    // A tick's own picture is the jar's frame, drawn from the state its simulation
+    // started from: exactly t = 0 of the blend towards the state it ended in. So a
+    // frame with a tick shows it as is, and later frames redraw at the time since
+    // that tick -- one scene draw per frame, as the base race manages, instead of
+    // the jar's draw plus a redraw on top of it.
+    if (ticked) tickAt = now;
+    else if (INTERPOLATE && xt.fase === 0) {    // racing only: the jar's other screens draw once per frame
       const t0 = performance.now();
-      if (interp.redraw(acc / TICK_MS)) stepped = true;
+      if (interp.redraw(Math.min(0.999, (now - tickAt) / TICK_MS))) stepped = true;
       redrawMs += performance.now() - t0;
     }
     if (!stepped) return;
     rd.end();
+    const work = performance.now() - w0;
+    if (ticked) { st.tickFrames++; st.tickWork += work; } else { st.plainFrames++; st.plainWork += work; }
+    if (work > st.worst) st.worst = work;
+    if (work > 16.7) st.over++;
     if (++frames >= 5 && now - lastFpsAt >= 500) {
       const dt = now - lastFpsAt;
       const buf = `${rd.gl.drawingBufferWidth}x${rd.gl.drawingBufferHeight}`;
-      log(`${(frames * 1000 / dt).toFixed(0)} fps  ${(ticks * 1000 / dt).toFixed(1)} tick/s  ${rd.inputVerts}/${rd.vertexCount} verts`
-        + `  fan=${rd.fanPolys} concave=${rd.concavePolys}/${rd.concaveVerts}v  ${buf}  fase=${xt.fase}`
-        + (SHOW_STATS ? `
-  frame ${(tickMs / Math.max(1, ticks)).toFixed(1)}ms/tick (draw+sim, the jar's frame)`
-          + `  redraw ${(redrawMs / Math.max(1, frames)).toFixed(1)}ms/frame  [interp=${INTERPOLATE ? 1 : 0}]` : ''));
+      let line = `${(frames * 1000 / dt).toFixed(0)} fps  ${(ticks * 1000 / dt).toFixed(1)} tick/s  ${rd.inputVerts}/${rd.vertexCount} verts`
+        + `  fan=${rd.fanPolys} concave=${rd.concavePolys}/${rd.concaveVerts}v  ${buf}  fase=${xt.fase}`;
+      if (SHOW_STATS) {
+        line += `
+  tick ${(tickMs / Math.max(1, ticks)).toFixed(1)}ms (the jar's frame: draw+sim)`
+          + `  redraw ${(redrawMs / Math.max(1, frames)).toFixed(1)}ms = draw ${(interp.prof.draw / Math.max(1, frames)).toFixed(1)} + restore ${(interp.prof.restore / Math.max(1, frames)).toFixed(1)}`
+          + `
+  frame work: with a tick ${(st.tickWork / Math.max(1, st.tickFrames)).toFixed(1)}ms, without ${(st.plainWork / Math.max(1, st.plainFrames)).toFixed(1)}ms`
+          + `, worst ${st.worst.toFixed(1)}ms, over 16.7ms: ${st.over}/${frames}  [interp=${INTERPOLATE ? 1 : 0}]`;
+      }
+      log(line);
       frames = 0; ticks = 0; lastFpsAt = now; tickMs = 0; redrawMs = 0;
+      interp.prof.draw = interp.prof.restore = 0;
+      Object.assign(st, { tickFrames: 0, tickWork: 0, plainFrames: 0, plainWork: 0, worst: 0, over: 0 });
     }
   };
   // ?selftest=N: N ticks flat out, with two redraws between ticks unless interp=0,

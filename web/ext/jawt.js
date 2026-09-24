@@ -120,6 +120,7 @@ export class URL {
 export class Image {
   constructor(width, height, pixels = new Int32Array(width * height), canvas = null) {
     this.width = width; this.height = height; this.pixels = pixels; this.canvas = canvas;
+    this.drawn = 0;
   }
   getWidth() { return this.width; }
   getHeight() { return this.height; }
@@ -131,13 +132,24 @@ export class Image {
    */
   source() {
     if (this.canvas) return this.canvas;
+    // Drawn a second time: a lasting image (the HUD's recoloured ones), worth its own canvas.
+    // A once-drawn one (the 870x480 image some screens rebuild every frame) keeps the scratch.
+    if (this.drawn++ > 0) {
+      this.canvas = new OffscreenCanvas(Math.max(1, this.width), Math.max(1, this.height));
+      this.canvas.getContext('2d').putImageData(this.imageData(), 0, 0);
+      return this.canvas;
+    }
     const w = Math.max(1, this.width), h = Math.max(1, this.height);
     if (!Image.scratch || Image.scratch.width !== w || Image.scratch.height !== h) Image.scratch = new OffscreenCanvas(w, h);
-    const data = new ImageData(w, h);
+    Image.scratch.getContext('2d').putImageData(this.imageData(), 0, 0);
+    return Image.scratch;
+  }
+
+  imageData() {
+    const data = new ImageData(Math.max(1, this.width), Math.max(1, this.height));
     const p = this.pixels, d = data.data;
     for (let i = 0; i < p.length; i++) { const v = p[i]; d[4 * i] = (v >> 16) & 255; d[4 * i + 1] = (v >> 8) & 255; d[4 * i + 2] = v & 255; d[4 * i + 3] = (v >>> 24) & 255; }
-    Image.scratch.getContext('2d').putImageData(data, 0, 0);
-    return Image.scratch;
+    return data;
   }
 }
 Image.scratch = null;
