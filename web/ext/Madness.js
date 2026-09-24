@@ -889,6 +889,9 @@ export class Madness {
               if (madness.colidim) {
                 madness.colidim = false;
               }
+              if (conto1.sprkRoll()) {   // ext-patch sparks-hit0: the base's car-to-car sparks
+                conto1.sprk(fr(fr(af[k] + af4[l]) / 2.0), fr(fr(af2[k] + af5[l]) / 2.0), fr(fr(af3[k] + af6[l]) / 2.0), fr(fr(madness.scx[l] + this.scx[k]) / 4.0), fr(fr(madness.scy[l] + this.scy[k]) / 4.0), fr(fr(madness.scz[l] + this.scz[k]) / 4.0), 2);
+              }
             }
             if (Math.abs(fr(this.scz[k] * this.moment[this.cn])) > Math.abs(fr(madness.scz[l] * madness.moment[madness.cn]))) {
               let f4 = fr(madness.scz[l] * this.revpush[this.cn]);
@@ -939,6 +942,9 @@ export class Madness {
               madness.regy(l, fr((Math.imul(this.revlift[this.cn], 7))), conto1, this.im);
               if (madness.colidim) {
                 madness.colidim = false;
+              }
+              if (conto1.sprkRoll()) {   // ext-patch sparks-hit1: the base's car-to-car sparks
+                conto1.sprk(fr(fr(af[k] + af4[l]) / 2.0), fr(fr(af2[k] + af5[l]) / 2.0), fr(fr(af3[k] + af6[l]) / 2.0), fr(fr(madness.scx[l] + this.scx[k]) / 4.0), fr(fr(madness.scy[l] + this.scy[k]) / 4.0), fr(fr(madness.scz[l] + this.scz[k]) / 4.0), 2);
               }
             }
             this.lastcolido[this.im] = 70;
@@ -2149,6 +2155,10 @@ export class Madness {
     }
     let i6 = 0;
     let aflag = new Array(4).fill(false);
+    // ext-patch sparks-state: the base Mad's scrape flags and wall counters (web/tools/ext-patches.mjs)
+    const gscr = new Array(4).fill(false);
+    this.crank ??= [0, 1, 2, 3].map(() => new Int32Array(4));
+    this.lcrank ??= [0, 1, 2, 3].map(() => new Int32Array(4));
     let l6 = 0;
     do {
       if (af3[l6] > (fr(this.groundlevel - 5.0))) {
@@ -2186,6 +2196,7 @@ export class Madness {
           f12 = 1.100000023841858;
         }
         this.regy(l6, Math.abs(fr(this.scy[l6] * f12)), conto, 1);
+        if (this.capsized) gscr[l6] = true;   // ext-patch sparks-ground
         if (this.scy[l6] > 0.0) {
           let scy4 = this.scy;
           let n14 = l6;
@@ -2204,6 +2215,10 @@ export class Madness {
       let j7 = 0;
       let i7 = 0;
       do {
+        // ext-patch sparks-scrape: a capsized car scraping the ground under a piece
+        if (gscr[i7] && (trackers.skd[j6] === 0 || trackers.skd[j6] === 1) && af[i7] > trackers.x[j6] - trackers.radx[j6] && af[i7] < trackers.x[j6] + trackers.radx[j6] && af2[i7] > trackers.z[j6] - trackers.radz[j6] && af2[i7] < trackers.z[j6] + trackers.radz[j6]) {
+          conto.sprk(af[i7], af3[i7], af2[i7], this.scx[i7], this.scy[i7], this.scz[i7], 1);
+        }
         if ((((((!aflag[i7] && (af[i7] > (i32(trackers.x[j6] - trackers.radx[j6])))) && (af[i7] < (i32(trackers.x[j6] + trackers.radx[j6])))) && (af2[i7] > (i32(trackers.z[j6] - trackers.radz[j6])))) && (af2[i7] < (i32(trackers.z[j6] + trackers.radz[j6])))) && (af3[i7] > (i32(trackers.y[j6] - trackers.rady[j6])))) && (af3[i7] < (i32(trackers.y[j6] + trackers.rady[j6])))) {
           let wallmulti = 1.0;
           if (this.xt.careermode) {
@@ -2281,6 +2296,9 @@ export class Madness {
               conto.dust(i7, af[i7], af3[i7], af2[i7], this.scx[i7], this.scz[i7], fr(f13 * this.simag[this.cn]), true, 0);
             }
             af3[i7] = fr(trackers.y[j6]);
+            if (this.capsized && (trackers.skd[j6] === 0 || trackers.skd[j6] === 1)) {   // ext-patch sparks-flat
+              conto.sprk(af[i7], af3[i7], af2[i7], this.scx[i7], this.scy[i7], this.scz[i7], 1);
+            }
             let f14 = 0.0;
             do {
               if ((i7 !== f14) && (af3[trunc(f14)] <= (i32(trackers.y[j6] - 5)))) {
@@ -2309,6 +2327,9 @@ export class Madness {
           if (((trackers.zy[j6] === -90) && (af2[i7] < (i32(trackers.z[j6] + trackers.radz[j6])))) && (this.scz[i7] < 0.0)) {
             af2[i7] = fr((i32(trackers.z[j6] + trackers.radz[j6])));
             let f15 = 0.0;
+            // ext-patch sparks-wall0: the base's wall sparks, from the second tick against it
+            if (trackers.skd[j6] !== 2) ++this.crank[0][i7];
+            if (this.crank[0][i7] > 1) conto.sprk(af[i7], af3[i7], af2[i7], this.scx[i7], this.scy[i7], this.scz[i7], 0);
             do {
               if ((i7 !== f15) && (af2[trunc(f15)] >= (i32(trackers.z[j6] + trackers.radz[j6])))) {
                 let array7 = af2;
@@ -2340,6 +2361,9 @@ export class Madness {
           if (((trackers.zy[j6] === 90) && (af2[i7] > (i32(trackers.z[j6] - trackers.radz[j6])))) && (this.scz[i7] > 0.0)) {
             af2[i7] = fr((i32(trackers.z[j6] - trackers.radz[j6])));
             let f16 = 0.0;
+            // ext-patch sparks-wall1: the base's wall sparks, from the second tick against it
+            if (trackers.skd[j6] !== 2) ++this.crank[1][i7];
+            if (this.crank[1][i7] > 1) conto.sprk(af[i7], af3[i7], af2[i7], this.scx[i7], this.scy[i7], this.scz[i7], 0);
             do {
               if ((i7 !== f16) && (af2[trunc(f16)] <= (i32(trackers.z[j6] - trackers.radz[j6])))) {
                 let array8 = af2;
@@ -2371,6 +2395,9 @@ export class Madness {
           if (((trackers.xy[j6] === -90) && (af[i7] < (i32(trackers.x[j6] + trackers.radx[j6])))) && (this.scx[i7] < 0.0)) {
             af[i7] = fr((i32(trackers.x[j6] + trackers.radx[j6])));
             let f17 = 0.0;
+            // ext-patch sparks-wall2: the base's wall sparks, from the second tick against it
+            if (trackers.skd[j6] !== 2) ++this.crank[2][i7];
+            if (this.crank[2][i7] > 1) conto.sprk(af[i7], af3[i7], af2[i7], this.scx[i7], this.scy[i7], this.scz[i7], 0);
             do {
               if ((i7 !== f17) && (af[trunc(f17)] >= (i32(trackers.x[j6] + trackers.radx[j6])))) {
                 let array9 = af;
@@ -2402,6 +2429,9 @@ export class Madness {
           if (((trackers.xy[j6] === 90) && (af[i7] > (i32(trackers.x[j6] - trackers.radx[j6])))) && (this.scx[i7] > 0.0)) {
             af[i7] = fr((i32(trackers.x[j6] - trackers.radx[j6])));
             let f18 = 0.0;
+            // ext-patch sparks-wall3: the base's wall sparks, from the second tick against it
+            if (trackers.skd[j6] !== 2) ++this.crank[3][i7];
+            if (this.crank[3][i7] > 1) conto.sprk(af[i7], af3[i7], af2[i7], this.scx[i7], this.scy[i7], this.scz[i7], 0);
             do {
               if ((i7 !== f18) && (af[trunc(f18)] <= (i32(trackers.x[j6] - trackers.radx[j6])))) {
                 let array10 = af;
@@ -2452,6 +2482,9 @@ export class Madness {
               }
               this.wtouch = true;
               this.gtouch = false;
+              if (this.capsized && (trackers.skd[j6] === 0 || trackers.skd[j6] === 1)) {   // ext-patch sparks-slope-z
+                conto.sprk(af[i7], af3[i7], af2[i7], this.scx[i7], this.scy[i7], this.scz[i7], 1);
+              }
               if (!flag5 && (this.roadtyp !== 0)) {
                 let f22 = 1.399999976158142;
                 conto.dust(i7, af[i7], af3[i7], af2[i7], this.scx[i7], this.scz[i7], fr(f22 * this.simag[this.cn]), true, 0);
@@ -2485,6 +2518,9 @@ export class Madness {
             }
             this.wtouch = true;
             this.gtouch = false;
+            if (this.capsized && (trackers.skd[j6] === 0 || trackers.skd[j6] === 1)) {   // ext-patch sparks-slope-x
+              conto.sprk(af[i7], af3[i7], af2[i7], this.scx[i7], this.scy[i7], this.scz[i7], 1);
+            }
             if (!flag5 && (this.roadtyp !== 0)) {
               let f26 = 1.399999976158142;
               conto.dust(i7, af[i7], af3[i7], af2[i7], this.scx[i7], this.scz[i7], fr(f26 * this.simag[this.cn]), true, 0);
@@ -2504,6 +2540,13 @@ export class Madness {
     }
     if (l6 === 4) {
       this.mtouch = true;
+    }
+    // ext-patch sparks-decay: a wall counter that did not move this tick restarts (the base Mad)
+    for (let n100 = 0; n100 < 4; ++n100) {
+      for (let n101 = 0; n101 < 4; ++n101) {
+        if (this.crank[n100][n101] === this.lcrank[n100][n101]) this.crank[n100][n101] = 0;
+        this.lcrank[n100][n101] = this.crank[n100][n101];
+      }
     }
     let k7 = 0;
     let i9 = 0;

@@ -6,10 +6,11 @@
 // optimisations. The Java's behaviour is checked against madness.jar by
 // ContO.test.js and draw.test.js (call for call); run them after any edit.
 
-import { floatArray, fr, i32, idiv, intArray, objArray, random, trunc } from '../java.js';
+import { floatArray, fr, i32, idiv, intArray, objArray, random, setDrawPhase, trunc } from '../java.js';
 import { Arrays, ByteArrayInputStream, Color, DataInputStream, Integer, Random, StringBuilder, System, charAt, jstr } from './jawt.js';
 import { Plane } from './Plane.js';
 import { Wheels } from './Wheels.js';
+import { BaseDust } from './basedust.js';
 
 export class ContO {
   constructor(k, ...a) {
@@ -283,6 +284,8 @@ export class ContO {
           this.keyz[j] = trunc((fr(fr(this.getvalue('w', s1, 2)) * this.div)));
           j = i32(j + 1);
           wheels.make(this.m, this.t, this.p, this.npl, trunc((fr((fr(fr(this.getvalue('w', s1, 0)) * this.div)) * this.iwid))), trunc((fr(fr(this.getvalue('w', s1, 1)) * this.div))), trunc((fr(fr(this.getvalue('w', s1, 2)) * this.div))), this.getvalue('w', s1, 3), trunc((fr((fr(fr(this.getvalue('w', s1, 4)) * this.div)) * this.iwid))), trunc((fr(fr(this.getvalue('w', s1, 5)) * this.div))), i3);
+          // base port's sparks: the base Wheels.make's sparkat, (int)(size / 10 * 24)
+          this.sprkat = trunc(fr(fr(fr(trunc(fr(fr(this.getvalue('w', s1, 5)) * this.div))) / 10.0) * 24.0));
           this.npl = i32(this.npl + 15);
         }
         if (s1.startsWith('tracks')) {
@@ -492,6 +495,7 @@ export class ContO {
     this.grounded = conto.grounded;
     this.isacar = conto.isacar;
     this.grat = conto.grat;
+    this.sprkat = conto.sprkat;
     this.p = objArray(conto.npl);
     for (let i2 = 0; i2 < this.npl; i2 = i32(i2 + 1)) {
       if (conto.p[i2].master !== 0) {
@@ -838,154 +842,12 @@ export class ContO {
   }
 
   pdust(i, g, j) {
-    // The base port's look (web/ContO.js pdust: a translucent octagon tinted by
-    // the road under it, whitened, radii kept per puff) on Extended's own puff
-    // lifecycle -- dust()'s four slots, stg 0..4, the dov pre/post-face
-    // handshake, the drift and rise -- which Record also replays. The jar's
-    // own pdust (an older one) drew an opaque star of ground/sky/fog that read
-    // as white blobs; replaced at the user's request.
-    // Randoms run on a tick only: an interpolated frame redraws the same puff.
-    const tick = !this.m.interpolating;
+    // Extended's own puff is kept for its state -- Record replays stg/dov/smag/
+    // fulls -- but no longer drawn: the base port's dust (basedust.js, fed from
+    // dust()) is, at the user's request. Only its lifecycle runs, at tick rate:
+    // the dov pre/post-face handshake and the stage.
+    if (this.m.interpolating) return;
     if ((Math.imul(j, this.dov[i])) > 0) {
-      const m = this.m;
-      const white = intArray(3);
-      for (let c = 0; c < 3; c++) {
-        white[c] = trunc(fr(255.0 + fr(255.0 * fr(m.snap[c] / 100.0))));
-        if (white[c] > 255) white[c] = 255;
-        if (white[c] < 0) white[c] = 0;
-      }
-      let r = idiv(m.crgrnd[0] + white[0], 2);
-      let gr = idiv(m.crgrnd[1] + white[1], 2);
-      let b = idiv(m.crgrnd[2] + white[2], 2);
-      let sbln = 0.6;
-      let nodust = true;
-      for (let k2 = 0; k2 < this.t.nt; k2 = i32(k2 + 1)) {
-        if (!m.effect[9] || (this.t.y[k2] === this.groundlevel)) {
-          if (this.groundlevel >= 0) {
-            nodust = false;
-          }
-          if (((((Math.abs(this.t.zy[k2]) | 0) !== 90) && ((Math.abs(this.t.xy[k2]) | 0) !== 90)) && ((Math.abs(i32(this.sx[i] - this.t.x[k2])) | 0) < this.t.radx[k2])) && ((Math.abs(i32(this.sz[i] - this.t.z[k2])) | 0) < this.t.radz[k2])) {
-            nodust = false;
-            if (this.t.skd[k2] === 0) sbln = 0.2;
-            if (this.t.skd[k2] === 1) sbln = 0.4;
-            if (this.t.skd[k2] === 2) sbln = 0.45;
-            r = idiv(this.t.c[k2][0] + white[0], 2);
-            gr = idiv(this.t.c[k2][1] + white[1], 2);
-            b = idiv(this.t.c[k2][2] + white[2], 2);
-          }
-        }
-      }
-      if (this.sy[i] > 250) {
-        this.sy[i] = 250;
-      }
-      let l2 = i32(m.cx + trunc((fr((fr(fr(((i32((i32(this.sx[i] - m.x)) - m.cx)))) * m.cos(m.xz))) - (fr(fr(((i32((i32(this.sz[i] - m.z)) - m.cz)))) * m.sin(m.xz)))))));
-      let i3 = i32(m.cz + trunc((fr((fr(fr(((i32((i32(this.sx[i] - m.x)) - m.cx)))) * m.sin(m.xz))) + (fr(fr(((i32((i32(this.sz[i] - m.z)) - m.cz)))) * m.cos(m.xz)))))));
-      let j3 = i32(m.cy + trunc((fr((fr(fr(((i32((i32(this.sy[i] - m.y)) - m.cy)))) * m.cos(m.zy))) - (fr(fr(((i32(i3 - m.cz)))) * m.sin(m.zy)))))));
-      i3 = i32(m.cz + trunc((fr((fr(fr(((i32((i32(this.sy[i] - m.y)) - m.cy)))) * m.sin(m.zy))) + (fr(fr(((i32(i3 - m.cz)))) * m.cos(m.zy)))))));
-      let k3 = trunc(Math.sqrt(i32((i32((Math.imul(((i32(m.cy - j3))), (i32(m.cy - j3)))) + (Math.imul(((i32(m.cx - l2))), (i32(m.cx - l2)))))) + (Math.imul(i3, i3)))));
-      for (let l3 = 0; l3 < 16; l3++) {
-        if (k3 > m.fade[l3]) {
-          r = idiv(r * m.fogd + m.cfade[0], m.fogd + 1);
-          gr = idiv(gr * m.fogd + m.cfade[1], m.fogd + 1);
-          b = idiv(b * m.fogd + m.cfade[2], m.fogd + 1);
-        }
-      }
-      if (tick) {
-        if ((i32((Math.abs(this.scx[i]) | 0) + (Math.abs(this.scz[i]) | 0))) > 150) {
-          let sy = this.sy;
-          sy[i] = trunc(fr(fr(sy[i]) - ((fr(3.0 + (fr(27.0 * this.smag[i])))))));
-        } else {
-          let sy2 = this.sy;
-          sy2[i] = trunc(fr(fr(sy2[i]) - ((fr(23.0 + (fr(7.0 * this.smag[i])))))));
-        }
-        let sx = this.sx;
-        sx[i] = trunc(fr(fr(sx[i]) + ((fr(fr(this.scx[i]) / ((fr(fr(((i32(this.stg[i] + 1)))) * this.smag[i]))))))));
-        let sz = this.sz;
-        sz[i] = trunc(fr(fr(sz[i]) + ((fr(fr(this.scz[i]) / ((fr(fr(((i32(this.stg[i] + 1)))) * this.smag[i]))))))));
-      }
-      // the base's per-vertex radii: rolled when the puff is born (osmag is
-      // the base dust()'s size x speed factor), grown every tick
-      this.vmag ??= objArray(6).map(() => floatArray(8));
-      const v = this.vmag[i];
-      if (this.stg[i] === 1 && tick) {
-        let n9 = fr((Math.sqrt(Math.imul(this.scx[i], this.scx[i]) + Math.imul(this.scz[i], this.scz[i])) - 40.0) / 160.0);
-        if (n9 > 1.0) n9 = 1.0;
-        const osmag = fr(this.smag[i] * n9);
-        for (let n4 = 0; n4 < 8; ++n4) v[n4] = fr(fr(osmag * m.random()) * 50.0);
-        for (let n5 = 0; n5 < 8; ++n5) {
-          const n6 = n5 === 0 ? 7 : n5 - 1;
-          const n7 = n5 === 7 ? 0 : n5 + 1;
-          v[n5] = fr(fr(fr(fr(v[n6] + v[n7]) / 2.0) + v[n5]) / 2.0);
-        }
-        v[6] = v[7];
-      }
-      const A = 0.9238, B = 0.3826;
-      const ai = intArray(8);
-      const ai2 = intArray(8);
-      ai[0] = this.xs(trunc(l2 + fr(fr(v[0] * A) * 1.5)), i3);
-      ai2[0] = this.ys(trunc(j3 + fr(fr(v[0] * B) * 1.5)), i3);
-      ai[1] = this.xs(trunc(l2 + fr(fr(v[1] * A) * 1.5)), i3);
-      ai2[1] = this.ys(trunc(j3 - fr(fr(v[1] * B) * 1.5)), i3);
-      ai[2] = this.xs(trunc(l2 + fr(v[2] * B)), i3);
-      ai2[2] = this.ys(trunc(j3 - fr(v[2] * A)), i3);
-      ai[3] = this.xs(trunc(l2 - fr(v[3] * B)), i3);
-      ai2[3] = this.ys(trunc(j3 - fr(v[3] * A)), i3);
-      ai[4] = this.xs(trunc(l2 - fr(fr(v[4] * A) * 1.5)), i3);
-      ai2[4] = this.ys(trunc(j3 - fr(fr(v[4] * B) * 1.5)), i3);
-      ai[5] = this.xs(trunc(l2 - fr(fr(v[5] * A) * 1.5)), i3);
-      ai2[5] = this.ys(trunc(j3 + fr(fr(v[5] * B) * 1.5)), i3);
-      ai[6] = this.xs(trunc(l2 - fr(fr(v[6] * B) * 1.7)), i3);
-      ai2[6] = this.ys(trunc(j3 + fr(v[6] * A)), i3);
-      ai[7] = this.xs(trunc(l2 + fr(fr(v[7] * B) * 1.7)), i3);
-      ai2[7] = this.ys(trunc(j3 + fr(v[7] * A)), i3);
-      if (tick) {
-        for (let n12 = 0; n12 < 7; ++n12) v[n12] = fr(v[n12] + fr(5.0 + fr(m.random() * 15.0)));
-        v[7] = v[6];
-      }
-      let flag = true;
-      if (nodust) {
-        flag = false;
-      }
-      let j4 = 0;
-      let k4 = 0;
-      let l4 = 0;
-      let i5 = 0;
-      let j5 = 0;
-      do {
-        if ((ai2[j5] < 0) || (i3 < 10)) {
-          j4 = i32(j4 + 1);
-        }
-        if ((ai2[j5] > m.h) || (i3 < 10)) {
-          k4 = i32(k4 + 1);
-        }
-        if ((ai[j5] < 0) || (i3 < 10)) {
-          l4 = i32(l4 + 1);
-        }
-        if ((ai[j5] > m.w) || (i3 < 10)) {
-          i5 = i32(i5 + 1);
-        }
-        if ((ai2[j5] < 45) && (m.flex !== 0)) {
-          m.flex = 0;
-        }
-      } while (++j5 < 8);
-      if ((((l4 === 4) || (j4 === 4)) || (k4 === 4)) || (i5 === 4)) {
-        flag = false;
-      }
-      if (flag) {
-        // ponytail: /5, not the base's /8 -- Extended's puff lives 4 stages, not 7
-        // (a longer life would change dust()'s spawn cadence and Record's replays)
-        let alpha = fr(sbln - fr(this.stg[i] * fr(sbln / 5.0)));
-        if (m.effect[4]) {
-          alpha = fr(alpha * (60 / 255));   // the jar's fadedshad
-        }
-        g.setColor(r, gr, b);
-        g.setComposite(alpha);
-        g.fillPolygon(ai, ai2, 8);
-        g.setComposite(1.0);
-      }
-      if (!tick) {
-        return;
-      }
       if (this.dov[i] === 1) {
         this.dov[i] = -1;
       }
@@ -998,9 +860,207 @@ export class ContO {
           this.dov[i] = 0;
         }
       }
-    } else if (this.dov[i] === 0 && tick) {
+    } else if (this.dov[i] === 0) {
       this.dov[i] = 1;
     }
+  }
+
+  // The base port's sparks (web/ContO.js sprk/dsprk, NFM2's newer ContO): the
+  // Extended jar has none. Madness.drive/colide call sprk() at the base's sites
+  // (ext-patch sparks in web/tools/ext-patches.mjs); d() draws them.
+  sprk(n, n2, n3, rcx, rcy, rcz, n4) {
+    if (n4 !== 1) {
+      this.srx = trunc(fr(n - fr(this.sprkat * this.m.sin(this.xz))));
+      this.sry = trunc(fr(n2 - fr(fr(this.sprkat * this.m.cos(this.zy)) * this.m.cos(this.xy))));
+      this.srz = trunc(fr(n3 + fr(this.sprkat * this.m.cos(this.xz))));
+      this.sprk_ = 1;
+    } else {
+      ++this.sprk_;
+      if (this.sprk_ === 4) {
+        this.srx = trunc(fr(this.x + rcx));
+        this.sry = trunc(n2);
+        this.srz = trunc(fr(this.z + rcz));
+        this.sprk_ = 5;
+      } else {
+        this.srx = trunc(n);
+        this.sry = trunc(n2);
+        this.srz = trunc(n3);
+      }
+    }
+    if (n4 === 2) {
+      this.sprk_ = 6;
+    }
+    this.rcx = fr(rcx);
+    this.rcy = fr(rcy);
+    this.rcz = fr(rcz);
+  }
+
+  dsprk(graphics2D, b) {
+    if (!this.rtg) {
+      if (!this.sprk_) return;
+      this.rtg = intArray(100);
+      this.rbef = new Array(100).fill(false);
+      this.rx = intArray(100);
+      this.ry = intArray(100);
+      this.rz = intArray(100);
+      this.vrx = floatArray(100);
+      this.vry = floatArray(100);
+      this.vrz = floatArray(100);
+    }
+    if (b && this.sprk_ !== 0) {
+      let n = idiv(trunc(Math.sqrt(fr(fr(fr(this.rcx * this.rcx) + fr(this.rcy * this.rcy)) + fr(this.rcz * this.rcz)))), 10);
+      if (n > 5) {
+        let b2 = false;
+        // Bytecode showed iadd for sum of squares; wrapped with i32() per §2b
+        // the base reads this.dist, set by its d() by now (see camdist)
+        if (this.camdist() < Math.sqrt(i32(
+          Math.imul(this.m.x + this.m.cx - this.srx, this.m.x + this.m.cx - this.srx) +
+          Math.imul(this.m.y + this.m.cy - this.sry, this.m.y + this.m.cy - this.sry) +
+          Math.imul(this.m.z - this.srz, this.m.z - this.srz)
+        ))) {
+          b2 = true;
+        }
+        if (n > 33) {
+          n = 33;
+        }
+        // Spawning is once per tick. Left unguarded, every interpolated frame
+        // seeded another n sparks from the same crash.
+        let n2 = this.m.interpolating ? n : 0;
+        for (let i = 0; i < 100 && n2 !== n; ++i) {
+          if (this.rtg[i] === 0) {
+            this.rtg[i] = 1;
+            this.rbef[i] = b2;
+            ++n2;
+          }
+          if (n2 === n) {
+            break;
+          }
+        }
+      }
+    }
+    for (let j = 0; j < 100; ++j) {
+      if (this.rtg[j] !== 0 && ((this.rbef[j] && b) || (!this.rbef[j] && !b))) {
+        // Same shape as pdust's stage 1: rolled once, on the tick that
+        // advances the spark off stage 1.
+        if (this.rtg[j] === 1 && !this.m.interpolating) {
+          if (this.sprk_ < 5) {
+            this.rx[j] = trunc(this.srx + 3 - (this.m.random() * 6.7));
+            this.ry[j] = trunc(this.sry + 3 - (this.m.random() * 6.7));
+            this.rz[j] = trunc(this.srz + 3 - (this.m.random() * 6.7));
+          } else {
+            this.rx[j] = trunc(this.srx + 10 - fr(this.m.random() * 20.0));
+            this.ry[j] = trunc(this.sry - fr(this.m.random() * 4.0));
+            this.rz[j] = trunc(this.srz + 10 - fr(this.m.random() * 20.0));
+          }
+          const n3 = trunc(Math.sqrt(fr(fr(fr(this.rcx * this.rcx) + fr(this.rcy * this.rcy)) + fr(this.rcz * this.rcz))));
+          const n4 = fr(0.2 + fr(0.4 * this.m.random()));
+          const n5 = fr(fr(this.m.random() * this.m.random()) * this.m.random());
+          let n6 = 1.0;
+          if (this.m.random() > this.m.random()) {
+            if (this.m.random() > this.m.random()) {
+              n6 *= -1.0;
+            }
+            this.vrx[j] = -fr(fr(this.rcx + fr(fr(fr(n3 * (fr(1.0 - fr(this.rcx / n3)))) * n5) * n6)) * n4);
+          }
+          if (this.m.random() > this.m.random()) {
+            if (this.m.random() > this.m.random()) {
+              n6 *= -1.0;
+            }
+            if (this.sprk_ === 5) {
+              n6 = 1.0;
+            }
+            this.vry[j] = -fr(fr(this.rcy + fr(fr(fr(n3 * (fr(1.0 - fr(this.rcy / n3)))) * n5) * n6)) * n4);
+          }
+          if (this.m.random() > this.m.random()) {
+            if (this.m.random() > this.m.random()) {
+              n6 *= -1.0;
+            }
+            this.vrz[j] = -fr(fr(this.rcz + fr(fr(fr(n3 * (fr(1.0 - fr(this.rcz / n3)))) * n5) * n6)) * n4);
+          }
+        }
+        // Compound assignment rewrites per §2: rx[n7] += (int)this.vrx[j], etc.
+        if (!this.m.interpolating) {
+          this.rx[j] = trunc(fr(this.rx[j] + this.vrx[j]));
+          this.ry[j] = trunc(fr(this.ry[j] + this.vry[j]));
+          this.rz[j] = trunc(fr(this.rz[j] + this.vrz[j]));
+        }
+
+        const n10 = this.m.cx + trunc(fr(fr((this.rx[j] - this.m.x - this.m.cx) * this.m.cos(this.m.xz)) - fr((this.rz[j] - this.m.z - this.m.cz) * this.m.sin(this.m.xz))));
+        const n11 = this.m.cz + trunc(fr(fr((this.rx[j] - this.m.x - this.m.cx) * this.m.sin(this.m.xz)) + fr((this.rz[j] - this.m.z - this.m.cz) * this.m.cos(this.m.xz))));
+        const n12 = this.m.cy + trunc(fr(fr((this.ry[j] - this.m.y - this.m.cy) * this.m.cos(this.m.zy)) - fr((n11 - this.m.cz) * this.m.sin(this.m.zy))));
+        const n13 = this.m.cz + trunc(fr(fr((this.ry[j] - this.m.y - this.m.cy) * this.m.sin(this.m.zy)) + fr((n11 - this.m.cz) * this.m.cos(this.m.zy))));
+        const n14 = this.m.cx + trunc(fr(fr((fr(this.rx[j] - this.m.x - this.m.cx + this.vrx[j])) * this.m.cos(this.m.xz)) - fr((fr(this.rz[j] - this.m.z - this.m.cz + this.vrz[j])) * this.m.sin(this.m.xz))));
+        const n15 = this.m.cz + trunc(fr(fr((fr(this.rx[j] - this.m.x - this.m.cx + this.vrx[j])) * this.m.sin(this.m.xz)) + fr((fr(this.rz[j] - this.m.z - this.m.cz + this.vrz[j])) * this.m.cos(this.m.xz))));
+        const n16 = this.m.cy + trunc(fr(fr((fr(this.ry[j] - this.m.y - this.m.cy + this.vry[j])) * this.m.cos(this.m.zy)) - fr((n15 - this.m.cz) * this.m.sin(this.m.zy))));
+        const n17 = this.m.cz + trunc(fr(fr((fr(this.ry[j] - this.m.y - this.m.cy + this.vry[j])) * this.m.sin(this.m.zy)) + fr((n15 - this.m.cz) * this.m.cos(this.m.zy))));
+        const xs = this.xs(n10, n13);
+        const ys = this.ys(n12, n13);
+        const xs2 = this.xs(n14, n17);
+        const ys2 = this.ys(n16, n17);
+        if (xs < this.m.iw && xs2 < this.m.iw) {
+          this.rtg[j] = 0;
+        }
+        if (xs > this.m.w && xs2 > this.m.w) {
+          this.rtg[j] = 0;
+        }
+        if (ys < this.m.ih && ys2 < this.m.ih) {
+          this.rtg[j] = 0;
+        }
+        if (ys > this.m.h && ys2 > this.m.h) {
+          this.rtg[j] = 0;
+        }
+        if (this.ry[j] > 250) {
+          this.rtg[j] = 0;
+        }
+        if (this.rtg[j] !== 0) {
+          let r = 255;
+          let g = 197 - 30 * this.rtg[j];
+          let b3 = 0;
+          for (let k = 0; k < 16; ++k) {
+            if (n13 > this.m.fade[k]) {
+              r = idiv(r * this.m.fogd + this.m.cfade[0], this.m.fogd + 1);
+              g = idiv(g * this.m.fogd + this.m.cfade[1], this.m.fogd + 1);
+              b3 = idiv(b3 * this.m.fogd + this.m.cfade[2], this.m.fogd + 1);
+            }
+          }
+          graphics2D.setColor(r, g, b3);
+          graphics2D.drawLine(xs, ys, xs2, ys2);
+          if (!this.m.interpolating) {
+            this.vrx[j] = fr(this.vrx[j] * 0.8);
+            this.vry[j] = fr(this.vry[j] * 0.8);
+            this.vrz[j] = fr(this.vrz[j] * 0.8);
+            if (this.rtg[j] === 3) {
+              this.rtg[j] = 0;
+            } else {
+              const rtg = this.rtg;
+              const n18 = j;
+              ++rtg[n18];
+            }
+          }
+        }
+      }
+    }
+    if (this.sprk_ !== 0) {
+      this.sprk_ = 0;
+    }
+  }
+
+  // The car's distance to the camera, as the base's d() sets this.dist before
+  // its dust and sparks (Extended's d() zeroes dist until the end).
+  camdist() {
+    return trunc(Math.sqrt(i32(
+      Math.imul(this.m.x + this.m.cx - this.x, this.m.x + this.m.cx - this.x) +
+      Math.imul(this.m.z - this.z, this.m.z - this.z) +
+      Math.imul(this.m.y + this.m.cy - this.y, this.m.y + this.m.cy - this.y)
+    )));
+  }
+
+  // The base's car-to-car sparks roll `random() > random()` on the sim stream;
+  // Extended's colide has no such roll, so it is made on the draw bank and the
+  // race's physics randoms stay the jar's.
+  sprkRoll() {
+    setDrawPhase(true);
+    try { return this.m.random() > this.m.random(); } finally { setDrawPhase(false); }
   }
 
   ys(i, j) {
@@ -1067,6 +1127,10 @@ export class ContO {
         if ((this.checkpoint !== 0) && ((i32(this.checkpoint - 1)) === this.m.checkpoint)) {
           l = -1;
         }
+        // the base port's dust and sparks, before the faces (the far ones)
+        const camdist = this.camdist();
+        if (this.bdust && !this.teleported && !this.m.effect[11]) this.bdust.draw(g, true, camdist);
+        this.dsprk(g, true);
         let ai2 = intArray(this.npl);
         let i4 = 0;
         do {
@@ -1096,6 +1160,9 @@ export class ContO {
             this.pdust(i32(this.p[ai2[l4]].master - 1), g, 1);
           }
         }
+        // ... and after them (the near ones)
+        if (this.bdust && !this.teleported && !this.m.effect[11]) this.bdust.draw(g, false, camdist);
+        this.dsprk(g, false);
         let whichgrounded = this.grounded;
         if (this.m.effect[9]) {
           whichgrounded = this.fakegrounded;
@@ -1104,6 +1171,9 @@ export class ContO {
       }
     }
     if (this.dist === 0 && !this.m.interpolating) {   // base port: an off-screen puff still ages at tick rate
+      if (this.rtg) this.rtg.fill(0);   // base port: an off-screen car's sparks and dust die
+      if (this.bdust) this.bdust.stg.fill(0);
+      this.sprk_ = 0;
       let k4 = 0;
       do {
         if (this.stg[k4] !== 0) {
@@ -1175,6 +1245,8 @@ export class ContO {
   }
 
   dust(i, f, f1, f2, f3, f4, f5, flag, j) {
+    // the base port's dust ring: a puff per wheel per tick (basedust.js)
+    (this.bdust ??= new BaseDust(this)).dust(i, f, f1, f2, trunc(f3), trunc(f4), f5, j, false);
     let flag2 = false;
     if ((j > 5) && (((i === 0) || (i === 2)))) {
       flag2 = true;

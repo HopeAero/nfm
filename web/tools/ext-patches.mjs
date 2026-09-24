@@ -4,12 +4,15 @@
 //   node web/tools/ext-patches.mjs           apply (after every J2JS regeneration)
 //   node web/tools/ext-patches.mjs --check   exit 1 unless every patch is in place
 //
-// Each patch replaces exact generated text with an equivalent that is cheaper,
-// and says so at the site (`// ext-patch <name>:`). It throws if the text it
-// expects is gone, so a regeneration that changes a site cannot slip through
-// unpatched or half-patched. They change cost, never results: draw.test.js
-// (every ContO.d/Plane.d call against madness.jar) and the trace replays must
-// still pass after `apply`.
+// Each patch replaces exact generated text and says so at the site
+// (`// ext-patch <name>:`). It throws if the text it expects is gone, so a
+// regeneration that changes a site cannot slip through unpatched or
+// half-patched. Two kinds:
+// - cost (face-order, rot-hoist): an equivalent that is cheaper; results
+//   unchanged, so draw.test.js (every ContO.d/Plane.d call against
+//   madness.jar) and the trace replays must still pass after `apply`;
+// - base-port features the jar lacks (sparks-*): they call into ContO and
+//   change what is drawn, never the physics -- no sim state, no sim randoms.
 
 import fs from 'node:fs';
 
@@ -104,16 +107,89 @@ function rotHoist(trig) {
   return { find, replace };
 }
 
+
+/**
+ * The base Mad's sparks (NFM2's newer drive/colide; the Extended jar has none):
+ * a capsized car scraping the ground or a slope, a car held against a wall for a
+ * second tick (crank, as the base), and car-to-car hits on a draw-bank roll. The
+ * base's extra `random() > random()` crank on skd 5 walls is left out: it would
+ * draw sim randoms and change Extended's race.
+ */
+const SPARK = (idx) => `conto.sprk(af[${idx}], af3[${idx}], af2[${idx}], this.scx[${idx}], this.scy[${idx}], this.scz[${idx}]`;
+const SKD01 = '(trackers.skd[j6] === 0 || trackers.skd[j6] === 1)';
+function after(name, find, add) { return { name, file: 'Madness.js', find, replace: find + add }; }
+function wall(n, find) {
+  return after(`sparks-wall${n}`, find,
+    `            // ext-patch sparks-wall${n}: the base's wall sparks, from the second tick against it\n` +
+    `            if (trackers.skd[j6] !== 2) ++this.crank[${n}][i7];\n` +
+    `            if (this.crank[${n}][i7] > 1) ${SPARK('i7')}, 0);\n`);
+}
+const SPARK_PATCHES = [
+  after('sparks-state', '    let aflag = new Array(4).fill(false);\n',
+    '    // ext-patch sparks-state: the base Mad\'s scrape flags and wall counters (web/tools/ext-patches.mjs)\n' +
+    '    const gscr = new Array(4).fill(false);\n' +
+    '    this.crank ??= [0, 1, 2, 3].map(() => new Int32Array(4));\n' +
+    '    this.lcrank ??= [0, 1, 2, 3].map(() => new Int32Array(4));\n'),
+  after('sparks-ground', '        this.regy(l6, Math.abs(fr(this.scy[l6] * f12)), conto, 1);\n',
+    '        if (this.capsized) gscr[l6] = true;   // ext-patch sparks-ground\n'),
+  { name: 'sparks-scrape', file: 'Madness.js',
+    find: '      do {\n        if ((((((!aflag[i7] && ',
+    replace: '      do {\n' +
+      '        // ext-patch sparks-scrape: a capsized car scraping the ground under a piece\n' +
+      `        if (gscr[i7] && ${SKD01} && af[i7] > trackers.x[j6] - trackers.radx[j6] && af[i7] < trackers.x[j6] + trackers.radx[j6] && af2[i7] > trackers.z[j6] - trackers.radz[j6] && af2[i7] < trackers.z[j6] + trackers.radz[j6]) {\n` +
+      `          ${SPARK('i7')}, 1);\n` +
+      '        }\n' +
+      '        if ((((((!aflag[i7] && ' },
+  after('sparks-flat', '            af3[i7] = fr(trackers.y[j6]);\n',
+    `            if (this.capsized && ${SKD01}) {   // ext-patch sparks-flat\n` +
+    `              ${SPARK('i7')}, 1);\n` +
+    '            }\n'),
+  wall(0, '            af2[i7] = fr((i32(trackers.z[j6] + trackers.radz[j6])));\n            let f15 = 0.0;\n'),
+  wall(1, '            af2[i7] = fr((i32(trackers.z[j6] - trackers.radz[j6])));\n            let f16 = 0.0;\n'),
+  wall(2, '            af[i7] = fr((i32(trackers.x[j6] + trackers.radx[j6])));\n            let f17 = 0.0;\n'),
+  wall(3, '            af[i7] = fr((i32(trackers.x[j6] - trackers.radx[j6])));\n            let f18 = 0.0;\n'),
+  { name: 'sparks-slope-z', file: 'Madness.js',
+    find: '              this.gtouch = false;\n              if (!flag5 && (this.roadtyp !== 0)) {\n                let f22 = ',
+    replace: '              this.gtouch = false;\n' +
+      `              if (this.capsized && ${SKD01}) {   // ext-patch sparks-slope-z\n` +
+      `                ${SPARK('i7')}, 1);\n` +
+      '              }\n' +
+      '              if (!flag5 && (this.roadtyp !== 0)) {\n                let f22 = ' },
+  { name: 'sparks-slope-x', file: 'Madness.js',
+    find: '            this.gtouch = false;\n            if (!flag5 && (this.roadtyp !== 0)) {\n              let f26 = ',
+    replace: '            this.gtouch = false;\n' +
+      `            if (this.capsized && ${SKD01}) {   // ext-patch sparks-slope-x\n` +
+      `              ${SPARK('i7')}, 1);\n` +
+      '            }\n' +
+      '            if (!flag5 && (this.roadtyp !== 0)) {\n              let f26 = ' },
+  after('sparks-decay', '    if (l6 === 4) {\n      this.mtouch = true;\n    }\n',
+    '    // ext-patch sparks-decay: a wall counter that did not move this tick restarts (the base Mad)\n' +
+    '    for (let n100 = 0; n100 < 4; ++n100) {\n' +
+    '      for (let n101 = 0; n101 < 4; ++n101) {\n' +
+    '        if (this.crank[n100][n101] === this.lcrank[n100][n101]) this.crank[n100][n101] = 0;\n' +
+    '        this.lcrank[n100][n101] = this.crank[n100][n101];\n' +
+    '      }\n' +
+    '    }\n'),
+  ...['madness.im', 'this.im'].map((who, n) => after(`sparks-hit${n}`,
+    `              madness.regy(l, fr((Math.imul(this.revlift[this.cn], 7))), conto1, ${who});\n              if (madness.colidim) {\n                madness.colidim = false;\n              }\n`,
+    `              if (conto1.sprkRoll()) {   // ext-patch sparks-hit${n}: the base's car-to-car sparks\n` +
+    '                conto1.sprk(fr(fr(af[k] + af4[l]) / 2.0), fr(fr(af2[k] + af5[l]) / 2.0), fr(fr(af3[k] + af6[l]) / 2.0), fr(fr(madness.scx[l] + this.scx[k]) / 4.0), fr(fr(madness.scy[l] + this.scy[k]) / 4.0), fr(fr(madness.scz[l] + this.scz[k]) / 4.0), 2);\n' +
+    '              }\n')),
+];
+
 export const PATCHES = [
   { name: 'face-order', file: 'ContO.js', find: FACE_ORDER_FIND, replace: FACE_ORDER_REPLACE },
   { name: 'rot-hoist', file: 'ContO.js', ...rotHoist('this.m') },
   { name: 'rot-hoist', file: 'Plane.js', ...rotHoist('this.m') },
   { name: 'rot-hoist', file: 'Medium.js', ...rotHoist('this') },
+  ...SPARK_PATCHES,
 ];
 
 /** 'applied' | 'pending' | throws when neither form is there exactly once. */
 export function state(src, p) {
-  const a = src.split(p.replace).length - 1, f = src.split(p.find).length - 1;
+  const a = src.split(p.replace).length - 1;
+  // an insertion keeps its anchor inside the replacement: those do not count
+  const f = src.split(p.find).length - 1 - (p.replace.includes(p.find) ? a : 0);
   if (a === 1 && f === 0) return 'applied';
   if (a === 0 && f === 1) return 'pending';
   throw new Error(`ext-patch ${p.name} (${p.file}): generated text not found as expected (applied ${a}, original ${f}) -- update the patch`);

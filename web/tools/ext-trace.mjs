@@ -66,6 +66,17 @@ function decode(v, ref) {
   throw new Error('bad value ' + JSON.stringify(v));
 }
 
+// Port-only fields a replayed method reaches: the base port's interpolation
+// guard, the draw-time random log and the draw random bank (a puff of the base
+// dust drawn from drive() rolls on it). Taken from a fresh instance, per call.
+const PORT_ONLY = { Medium: ['interpolating', 'rlog', 'rn', 'rp', 'recording', 'dcntrn', 'ddiup', 'drand', 'dtrn'] };
+const PORT_INIT = {
+  get Medium() {
+    const m = new CLASSES.Medium();
+    return Object.fromEntries(PORT_ONLY.Medium.map((k) => [k, m[k]]));
+  },
+};
+
 /** Rebuild the "before" graph. Returns {get(id), idOf(obj), touched:Set} */
 let writes = null, writeStack = 0;   // PUTFIELD-order log of the port's field writes
 
@@ -103,7 +114,14 @@ export function rebuild(pre, track = true) {
   for (const [id, o] of Object.entries(pre)) {
     const t = raw.get(+id);
     if ('a' in o) o.v.forEach((v, i) => { t[i] = decode(v, ref); });
-    else for (const [k, v] of Object.entries(o.f)) t[k] = decode(v, ref);
+    else {
+      for (const [k, v] of Object.entries(o.f)) t[k] = decode(v, ref);
+      // fields the port has and the jar does not (no constructor ran): their initial values
+      if (PORT_ONLY[o.c]) {
+        const init = PORT_INIT[o.c];
+        for (const k of PORT_ONLY[o.c]) if (!(k in t)) t[k] = init[k];
+      }
+    }
   }
   return { get: ref, raw, idOf, touched };
 }
