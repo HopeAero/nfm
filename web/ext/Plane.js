@@ -180,22 +180,22 @@ export class Plane {
         this.hsb[1] = 0.25;
       }
       if ((this.bfase > 25) && (this.hsb[2] > 0.7)) {
-        this.hsb[2] = 0.7;
+        this.hsb[2] = 0.699999988079071;
       }
       if ((this.bfase > 30) && (this.hsb[1] > 0.15)) {
-        this.hsb[1] = 0.15;
+        this.hsb[1] = 0.15000000596046448;
       }
       if ((this.bfase > 35) && (this.hsb[2] > 0.6)) {
-        this.hsb[2] = 0.6;
+        this.hsb[2] = 0.6000000238418579;
       }
       if (this.bfase > 40) {
-        this.hsb[0] = 0.075;
+        this.hsb[0] = 0.07500000298023224;
       }
       if ((this.bfase > 50) && (this.hsb[2] > 0.5)) {
         this.hsb[2] = 0.5;
       }
       if (this.bfase > 60) {
-        this.hsb[0] = 0.05;
+        this.hsb[0] = 0.05000000074505806;
       }
     }
     this.road = flag1;
@@ -274,22 +274,22 @@ export class Plane {
         this.hsb[1] = 0.25;
       }
       if ((this.bfase > 25) && (this.hsb[2] > 0.7)) {
-        this.hsb[2] = 0.7;
+        this.hsb[2] = 0.699999988079071;
       }
       if ((this.bfase > 30) && (this.hsb[1] > 0.15)) {
-        this.hsb[1] = 0.15;
+        this.hsb[1] = 0.15000000596046448;
       }
       if ((this.bfase > 35) && (this.hsb[2] > 0.6)) {
-        this.hsb[2] = 0.6;
+        this.hsb[2] = 0.6000000238418579;
       }
       if (this.bfase > 40) {
-        this.hsb[0] = 0.075;
+        this.hsb[0] = 0.07500000298023224;
       }
       if ((this.bfase > 50) && (this.hsb[2] > 0.5)) {
         this.hsb[2] = 0.5;
       }
       if (this.bfase > 60) {
-        this.hsb[0] = 0.05;
+        this.hsb[0] = 0.05000000074505806;
       }
     }
   }
@@ -349,13 +349,13 @@ export class Plane {
       if ((this.embos > 7) && (this.embos <= 9)) {
         f = fr(1.0 + (fr(this.m.random() / 3.0)));
         if (this.hsb[2] > 0.7) {
-          this.hsb[2] = 0.7;
+          this.hsb[2] = 0.699999988079071;
         }
       }
       if ((this.embos > 9) && (this.embos <= 10)) {
         f = fr(1.0 + (fr(this.m.random() / 2.0)));
         if (this.hsb[2] > 0.6) {
-          this.hsb[2] = 0.6;
+          this.hsb[2] = 0.6000000238418579;
         }
       }
       if ((this.embos > 10) && (this.embos <= 12)) {
@@ -370,8 +370,8 @@ export class Plane {
         this.bfase = -7;
       }
       if (this.embos === 13) {
-        this.hsb[1] = 0.2;
-        this.hsb[2] = 0.4;
+        this.hsb[1] = 0.20000000298023224;
+        this.hsb[2] = 0.4000000059604645;
       }
       if (this.embos === 16) {
         this.pa = trunc((fr(this.m.random() * fr(this.n))));
@@ -952,27 +952,27 @@ export class Plane {
         f1 = fr(f1 * 0.86);
       }
       if (f1 < 0.37) {
-        f1 = 0.37;
+        f1 = 0.3700000047683716;
       }
       if (this.gr === -9) {
-        f1 = 0.7;
+        f1 = 0.699999988079071;
       }
       if (this.gr === -4) {
-        f1 = 0.74;
+        f1 = 0.7400000095367432;
       }
       if ((this.gr !== -7) && flag1) {
-        f1 = 0.32;
+        f1 = 0.3199999928474426;
       }
       if (((this.gr === -8) || (this.gr === -14)) || (this.gr === -15)) {
         f1 = 1.0;
       }
       if (this.gr === -11) {
-        f1 = 0.67;
+        f1 = 0.6700000166893005;
         if (i2 === -1) {
           if (this.m.cpflik || ((this.m.nochekflk && !this.m.lastcheck))) {
             f1 = 1.0;
           } else {
-            f1 = 0.76;
+            f1 = 0.7599999904632568;
           }
         }
       }
@@ -980,21 +980,21 @@ export class Plane {
         if (this.m.cpflik) {
           f1 = 0.0;
         } else {
-          f1 = 0.76;
+          f1 = 0.7599999904632568;
         }
       }
       if (this.gr === -6) {
-        f1 = 0.62;
+        f1 = 0.6200000047683716;
       }
       if (this.gr === -5) {
-        f1 = 0.55;
+        f1 = 0.550000011920929;
       }
     } else {
       if (f1 > 1.0) {
         f1 = 1.0;
       }
       if ((f1 < 0.6) || flag1) {
-        f1 = 0.6;
+        f1 = 0.6000000238418579;
       }
     }
     let color = Color.getHSBColor(this.hsb[0], this.hsb[1], fr(this.hsb[2] * f1));
@@ -1267,7 +1267,7 @@ export class Plane {
         if (k16 > 255) {
           k16 = 255;
         }
-        i6 = trunc((fr(128.0 + (fr(12.8 * this.m.elecr)))));
+        i6 = trunc((fr(128.0 + (fr(12.800000190734863 * this.m.elecr)))));
         if (i6 > 255) {
           i6 = 255;
         }

@@ -602,7 +602,7 @@ export class Medium {
         let d = random();
         let d_102_ = random();
         for (let i_103_ = 0; i_103_ < 3; i_103_ = i32(i_103_ + 1)) {
-          f_92_ = fr((fr(fr(this.clds[i_103_]) * 1.05)) - fr(this.clds[i_103_]));
+          f_92_ = fr((fr(fr(this.clds[i_103_]) * 1.0499999523162842)) - fr(this.clds[i_103_]));
           this.clc[i_91_][0][i_101_][i_103_] = trunc((this.clds[i_103_] + (f_92_ * d)));
           if (this.clc[i_91_][0][i_101_][i_103_] > 255) {
             this.clc[i_91_][0][i_101_][i_103_] = 255;
@@ -610,7 +610,7 @@ export class Medium {
           if (this.clc[i_91_][0][i_101_][i_103_] < 0) {
             this.clc[i_91_][0][i_101_][i_103_] = 0;
           }
-          this.clc[i_91_][1][i_101_][i_103_] = trunc(((fr(fr(this.clds[i_103_]) * 1.05)) + (f_92_ * d_102_)));
+          this.clc[i_91_][1][i_101_][i_103_] = trunc(((fr(fr(this.clds[i_103_]) * 1.0499999523162842)) + (f_92_ * d_102_)));
           if (this.clc[i_91_][1][i_101_][i_103_] > 255) {
             this.clc[i_91_][1][i_101_][i_103_] = 255;
           }
@@ -2145,9 +2145,9 @@ export class Medium {
       this.focus_point = trunc((fr(400.0 * this.fo)));
       if (Math.abs(fr(this.fo - this.gofo)) > 0.005) {
         if (this.fo < this.gofo) {
-          this.fo = fr(this.fo + 0.005);
+          this.fo = fr(this.fo + 0.004999999888241291);
         } else {
-          this.fo = fr(this.fo - 0.005);
+          this.fo = fr(this.fo - 0.004999999888241291);
         }
       } else {
         this.gofo = fr((0.3499999940395355 + (random() * 1.3)));

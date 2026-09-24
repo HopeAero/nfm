@@ -683,9 +683,9 @@ export class xtGraphics {
     this.strans = 255;
     this.xfade = 255;
     this.statpoints = intArray(39);
-    this.proba = Float32Array.from([0.5, 0.5, 0.4, 0.3, 0.3, 0.4, 0.3, 0.3, 0.3, 0.1, 0.1, 0.5, 0.1, 0.0, 0.0, 0.0, 0.0, 0.1, 0.1, 0.5, 0.85, 0.85, 0.0, 0.5, 0.5, 0.4, 0.3, 0.5, 0.4, 0.3, 0.3, 0.3, 0.1, 0.1, 0.5, 0.1, 0.0, 0.0, 0.0]);
-    this.outdam = Float32Array.from([0.5, 0.3, 0.7, 0.42, 0.56, 0.35, 0.66, 0.85, 0.72, 0.62, 0.79, 1.1, 0.68, 1.5, 1.0, 0.85, 1.1, 1.25, 1.4, 2.35, 1.9, 0.85, 2.15, 0.6, 0.3, 0.7, 0.42, 0.5, 0.46, 0.75, 0.65, 0.72, 0.62, 0.79, 0.95, 0.77, 1.5, 0.85, 1.0]);
-    this.powersave = Float32Array.from([0.4, 0.4, 0.75, 0.4, 0.81, 0.4, 0.68, 0.68, 0.49, 0.94, 0.49, 0.88, 0.75, 1.0, 0.59, 0.94, 0.75, 0.94, 1.0, 1.0, 1.0, 0.94, 1.0, 0.4, 0.4, 0.75, 0.4, 0.81, 0.4, 0.68, 0.68, 0.49, 0.94, 0.49, 0.88, 0.75, 1.0, 0.59, 0.94]);
+    this.proba = Float32Array.from([0.5, 0.5, 0.4000000059604645, 0.30000001192092896, 0.30000001192092896, 0.4000000059604645, 0.30000001192092896, 0.30000001192092896, 0.30000001192092896, 0.10000000149011612, 0.10000000149011612, 0.5, 0.10000000149011612, 0.0, 0.0, 0.0, 0.0, 0.10000000149011612, 0.10000000149011612, 0.5, 0.8500000238418579, 0.8500000238418579, 0.0, 0.5, 0.5, 0.4000000059604645, 0.30000001192092896, 0.5, 0.4000000059604645, 0.30000001192092896, 0.30000001192092896, 0.30000001192092896, 0.10000000149011612, 0.10000000149011612, 0.5, 0.10000000149011612, 0.0, 0.0, 0.0]);
+    this.outdam = Float32Array.from([0.5, 0.30000001192092896, 0.699999988079071, 0.41999998688697815, 0.5600000023841858, 0.3499999940395355, 0.6600000262260437, 0.8500000238418579, 0.7200000286102295, 0.6200000047683716, 0.7900000214576721, 1.100000023841858, 0.6800000071525574, 1.5, 1.0, 0.8500000238418579, 1.100000023841858, 1.25, 1.399999976158142, 2.3499999046325684, 1.899999976158142, 0.8500000238418579, 2.1500000953674316, 0.6000000238418579, 0.30000001192092896, 0.699999988079071, 0.41999998688697815, 0.5, 0.46000000834465027, 0.75, 0.6499999761581421, 0.7200000286102295, 0.6200000047683716, 0.7900000214576721, 0.949999988079071, 0.7699999809265137, 1.5, 0.8500000238418579, 1.0]);
+    this.powersave = Float32Array.from([0.4000000059604645, 0.4000000059604645, 0.75, 0.4000000059604645, 0.8100000023841858, 0.4000000059604645, 0.6800000071525574, 0.6800000071525574, 0.49000000953674316, 0.9399999976158142, 0.49000000953674316, 0.8799999952316284, 0.75, 1.0, 0.5899999737739563, 0.9399999976158142, 0.75, 0.9399999976158142, 1.0, 1.0, 1.0, 0.9399999976158142, 1.0, 0.4000000059604645, 0.4000000059604645, 0.75, 0.4000000059604645, 0.8100000023841858, 0.4000000059604645, 0.6800000071525574, 0.6800000071525574, 0.49000000953674316, 0.9399999976158142, 0.49000000953674316, 0.8799999952316284, 0.75, 1.0, 0.5899999737739563, 0.9399999976158142]);
     this.ptmatch = 1;
     this.totalsp = intArray(101);
     this.bonuspoints = intArray(101);
@@ -699,7 +699,7 @@ export class xtGraphics {
     this.sndsize = Int32Array.from([106, 76, 56, 116, 92, 208, 70, 80, 152, 102, 27, 65, 52, 30, 151, 129, 70, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100]);
     this.bgmy = Int32Array.from([0, 400]);
     this.trkx = Int32Array.from([100, 770]);
-    this.hipno = Float32Array.from([1.0, 1.0, 3.0, 1.0, 1.2, 1.0, 1.7, 1.0, 1.0, 8.0, 1.5, 2.0, 1.2, 10.0, 1.8, 1.4, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0]);
+    this.hipno = Float32Array.from([1.0, 1.0, 3.0, 1.0, 1.2000000476837158, 1.0, 1.7000000476837158, 1.0, 1.0, 8.0, 1.5, 2.0, 1.2000000476837158, 10.0, 1.7999999523162842, 1.399999976158142, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0]);
     this.pgatx = Int32Array.from([246, 275, 315, 367, 434, 501, 552, 593, 621]);
     this.pgaty = Int32Array.from([208, 228, 241, 252, 259, 254, 243, 229, 211]);
     this.glowgtext = 60;
@@ -1755,9 +1755,9 @@ export class xtGraphics {
         k3 = (i2 = color.getGreen());
         l3 = (j2 = color.getBlue());
       } else {
-        j3 = (l = trunc((fr(((fr(fr(color.getRed()) + (fr((fr(fr(l) * 0.38)) * fr(i)))))) / ((fr(1.0 + (fr(0.38 * fr(i))))))))));
-        k3 = (i2 = trunc((fr(((fr(fr(color.getGreen()) + (fr((fr(fr(i2) * 0.38)) * fr(i)))))) / ((fr(1.0 + (fr(0.38 * fr(i))))))))));
-        l3 = (j2 = trunc((fr(((fr(fr(color.getBlue()) + (fr((fr(fr(j2) * 0.38)) * fr(i)))))) / ((fr(1.0 + (fr(0.38 * fr(i))))))))));
+        j3 = (l = trunc((fr(((fr(fr(color.getRed()) + (fr((fr(fr(l) * 0.3799999952316284)) * fr(i)))))) / ((fr(1.0 + (fr(0.3799999952316284 * fr(i))))))))));
+        k3 = (i2 = trunc((fr(((fr(fr(color.getGreen()) + (fr((fr(fr(i2) * 0.3799999952316284)) * fr(i)))))) / ((fr(1.0 + (fr(0.3799999952316284 * fr(i))))))))));
+        l3 = (j2 = trunc((fr(((fr(fr(color.getBlue()) + (fr((fr(fr(j2) * 0.3799999952316284)) * fr(i)))))) / ((fr(1.0 + (fr(0.3799999952316284 * fr(i))))))))));
       }
       if (++k === 870) {
         k = 0;
@@ -4575,7 +4575,7 @@ export class xtGraphics {
           spatkpower = trunc((fr(98.0 * ((fr(madness[0].speclast / 120.0))))));
         }
         this.rd.fillRect(732, 51, spatkpower, 8);
-        this.rd.setFont(this.adventure.deriveFont(1, 12.7));
+        this.rd.setFont(this.adventure.deriveFont(1, 12.699999809265137));
         this.ftm = this.rd.getFontMetrics();
         this.rd.setColor(0, 0, 0);
         this.rd.drawString('Special', i32(718 - this.ftm.stringWidth('Special')), 61);
@@ -4599,7 +4599,7 @@ export class xtGraphics {
             this.rd.drawString('- / -', 150, 18);
           }
           this.rd.setColor(0, 0, 0);
-          this.rd.setFont(this.adventure.deriveFont(1, 13.4));
+          this.rd.setFont(this.adventure.deriveFont(1, 13.399999618530273));
           this.ftm = this.rd.getFontMetrics();
           this.rd.drawString('lap:', i32(43 - this.ftm.stringWidth('lap:')), 18);
           this.rd.drawString('wasted:', i32(137 - this.ftm.stringWidth('wasted')), 18);
@@ -4626,7 +4626,7 @@ export class xtGraphics {
           if (!this.unlimitedlaps) {
             this.rd.drawString(new StringBuilder().append(position).toString(), 88, 43);
             let offset = this.ftm.stringWidth(new StringBuilder().append(position).toString());
-            this.rd.setFont(this.adventure.deriveFont(1, 9.6));
+            this.rd.setFont(this.adventure.deriveFont(1, 9.600000381469727));
             this.ftm = this.rd.getFontMetrics();
             this.rd.drawString(new StringBuilder().append(suffix).toString(), i32(93 + offset), 38);
           } else {
@@ -6967,18 +6967,18 @@ export class xtGraphics {
           }
         }
         if ((checkpoints.stage === 11) && !this.bonusstage[1]) {
-          let goalgrip = fr(24.2 + (fr(fr(((i32((Math.imul(madness[i32(this.nplayers - 1)].level[this.sc[i32(this.nplayers - 1)]], 3)) - 1)))) * 0.2)));
-          if (goalgrip > 45.6) {
-            goalgrip = 45.6;
+          let goalgrip = fr(24.200000762939453 + (fr(fr(((i32((Math.imul(madness[i32(this.nplayers - 1)].level[this.sc[i32(this.nplayers - 1)]], 3)) - 1)))) * 0.20000000298023224)));
+          if (goalgrip > 45.599998474121094) {
+            goalgrip = 45.599998474121094;
           }
           let fireaffect = fr((fr((fr(((fr(madness[a3].grip[this.sc[a3]] - (fr((fr(goalgrip * 5.0)) / 6.0))))) * 0.25)) / ((fr(goalgrip / 6.0))))) + 0.75);
           if (madness[a3].grip[this.sc[a3]] < (fr((fr(goalgrip * 5.0)) / 6.0))) {
-            fireaffect = fr((fr((fr(((fr(madness[a3].grip[this.sc[a3]] - (fr(goalgrip / 2.0))))) * 0.2)) / ((fr(goalgrip / 3.0))))) + 0.55);
+            fireaffect = fr((fr((fr(((fr(madness[a3].grip[this.sc[a3]] - (fr(goalgrip / 2.0))))) * 0.20000000298023224)) / ((fr(goalgrip / 3.0))))) + 0.550000011920929);
           }
           if (fireaffect > 1.0) {
             fireaffect = 1.0;
           }
-          nuclearmod = fr((fr((fr(fireaffect * fireaffect)) * 0.9)) + 0.1);
+          nuclearmod = fr((fr((fr(fireaffect * fireaffect)) * 0.8999999761581421)) + 0.10000000149011612);
           let roundinterval = this.round(fr((fr((fr(nuclearmod * nuclearmod)) * nuclearmod)) * 2000.0), 0);
           let redinterval = trunc(roundinterval);
           if (redinterval < 2000) {
@@ -6987,13 +6987,13 @@ export class xtGraphics {
           } else {
             madness[a3].nuclearmod = 1.0;
           }
-          statfall = fr(fr(statdrop) * 0.075);
-          let statfalllimit = fr(((fr(10.0 + (fr((fr(((fr(1.0 - nuclearmod))) * 400.0)) / 9.0))))) * 0.01);
+          statfall = fr(fr(statdrop) * 0.07500000298023224);
+          let statfalllimit = fr(((fr(10.0 + (fr((fr(((fr(1.0 - nuclearmod))) * 400.0)) / 9.0))))) * 0.009999999776482582);
           if (statfall > statfalllimit) {
             statfall = statfalllimit;
           }
         }
-        contgrip[a3] = fr(((fr(madness[a3].gripreset[this.sc[a3]] + (fr(fr(madness[a3].aigripsp[this.sc[a3]]) * 0.2))))) * ((fr(1.0 - (fr(statfall * 0.25))))));
+        contgrip[a3] = fr(((fr(madness[a3].gripreset[this.sc[a3]] + (fr(fr(madness[a3].aigripsp[this.sc[a3]]) * 0.20000000298023224))))) * ((fr(1.0 - (fr(statfall * 0.25))))));
         let maxspeed = trunc(((madness[a3].nitroswits[this.sc[a3]][2] + madness[a3].aitssp[this.sc[a3]]) - speedcut[a3]));
         speed[a3][0] = idiv((Math.imul(madness[a3].nitroswits[this.sc[a3]][0], maxspeed)), madness[a3].nitroswits[this.sc[a3]][2]);
         speed[a3][1] = idiv((Math.imul(madness[a3].nitroswits[this.sc[a3]][1], maxspeed)), madness[a3].nitroswits[this.sc[a3]][2]);
@@ -7008,13 +7008,13 @@ export class xtGraphics {
           speed[a3][2] = 20;
         }
         if (checkpoints.stage === 9) {
-          let goalgrip2 = fr(24.2 + (fr(fr(((i32((Math.imul(madness[i32(this.nplayers - 1)].level[this.sc[i32(this.nplayers - 1)]], 3)) - 1)))) * 0.2)));
+          let goalgrip2 = fr(24.200000762939453 + (fr(fr(((i32((Math.imul(madness[i32(this.nplayers - 1)].level[this.sc[i32(this.nplayers - 1)]], 3)) - 1)))) * 0.20000000298023224)));
           if (goalgrip2 > 42.0) {
             goalgrip2 = 42.0;
           }
-          let gripmod = fr((fr((fr(((fr(madness[a3].grip[this.sc[a3]] - (fr((fr(goalgrip2 * 5.0)) / 6.0))))) * 0.4)) / ((fr(goalgrip2 / 6.0))))) + 0.6);
+          let gripmod = fr((fr((fr(((fr(madness[a3].grip[this.sc[a3]] - (fr((fr(goalgrip2 * 5.0)) / 6.0))))) * 0.4000000059604645)) / ((fr(goalgrip2 / 6.0))))) + 0.6000000238418579);
           if (madness[a3].grip[this.sc[a3]] < (fr((fr(goalgrip2 * 5.0)) / 6.0))) {
-            gripmod = fr((fr((fr(((fr(madness[a3].grip[this.sc[a3]] - (fr(goalgrip2 / 2.0))))) * 0.35)) / ((fr(goalgrip2 / 3.0))))) + 0.25);
+            gripmod = fr((fr((fr(((fr(madness[a3].grip[this.sc[a3]] - (fr(goalgrip2 / 2.0))))) * 0.3499999940395355)) / ((fr(goalgrip2 / 3.0))))) + 0.25);
           }
           if (gripmod < 0.25) {
             gripmod = 0.25;
@@ -7026,23 +7026,23 @@ export class xtGraphics {
           madness[a3].powermulti = fr(1.0 / powermod);
           let fireaffect2 = fr((fr((fr(((fr(madness[a3].grip[this.sc[a3]] - (fr((fr(goalgrip2 * 5.0)) / 6.0))))) * 0.25)) / ((fr(goalgrip2 / 6.0))))) + 0.75);
           if (madness[a3].grip[this.sc[a3]] < (fr((fr(goalgrip2 * 5.0)) / 6.0))) {
-            fireaffect2 = fr((fr((fr(((fr(madness[a3].grip[this.sc[a3]] - (fr(goalgrip2 / 2.0))))) * 0.2)) / ((fr(goalgrip2 / 3.0))))) + 0.55);
+            fireaffect2 = fr((fr((fr(((fr(madness[a3].grip[this.sc[a3]] - (fr(goalgrip2 / 2.0))))) * 0.20000000298023224)) / ((fr(goalgrip2 / 3.0))))) + 0.550000011920929);
           }
           if (fireaffect2 > 1.0) {
             fireaffect2 = 1.0;
           }
-          firemod = fr((fr((fr(fireaffect2 * fireaffect2)) * 0.645)) + 0.355);
-          if (firemod < 0.55) {
-            firemod = 0.55;
+          firemod = fr((fr((fr(fireaffect2 * fireaffect2)) * 0.6449999809265137)) + 0.35499998927116394);
+          if (firemod < 0.550000011920929) {
+            firemod = 0.550000011920929;
           }
         }
         let maxaccel = fr((fr(((fr(madness[a3].nitroacelf[this.sc[a3]][0] + (fr(fr(madness[a3].aiaccsp[this.sc[a3]]) / 10.0))))) * ((fr((fr(((fr(1.0 - firemod))) / 2.0)) + firemod))))) * ((fr(1.0 - (fr(statfall * 0.5))))));
         accel[a3][0] = maxaccel;
         accel[a3][1] = fr((fr(madness[a3].nitroacelf[this.sc[a3]][1] * maxaccel)) / madness[a3].nitroacelf[this.sc[a3]][0]);
         accel[a3][2] = fr((fr(madness[a3].nitroacelf[this.sc[a3]][2] * maxaccel)) / madness[a3].nitroacelf[this.sc[a3]][0]);
-        statairs[a3] = fr(((fr(madness[a3].airsreset[this.sc[a3]] + (fr(fr(madness[a3].aistusp[this.sc[a3]]) * 0.025))))) * ((fr(1.0 - statfall))));
+        statairs[a3] = fr(((fr(madness[a3].airsreset[this.sc[a3]] + (fr(fr(madness[a3].aistusp[this.sc[a3]]) * 0.02500000037252903))))) * ((fr(1.0 - statfall))));
         statairc[a3] = trunc((fr(fr(((i32(madness[a3].aircreset[this.sc[a3]] + madness[a3].aistusp[this.sc[a3]])))) * ((fr(1.0 - statfall))))));
-        strength[a3] = fr(madness[a3].momentreset[this.sc[a3]] + (fr(fr(madness[a3].aistrsp[this.sc[a3]]) * 0.025)));
+        strength[a3] = fr(madness[a3].momentreset[this.sc[a3]] + (fr(fr(madness[a3].aistrsp[this.sc[a3]]) * 0.02500000037252903)));
         endurance[a3] = this.healthcalc(madness[a3].healthreset[this.sc[a3]], madness[a3].aiendsp[this.sc[a3]], madness[a3].cn, firemod);
       } else {
         speed[a3][0] = trunc((madness[a3].nitroswits[this.sc[a3]][0] * ((1.0 + this.stataffect[a3]))));
@@ -7108,10 +7108,10 @@ export class xtGraphics {
         }
         let maxaccel2 = accel[a3][0];
         if (this.sc[a3] === 15) {
-          maxaccel2 = fr(accel[a3][0] * ((fr(1.0 + (fr(0.3 * fr(specialboost)))))));
+          maxaccel2 = fr(accel[a3][0] * ((fr(1.0 + (fr(0.30000001192092896 * fr(specialboost)))))));
         }
         if (this.sc[a3] === 38) {
-          maxaccel2 = fr(accel[a3][0] * ((fr(1.0 + (fr(0.2 * fr(specialboost)))))));
+          maxaccel2 = fr(accel[a3][0] * ((fr(1.0 + (fr(0.20000000298023224 * fr(specialboost)))))));
         }
         if (this.sc[a3] === 22) {
           maxaccel2 = fr(accel[a3][0] * ((fr(1.0 + (fr(1.0 * fr(specialboost)))))));
@@ -7124,40 +7124,40 @@ export class xtGraphics {
         madness[a3].airc[this.sc[a3]] = statairc[a3];
         if (this.sc[a3] === 8) {
           let contstat = fr((fr(((fr(contgrip[a3] - 10.0))) * 5.0)) * ((fr(1.0 + (fr(1.0 * fr(specialboost)))))));
-          let backtogrip = fr((fr(contstat * 0.2)) + 10.0);
+          let backtogrip = fr((fr(contstat * 0.20000000298023224)) + 10.0);
           madness[a3].grip[this.sc[a3]] = backtogrip;
         }
         if (this.sc[a3] === 31) {
           let contstat = fr((fr(((fr(contgrip[a3] - 10.0))) * 5.0)) * ((fr(1.0 + (fr(0.75 * fr(specialboost)))))));
-          let backtogrip = fr((fr(contstat * 0.2)) + 10.0);
+          let backtogrip = fr((fr(contstat * 0.20000000298023224)) + 10.0);
           madness[a3].grip[this.sc[a3]] = backtogrip;
         }
         if (this.sc[a3] === 16) {
           let contstat = fr((fr(((fr(contgrip[a3] - 10.0))) * 5.0)) * ((fr(1.0 + (fr(0.5 * fr(specialboost)))))));
-          let backtogrip = fr((fr(contstat * 0.2)) + 10.0);
+          let backtogrip = fr((fr(contstat * 0.20000000298023224)) + 10.0);
           madness[a3].grip[this.sc[a3]] = backtogrip;
         }
         if (this.sc[a3] === 15) {
-          let contstat = fr((fr(((fr(contgrip[a3] - 10.0))) * 5.0)) * ((fr(1.0 + (fr(0.3 * fr(specialboost)))))));
-          let backtogrip = fr((fr(contstat * 0.2)) + 10.0);
+          let contstat = fr((fr(((fr(contgrip[a3] - 10.0))) * 5.0)) * ((fr(1.0 + (fr(0.30000001192092896 * fr(specialboost)))))));
+          let backtogrip = fr((fr(contstat * 0.20000000298023224)) + 10.0);
           madness[a3].grip[this.sc[a3]] = backtogrip;
         }
         if (this.sc[a3] === 38) {
-          let contstat = fr((fr(((fr(contgrip[a3] - 10.0))) * 5.0)) * ((fr(1.0 + (fr(0.2 * fr(specialboost)))))));
-          let backtogrip = fr((fr(contstat * 0.2)) + 10.0);
+          let contstat = fr((fr(((fr(contgrip[a3] - 10.0))) * 5.0)) * ((fr(1.0 + (fr(0.20000000298023224 * fr(specialboost)))))));
+          let backtogrip = fr((fr(contstat * 0.20000000298023224)) + 10.0);
           madness[a3].grip[this.sc[a3]] = backtogrip;
         }
         if ((((this.sc[a3] === 17) || (this.sc[a3] === 7)) || (this.sc[a3] === 30)) || (this.sc[a3] === 37)) {
           this.healthmulti[a3] = fr(1.0 + (fr(0.5 * fr(specialboost))));
         }
         if ((((((((this.sc[a3] === 0) || (this.sc[a3] === 23)) || (this.sc[a3] === 36)) || (this.sc[a3] === 22)) || (this.sc[a3] === 33)) || (this.sc[a3] === 2)) || (this.sc[a3] === 25)) || (this.sc[a3] === 19)) {
-          this.healthmulti[a3] = fr(1.0 + (fr(0.3 * fr(specialboost))));
+          this.healthmulti[a3] = fr(1.0 + (fr(0.30000001192092896 * fr(specialboost))));
         }
         if (((this.sc[a3] === 10) || (this.sc[a3] === 13)) || (this.sc[a3] === 20)) {
-          this.healthmulti[a3] = fr(1.0 + (fr(0.4 * fr(specialboost))));
+          this.healthmulti[a3] = fr(1.0 + (fr(0.4000000059604645 * fr(specialboost))));
         }
         if (this.sc[a3] === 14) {
-          this.healthmulti[a3] = fr(1.0 + (fr(0.7 * fr(specialboost))));
+          this.healthmulti[a3] = fr(1.0 + (fr(0.699999988079071 * fr(specialboost))));
         }
         if (this.sc[a3] === 18) {
           this.healthmulti[a3] = fr(1.0 + (fr(0.25 * fr(specialboost))));
@@ -7167,7 +7167,7 @@ export class xtGraphics {
           madness[a3].airc[this.sc[a3]] = trunc((statairc[a3] * ((1.0 + (0.75 * specialboost)))));
         }
         if (this.sc[a3] === 26) {
-          madness[a3].airs[this.sc[a3]] = fr(statairs[a3] * ((fr(1.0 + (fr(0.6 * fr(specialboost)))))));
+          madness[a3].airs[this.sc[a3]] = fr(statairs[a3] * ((fr(1.0 + (fr(0.6000000238418579 * fr(specialboost)))))));
           madness[a3].airc[this.sc[a3]] = trunc((statairc[a3] * ((1.0 + (0.6 * specialboost)))));
         }
         if (this.sc[a3] === 14) {
@@ -7175,52 +7175,52 @@ export class xtGraphics {
           madness[a3].airc[this.sc[a3]] = trunc((statairc[a3] * ((1.0 + (1.0 * specialboost)))));
         }
         if (this.sc[a3] === 15) {
-          madness[a3].airs[this.sc[a3]] = fr(statairs[a3] * ((fr(1.0 + (fr(0.3 * fr(specialboost)))))));
+          madness[a3].airs[this.sc[a3]] = fr(statairs[a3] * ((fr(1.0 + (fr(0.30000001192092896 * fr(specialboost)))))));
           madness[a3].airc[this.sc[a3]] = trunc((statairc[a3] * ((1.0 + (0.3 * specialboost)))));
-          this.healthmulti[a3] = fr(1.0 + (fr(0.3 * fr(specialboost))));
+          this.healthmulti[a3] = fr(1.0 + (fr(0.30000001192092896 * fr(specialboost))));
         }
         if (this.sc[a3] === 38) {
-          madness[a3].airs[this.sc[a3]] = fr(statairs[a3] * ((fr(1.0 + (fr(0.2 * fr(specialboost)))))));
+          madness[a3].airs[this.sc[a3]] = fr(statairs[a3] * ((fr(1.0 + (fr(0.20000000298023224 * fr(specialboost)))))));
           madness[a3].airc[this.sc[a3]] = trunc((statairc[a3] * ((1.0 + (0.2 * specialboost)))));
-          this.healthmulti[a3] = fr(1.0 + (fr(0.2 * fr(specialboost))));
+          this.healthmulti[a3] = fr(1.0 + (fr(0.20000000298023224 * fr(specialboost))));
         }
         if (!madness[a3].strswap) {
           if (((this.sc[a3] === 0) || (this.sc[a3] === 6)) || (this.sc[a3] === 29)) {
             strspboost = fr(0.5 * fr(specialboost));
           }
           if (this.sc[a3] === 23) {
-            strspboost = fr(0.55 * fr(specialboost));
+            strspboost = fr(0.550000011920929 * fr(specialboost));
           }
           if ((this.sc[a3] === 4) || (this.sc[a3] === 27)) {
-            strspboost = fr(0.7 * fr(specialboost));
+            strspboost = fr(0.699999988079071 * fr(specialboost));
           }
           if (((this.sc[a3] === 20) || (this.sc[a3] === 7)) || (this.sc[a3] === 30)) {
-            strspboost = fr(0.6 * fr(specialboost));
+            strspboost = fr(0.6000000238418579 * fr(specialboost));
           }
           if (this.sc[a3] === 22) {
-            strspboost = fr(0.15 * fr(specialboost));
+            strspboost = fr(0.15000000596046448 * fr(specialboost));
           }
           if ((this.sc[a3] === 19) || (this.sc[a3] === 38)) {
-            strspboost = fr(0.2 * fr(specialboost));
+            strspboost = fr(0.20000000298023224 * fr(specialboost));
           }
           if ((((((this.sc[a3] === 14) || (this.sc[a3] === 32)) || (this.sc[a3] === 13)) || (this.sc[a3] === 11)) || (this.sc[a3] === 9)) || (this.sc[a3] === 31)) {
-            strspboost = fr(0.4 * fr(specialboost));
+            strspboost = fr(0.4000000059604645 * fr(specialboost));
           }
           if ((this.sc[a3] === 5) || (this.sc[a3] === 28)) {
             if ((Math.imul(madness[a3].hitmag, 2)) < madness[a3].maxmag[this.sc[a3]]) {
-              strspboost = fr(0.3 * fr(specialboost));
+              strspboost = fr(0.30000001192092896 * fr(specialboost));
             } else {
-              strspboost = fr(0.6 * fr(specialboost));
+              strspboost = fr(0.6000000238418579 * fr(specialboost));
             }
           }
           if (((((this.sc[a3] === 33) || (this.sc[a3] === 15)) || (this.sc[a3] === 16)) || (this.sc[a3] === 34)) || (this.sc[a3] === 36)) {
-            strspboost = fr(0.3 * fr(specialboost));
+            strspboost = fr(0.30000001192092896 * fr(specialboost));
           }
           if ((this.sc[a3] === 37) || (this.sc[a3] === 10)) {
-            strspboost = fr(0.35 * fr(specialboost));
+            strspboost = fr(0.3499999940395355 * fr(specialboost));
           }
           if (((this.sc[a3] === 2) || (this.sc[a3] === 25)) || (this.sc[a3] === 8)) {
-            strspboost = fr(0.45 * fr(specialboost));
+            strspboost = fr(0.44999998807907104 * fr(specialboost));
           }
           if (this.sc[a3] === 18) {
             strspboost = fr(0.25 * fr(specialboost));
@@ -8481,7 +8481,7 @@ export class xtGraphics {
         let hishealth2 = hishealth * 100.0;
         let hishealth3 = this.round(hishealth2, 1);
         this.drawcs(22, jstr(hishealth3, 'D') + ' %', 0, 0, 0, 3);
-        let str = fr(madness[1].moment[this.sc[1]] / 2.1);
+        let str = fr(madness[1].moment[this.sc[1]] / 2.0999999046325684);
         let strength = trunc((fr(str * 100.0)));
         let speed = idiv(madness[1].swits[this.sc[1]][2], 2);
         this.rd.setFont(this.adventure.deriveFont(1, 15.0));
@@ -8880,7 +8880,7 @@ export class xtGraphics {
         if (checkpoints.clear[a2] < 5) {
           waster = true;
         }
-        let goalgrip = fr(34.5 + (fr(((fr((fr(fr(madness[i32(this.nplayers - 1)].level[this.sc[i32(this.nplayers - 1)]]) * 1.75)) - 1.0))) * 0.2)));
+        let goalgrip = fr(34.5 + (fr(((fr((fr(fr(madness[i32(this.nplayers - 1)].level[this.sc[i32(this.nplayers - 1)]]) * 1.75)) - 1.0))) * 0.20000000298023224)));
         if (goalgrip > 56.0) {
           goalgrip = 56.0;
         }
@@ -9083,7 +9083,7 @@ export class xtGraphics {
       let fullpownit = this.fullpownit;
       let n20 = 0;
       fullpownit[n20] = fullpownit[n20] + lvmulti;
-      this.powxpadjust = trunc(this.powxpadjust + lvmulti);
+      this.powxpadjust = i32(this.powxpadjust + trunc(lvmulti));
       let extraxp = i32(trunc(this.fullpownit[0]) - this.powxpadjust);
       if (!this.noexp) {
         let exp = madness[0].exp;
@@ -9331,7 +9331,7 @@ export class xtGraphics {
         if (!this.noexp) {
           let exp2 = madness[0].exp;
           let n30 = this.sc[0];
-          exp2[n30] = i32(exp2[n30] + trunc(((this.spkamount * extramod) * this.expmult)));
+          exp2[n30] = trunc(exp2[n30] + (((this.spkamount * extramod) * this.expmult)));
         }
       }
       this.ktch = true;
@@ -9837,18 +9837,18 @@ export class xtGraphics {
     }
     for (let a3 = 0; a3 < this.nplayers; a3 = i32(a3 + 1)) {
       speed[a3] = idiv(((i32(madness[a3].nitroswits[this.sc[a3]][2] + madness[a3].aitssp[this.sc[a3]]))), 2);
-      let realacelf = Float32Array.from([fr((fr(madness[a3].nitroacelf[this.sc[a3]][0] + (fr(fr(madness[a3].aiaccsp[this.sc[a3]]) * 0.1)))) - 6.0), 0.0, 0.0]);
+      let realacelf = Float32Array.from([fr((fr(madness[a3].nitroacelf[this.sc[a3]][0] + (fr(fr(madness[a3].aiaccsp[this.sc[a3]]) * 0.10000000149011612)))) - 6.0), 0.0, 0.0]);
       realacelf[1] = fr((fr((fr(madness[a3].nitroacelf[this.sc[a3]][1] * realacelf[0])) / madness[a3].nitroacelf[this.sc[a3]][0])) - 3.0);
       realacelf[2] = fr((fr((fr(madness[a3].nitroacelf[this.sc[a3]][2] * realacelf[0])) / madness[a3].nitroacelf[this.sc[a3]][0])) - 2.0);
       accelf[a3] = fr(((fr((fr((fr(realacelf[0] * 21.0)) + (fr(realacelf[1] * 6.0)))) + (fr(realacelf[2] * 3.0))))) / 201.0);
       acceleration[a3] = trunc((fr(accelf[a3] * 100.0)));
-      contgri[a3] = fr(((fr((fr(madness[a3].gripreset[this.sc[a3]] + (fr(fr(madness[a3].aigripsp[this.sc[a3]]) * 0.2)))) - 10.0))) / 20.0);
+      contgri[a3] = fr(((fr((fr(madness[a3].gripreset[this.sc[a3]] + (fr(fr(madness[a3].aigripsp[this.sc[a3]]) * 0.20000000298023224)))) - 10.0))) / 20.0);
       control2[a3] = trunc((fr(contgri[a3] * 100.0)));
-      stunts[a3] = fr(((fr(fr((i32(madness[a3].aircreset[this.sc[a3]] + madness[a3].aistusp[this.sc[a3]]))) + (fr(((fr(madness[a3].airsreset[this.sc[a3]] + (fr(fr(madness[a3].aistusp[this.sc[a3]]) * 0.025))))) * 10.0))))) / 125.0);
+      stunts[a3] = fr(((fr(fr((i32(madness[a3].aircreset[this.sc[a3]] + madness[a3].aistusp[this.sc[a3]]))) + (fr(((fr(madness[a3].airsreset[this.sc[a3]] + (fr(fr(madness[a3].aistusp[this.sc[a3]]) * 0.02500000037252903))))) * 10.0))))) / 125.0);
       stunting[a3] = trunc((fr(stunts[a3] * 100.0)));
-      str[a3] = fr(((fr(madness[a3].momentreset[this.sc[a3]] + (fr(fr(madness[a3].aistrsp[this.sc[a3]]) * 0.025))))) / 2.1);
+      str[a3] = fr(((fr(madness[a3].momentreset[this.sc[a3]] + (fr(fr(madness[a3].aistrsp[this.sc[a3]]) * 0.02500000037252903))))) / 2.0999999046325684);
       strength[a3] = trunc((fr(str[a3] * 100.0)));
-      end[a3] = fr(this.outdam[this.sc[a3]] + (fr(fr(madness[a3].aiendsp[this.sc[a3]]) * 0.01)));
+      end[a3] = fr(this.outdam[this.sc[a3]] + (fr(fr(madness[a3].aiendsp[this.sc[a3]]) * 0.009999999776482582)));
       defence[a3] = trunc((fr(end[a3] * 100.0)));
       if (undead && !partundead) {
         if (a3 > 0) {
@@ -10263,7 +10263,7 @@ export class xtGraphics {
             madness[g].aistrsp[this.sc[g]] = i32((i32(this.totalsp[g] - madness[g].aiendsp[this.sc[g]])) - madness[g].aitssp[this.sc[g]]);
           }
           if (checkpoints.stage === 9) {
-            let goalgrip = fr(24.2 + (fr(fr(((i32((Math.imul(madness[i32(this.nplayers - 1)].level[this.sc[i32(this.nplayers - 1)]], 3)) - 1)))) * 0.2)));
+            let goalgrip = fr(24.200000762939453 + (fr(fr(((i32((Math.imul(madness[i32(this.nplayers - 1)].level[this.sc[i32(this.nplayers - 1)]], 3)) - 1)))) * 0.20000000298023224)));
             if (goalgrip > 42.0) {
               goalgrip = 42.0;
             }
@@ -10346,7 +10346,7 @@ export class xtGraphics {
             madness[g].aistrsp[this.sc[g]] = i32(this.totalsp[g] - 175);
           }
           if (checkpoints.stage === 24) {
-            if (madness[0].moment[this.sc[0]] <= 13.65) {
+            if (madness[0].moment[this.sc[0]] <= 13.649999618530273) {
               madness[g].aitssp[this.sc[g]] = 98;
               madness[g].aistrsp[this.sc[g]] = 490;
               madness[g].aiendsp[this.sc[g]] = i32(this.totalsp[g] - 588);
@@ -10430,7 +10430,7 @@ export class xtGraphics {
                   madness[g].aiendsp[this.sc[g]] = idiv(this.totalsp[g], 4);
                 }
                 if (checkpoints.stage === 5) {
-                  let userstrength = fr(madness[0].momentreset[this.sc[0]] + (fr(fr(madness[0].aistrsp[this.sc[0]]) * 0.025)));
+                  let userstrength = fr(madness[0].momentreset[this.sc[0]] + (fr(fr(madness[0].aistrsp[this.sc[0]]) * 0.02500000037252903)));
                   if (userstrength >= 2.5) {
                     madness[g].aitssp[this.sc[g]] = idiv(this.totalsp[g], 2);
                     madness[g].aiendsp[this.sc[g]] = idiv(this.totalsp[g], 2);
@@ -10442,7 +10442,7 @@ export class xtGraphics {
               }
             } else {
               if (checkpoints.stage === 10) {
-                let userstrength = fr(madness[0].momentreset[this.sc[0]] + (fr(fr(madness[0].aistrsp[this.sc[0]]) * 0.025)));
+                let userstrength = fr(madness[0].momentreset[this.sc[0]] + (fr(fr(madness[0].aistrsp[this.sc[0]]) * 0.02500000037252903)));
                 if (userstrength < 4.0) {
                   madness[g].aiendsp[this.sc[g]] = idiv(this.totalsp[g], 4);
                   madness[g].aitssp[this.sc[g]] = i32(this.totalsp[g] - madness[g].aiendsp[this.sc[g]]);
@@ -10544,7 +10544,7 @@ export class xtGraphics {
                 }
               }
             } else {
-              let userstrength = fr(madness[0].momentreset[this.sc[0]] + (fr(fr(madness[0].aistrsp[this.sc[0]]) * 0.025)));
+              let userstrength = fr(madness[0].momentreset[this.sc[0]] + (fr(fr(madness[0].aistrsp[this.sc[0]]) * 0.02500000037252903)));
               if ((userstrength < 4.0) || (((userstrength < 2.5) && (checkpoints.stage === 5)))) {
                 madness[g].aiendsp[this.sc[g]] = idiv((Math.imul(this.totalsp[g], 5)), 16);
                 madness[g].aitssp[this.sc[g]] = i32(this.totalsp[g] - madness[g].aiendsp[this.sc[g]]);
@@ -10569,7 +10569,7 @@ export class xtGraphics {
               madness[g].aitssp[this.sc[g]] = i32((i32(this.totalsp[g] - madness[g].aistrsp[this.sc[g]])) - madness[g].aiendsp[this.sc[g]]);
             } else {
               if (checkpoints.stage === 5) {
-                let userstrength = fr(madness[0].momentreset[this.sc[0]] + (fr(fr(madness[0].aistrsp[this.sc[0]]) * 0.025)));
+                let userstrength = fr(madness[0].momentreset[this.sc[0]] + (fr(fr(madness[0].aistrsp[this.sc[0]]) * 0.02500000037252903)));
                 if (userstrength < 2.5) {
                   madness[g].aiendsp[this.sc[g]] = idiv((Math.imul(this.totalsp[g], 3)), 8);
                   madness[g].aitssp[this.sc[g]] = i32(this.totalsp[g] - madness[g].aiendsp[this.sc[g]]);
@@ -10888,7 +10888,7 @@ export class xtGraphics {
               }
             } else {
               if ((checkpoints.stage === 10) || (checkpoints.stage === 5)) {
-                let userstrength = fr(madness[0].momentreset[this.sc[0]] + (fr(fr(madness[0].aistrsp[this.sc[0]]) * 0.025)));
+                let userstrength = fr(madness[0].momentreset[this.sc[0]] + (fr(fr(madness[0].aistrsp[this.sc[0]]) * 0.02500000037252903)));
                 if ((userstrength < 4.0) || (((userstrength < 2.5) && (checkpoints.stage === 5)))) {
                   madness[g].aiendsp[this.sc[g]] = idiv((Math.imul(this.totalsp[g], 3)), 8);
                   madness[g].aitssp[this.sc[g]] = i32(this.totalsp[g] - madness[g].aiendsp[this.sc[g]]);
@@ -10939,7 +10939,7 @@ export class xtGraphics {
                     madness[g].aistrsp[this.sc[g]] = idiv(this.totalsp[g], 4);
                   } else {
                     if (checkpoints.stage === 10) {
-                      let userstrength = fr(madness[0].momentreset[this.sc[0]] + (fr(fr(madness[0].aistrsp[this.sc[0]]) * 0.025)));
+                      let userstrength = fr(madness[0].momentreset[this.sc[0]] + (fr(fr(madness[0].aistrsp[this.sc[0]]) * 0.02500000037252903)));
                       if (userstrength < 4.0) {
                         madness[g].aistrsp[this.sc[g]] = idiv(this.totalsp[g], 4);
                         madness[g].aiendsp[this.sc[g]] = idiv(this.totalsp[g], 4);
@@ -11263,7 +11263,7 @@ export class xtGraphics {
                 madness[g].aiendsp[this.sc[g]] = idiv(this.totalsp[g], 2);
               }
               if (checkpoints.stage === 10) {
-                let userstrength = fr(madness[0].momentreset[this.sc[0]] + (fr(fr(madness[0].aistrsp[this.sc[0]]) * 0.025)));
+                let userstrength = fr(madness[0].momentreset[this.sc[0]] + (fr(fr(madness[0].aistrsp[this.sc[0]]) * 0.02500000037252903)));
                 if (userstrength < 4.0) {
                   madness[g].aiendsp[this.sc[g]] = idiv((Math.imul(this.totalsp[g], 3)), 8);
                   madness[g].aitssp[this.sc[g]] = i32(this.totalsp[g] - madness[g].aiendsp[this.sc[g]]);
@@ -11303,7 +11303,7 @@ export class xtGraphics {
               } else {
                 let nostrength = false;
                 if ((checkpoints.stage === 13) && (((this.unlocked[1] === checkpoints.stage) || this.hardstage))) {
-                  let userstrength2 = fr(madness[0].momentreset[this.sc[0]] + (fr(fr(madness[0].aistrsp[this.sc[0]]) * 0.025)));
+                  let userstrength2 = fr(madness[0].momentreset[this.sc[0]] + (fr(fr(madness[0].aistrsp[this.sc[0]]) * 0.02500000037252903)));
                   if (userstrength2 > 5.0) {
                     nostrength = true;
                   }
@@ -11775,7 +11775,7 @@ export class xtGraphics {
                   madness[g].aiendsp[this.sc[g]] = i32((i32(this.totalsp[g] - madness[g].aistrsp[this.sc[g]])) - madness[g].aitssp[this.sc[g]]);
                 }
                 let toostrong = false;
-                let userstrength2 = fr(madness[0].momentreset[this.sc[0]] + (fr(fr(madness[0].aistrsp[this.sc[0]]) * 0.025)));
+                let userstrength2 = fr(madness[0].momentreset[this.sc[0]] + (fr(fr(madness[0].aistrsp[this.sc[0]]) * 0.02500000037252903)));
                 if ((((userstrength2 > 13.75) && (((this.unlocked[1] === checkpoints.stage) || this.hardstage))) && !madness[g].shadowcar) && (((this.sc[0] === 18) || (this.sc[0] === 22)))) {
                   toostrong = true;
                 }
@@ -11870,7 +11870,7 @@ export class xtGraphics {
                   madness[g].aiendsp[this.sc[g]] = i32((i32(this.totalsp[g] - madness[g].aitssp[this.sc[g]])) - madness[g].aistrsp[this.sc[g]]);
                 }
                 let toostrong = false;
-                let userstrength2 = fr(madness[0].momentreset[this.sc[0]] + (fr(fr(madness[0].aistrsp[this.sc[0]]) * 0.025)));
+                let userstrength2 = fr(madness[0].momentreset[this.sc[0]] + (fr(fr(madness[0].aistrsp[this.sc[0]]) * 0.02500000037252903)));
                 if ((((userstrength2 > 13.75) && (((this.unlocked[1] === checkpoints.stage) || this.hardstage))) && !madness[g].shadowcar) && (((this.sc[0] === 18) || (this.sc[0] === 22)))) {
                   toostrong = true;
                 }
@@ -12016,8 +12016,8 @@ export class xtGraphics {
             let afuckingracer = false;
             let totalpoints = i32(this.spcalc(madness[0].level[this.sc[0]]) + this.extpoints[this.sc[0]]);
             let instrength = idiv(totalpoints, 4);
-            let userstrength3 = fr(madness[0].momentreset[this.sc[0]] + (fr(fr(madness[0].aistrsp[this.sc[0]]) * 0.025)));
-            let strengthneed = fr(5.0 + (fr(fr(((i32(madness[i32(this.nplayers - 1)].level[this.sc[i32(this.nplayers - 1)]] - 42)))) * 0.075)));
+            let userstrength3 = fr(madness[0].momentreset[this.sc[0]] + (fr(fr(madness[0].aistrsp[this.sc[0]]) * 0.02500000037252903)));
+            let strengthneed = fr(5.0 + (fr(fr(((i32(madness[i32(this.nplayers - 1)].level[this.sc[i32(this.nplayers - 1)]] - 42)))) * 0.07500000298023224)));
             if (((i32((i32(madness[0].aistrsp[this.sc[0]] - madness[0].level[this.sc[0]])) + 1)) < instrength) || (userstrength3 < strengthneed)) {
               afuckingracer = true;
             }
@@ -13027,17 +13027,17 @@ export class xtGraphics {
             if ((((i32(i - this.sc[k2])) > 4) && (i !== 28)) && !this.classicmode) {
               f = fr(f + (fr(fr(((i32((i32(i - this.sc[k2])) - 4)))) / 10.0)));
               if (f > 0.9) {
-                f = 0.9;
+                f = 0.8999999761581421;
               }
             }
             if ((((i32(i - this.sc[k2])) > 4) && (i !== 17)) && this.classicmode) {
               f = fr(f + (fr(fr(((i32((i32(i - this.sc[k2])) - 4)))) / 10.0)));
               if (f > 0.9) {
-                f = 0.9;
+                f = 0.8999999761581421;
               }
             }
             if ((i === 16) && (f < 0.9)) {
-              f = 0.9;
+              f = 0.8999999761581421;
             }
             if (random() < f) {
               aflag[k2] = false;
@@ -14868,7 +14868,7 @@ export class xtGraphics {
       this.flang = 1;
       this.flangados = trunc((fr((fr(this.m.random() * 6.0)) + 2.0)));
       this.blackn = 0.0;
-      this.blacknados = fr(this.m.random() * 0.4);
+      this.blacknados = fr(this.m.random() * 0.4000000059604645);
     }
     let i = 0;
     do {
@@ -15793,7 +15793,7 @@ export class xtGraphics {
           if (f4 > 163) {
             f4 = 163;
           }
-          let str = fr(madness.momentreset[this.sc[0]] / 2.1);
+          let str = fr(madness.momentreset[this.sc[0]] / 2.0999999046325684);
           let f5 = trunc((fr(str * 163.0)));
           if (f5 > 163) {
             f5 = 163;
@@ -15893,14 +15893,14 @@ export class xtGraphics {
             this.rd.drawString('STRENGTH:', i32(570 - this.ftm.stringWidth('STRENGTH:')), 438);
             this.rd.drawString('DEFENCE:', i32(570 - this.ftm.stringWidth('DEFENCE:')), 468);
             estat[1] = fr(fr(((i32((i32(madness.nitroswits[this.sc[0]][2] + madness.aitssp[this.sc[0]])) - 220)))) / 90.0);
-            let realacelf2 = Float32Array.from([fr((fr(madness.nitroacelf[this.sc[0]][0] + (fr(fr(madness.aiaccsp[this.sc[0]]) * 0.1)))) - 6.0), 0.0, 0.0]);
+            let realacelf2 = Float32Array.from([fr((fr(madness.nitroacelf[this.sc[0]][0] + (fr(fr(madness.aiaccsp[this.sc[0]]) * 0.10000000149011612)))) - 6.0), 0.0, 0.0]);
             realacelf2[1] = fr((fr((fr(madness.nitroacelf[this.sc[0]][1] * realacelf2[0])) / madness.nitroacelf[this.sc[0]][0])) - 3.0);
             realacelf2[2] = fr((fr((fr(madness.nitroacelf[this.sc[0]][2] * realacelf2[0])) / madness.nitroacelf[this.sc[0]][0])) - 2.0);
             estat[2] = fr(((fr((fr((fr(realacelf2[0] * 21.0)) + (fr(realacelf2[1] * 6.0)))) + (fr(realacelf2[2] * 3.0))))) / 201.0);
-            estat[3] = fr(((fr((fr(madness.gripreset[this.sc[0]] + (fr(fr(madness.aigripsp[this.sc[0]]) * 0.2)))) - 10.0))) / 20.0);
-            estat[4] = fr(((fr(fr((i32(madness.aircreset[this.sc[0]] + madness.aistusp[this.sc[0]]))) + (fr(((fr(madness.airsreset[this.sc[0]] + (fr(fr(madness.aistusp[this.sc[0]]) * 0.025))))) * 10.0))))) / 125.0);
-            estat[5] = fr(((fr(madness.momentreset[this.sc[0]] + (fr(fr(madness.aistrsp[this.sc[0]]) * 0.025))))) / 2.1);
-            estat[6] = fr(this.outdam[this.sc[0]] + (fr(fr(madness.aiendsp[this.sc[0]]) * 0.01)));
+            estat[3] = fr(((fr((fr(madness.gripreset[this.sc[0]] + (fr(fr(madness.aigripsp[this.sc[0]]) * 0.20000000298023224)))) - 10.0))) / 20.0);
+            estat[4] = fr(((fr(fr((i32(madness.aircreset[this.sc[0]] + madness.aistusp[this.sc[0]]))) + (fr(((fr(madness.airsreset[this.sc[0]] + (fr(fr(madness.aistusp[this.sc[0]]) * 0.02500000037252903))))) * 10.0))))) / 125.0);
+            estat[5] = fr(((fr(madness.momentreset[this.sc[0]] + (fr(fr(madness.aistrsp[this.sc[0]]) * 0.02500000037252903))))) / 2.0999999046325684);
+            estat[6] = fr(this.outdam[this.sc[0]] + (fr(fr(madness.aiendsp[this.sc[0]]) * 0.009999999776482582)));
             estat[0] = fr(((fr((fr((fr((fr((fr(estat[1] + estat[2])) + estat[3])) + estat[4])) + estat[5])) + estat[6]))) / 6.0);
           } else {
             for (let a4 = 0; a4 < 7; a4 = i32(a4 + 1)) {
@@ -16138,7 +16138,7 @@ export class xtGraphics {
           }
           if (this.savefase === 1) {
             if (!this.nclicked) {
-              this.rd.setFont(this.adventure.deriveFont(1, 12.3));
+              this.rd.setFont(this.adventure.deriveFont(1, 12.300000190734863));
               this.ftm = this.rd.getFontMetrics();
               let carprice = idiv(madness.level[this.sc[0]], 3);
               if (this.boncomp[3] === 0) {
@@ -18121,7 +18121,7 @@ export class xtGraphics {
     this.flang = 1;
     this.flangados = trunc((fr((fr(this.m.random() * 6.0)) + 2.0)));
     this.blackn = 0.0;
-    this.blacknados = fr(this.m.random() * 0.4);
+    this.blacknados = fr(this.m.random() * 0.4000000059604645);
     let pixelgrabber = new PixelGrabber(this.carsbg, 0, 0, 870, 480, this.flexpix, 0, 870);
     try {
       pixelgrabber.grabPixels();
@@ -18298,14 +18298,14 @@ export class xtGraphics {
 
   getstats$1(madness) {
     let pace = fr(fr(((i32((i32(madness.nitroswits[this.sc[0]][2] + madness.aitssp[this.sc[0]])) - 220)))) / 90.0);
-    let realacelf = Float32Array.from([fr((fr(madness.nitroacelf[this.sc[0]][0] + (fr(fr(madness.aiaccsp[this.sc[0]]) * 0.1)))) - 6.0), 0.0, 0.0]);
+    let realacelf = Float32Array.from([fr((fr(madness.nitroacelf[this.sc[0]][0] + (fr(fr(madness.aiaccsp[this.sc[0]]) * 0.10000000149011612)))) - 6.0), 0.0, 0.0]);
     realacelf[1] = fr((fr((fr(madness.nitroacelf[this.sc[0]][1] * realacelf[0])) / madness.nitroacelf[this.sc[0]][0])) - 3.0);
     realacelf[2] = fr((fr((fr(madness.nitroacelf[this.sc[0]][2] * realacelf[0])) / madness.nitroacelf[this.sc[0]][0])) - 2.0);
     let accel = fr(((fr((fr((fr(realacelf[0] * 21.0)) + (fr(realacelf[1] * 6.0)))) + (fr(realacelf[2] * 3.0))))) / 201.0);
-    let grip = fr(((fr((fr(madness.gripreset[this.sc[0]] + (fr(fr(madness.aigripsp[this.sc[0]]) * 0.2)))) - 10.0))) / 20.0);
-    let stunts = fr(((fr(fr((i32(madness.aircreset[this.sc[0]] + madness.aistusp[this.sc[0]]))) + (fr(((fr(madness.airsreset[this.sc[0]] + (fr(fr(madness.aistusp[this.sc[0]]) * 0.025))))) * 10.0))))) / 125.0);
-    let str = fr(((fr(madness.momentreset[this.sc[0]] + (fr(fr(madness.aistrsp[this.sc[0]]) * 0.025))))) / 2.1);
-    let tank = fr(this.outdam[this.sc[0]] + (fr(fr(madness.aiendsp[this.sc[0]]) * 0.01)));
+    let grip = fr(((fr((fr(madness.gripreset[this.sc[0]] + (fr(fr(madness.aigripsp[this.sc[0]]) * 0.20000000298023224)))) - 10.0))) / 20.0);
+    let stunts = fr(((fr(fr((i32(madness.aircreset[this.sc[0]] + madness.aistusp[this.sc[0]]))) + (fr(((fr(madness.airsreset[this.sc[0]] + (fr(fr(madness.aistusp[this.sc[0]]) * 0.02500000037252903))))) * 10.0))))) / 125.0);
+    let str = fr(((fr(madness.momentreset[this.sc[0]] + (fr(fr(madness.aistrsp[this.sc[0]]) * 0.02500000037252903))))) / 2.0999999046325684);
+    let tank = fr(this.outdam[this.sc[0]] + (fr(fr(madness.aiendsp[this.sc[0]]) * 0.009999999776482582)));
     let avg = fr(((fr((fr((fr((fr((fr(pace + accel)) + grip)) + stunts)) + str)) + tank))) / 6.0);
     this.stat[0] = trunc((fr(pace * 100.0)));
     this.stat[1] = trunc((fr(accel * 100.0)));

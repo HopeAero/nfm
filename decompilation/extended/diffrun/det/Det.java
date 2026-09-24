@@ -107,14 +107,39 @@ public final class Det {
         preXs = xs;
         preNanos = nanos;
         preJson = graph();
+        if (logWrites) { writes = new StringBuilder(); nwrites = 0; }
     }
+
+    public static boolean logWrites;
+
+    // ---- field-write log (-Ddiffrun.trace.writes=true) ---------------------
+    // Every PUTFIELD in a game class calls one of these (DiffRun.transform) with
+    // the value about to be stored and the field's name. During a sampled call
+    // they are appended in order; ext-trace.mjs logs the port's writes the same
+    // way and reports the first one that differs -- the statement at fault.
+    static StringBuilder writes;
+    static int nwrites;
+
+    static void w(String f, String v) {
+        if (writes == null || Thread.currentThread() != game) return;
+        if (nwrites++ > 0) writes.append(',');
+        writes.append("[\"").append(f).append("\",").append(v).append(']');
+    }
+    public static void wI(int v, String f) { if (writes != null) w(f, Integer.toString(v)); }
+    public static void wJ(long v, String f) { if (writes != null) w(f, Long.toString(v)); }
+    public static void wF(float v, String f) { if (writes != null) w(f, value(v, null)); }
+    public static void wD(double v, String f) { if (writes != null) w(f, value(v, null)); }
+    public static void wA(Object v, String f) { if (writes != null) w(f, v == null ? "null" : v instanceof String s ? str(s) : "\"<" + v.getClass().getName() + ">\""); }
 
     public static void exit(Object self) {
         if (!tracing || Thread.currentThread() != game) return;
         if (--depth > 0 || roots == null) return;
+        String wl = writes == null ? null : writes.toString();
+        writes = null;
         String post = graph();
         try {
             traceOut.write("{\"call\":" + (calls - 1) + ",\"xs\":" + preXs + ",\"nanos\":" + preNanos
+                    + (wl != null ? ",\"writes\":[" + wl + "]" : "")
                     + ",\"roots\":" + rootIds() + ",\"pre\":" + preJson + ",\"post\":" + post + "}\n");
             traceOut.flush();
         } catch (java.io.IOException e) { throw new RuntimeException(e); }

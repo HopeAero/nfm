@@ -203,21 +203,21 @@ export class Madness {
     this.swits = [Int32Array.from([50, 180, 280]), Int32Array.from([100, 200, 310]), Int32Array.from([60, 180, 271]), Int32Array.from([70, 200, 300]), Int32Array.from([70, 170, 280]), Int32Array.from([60, 200, 290]), Int32Array.from([60, 170, 280]), Int32Array.from([60, 180, 275]), Int32Array.from([90, 210, 295]), Int32Array.from([90, 190, 276]), Int32Array.from([70, 200, 295]), Int32Array.from([50, 160, 270]), Int32Array.from([90, 200, 305]), Int32Array.from([70, 150, 250]), Int32Array.from([80, 200, 300]), Int32Array.from([70, 210, 290]), Int32Array.from([90, 200, 285]), Int32Array.from([140, 225, 320]), Int32Array.from([70, 180, 260]), Int32Array.from([135, 210, 300]), Int32Array.from([50, 130, 210]), Int32Array.from([150, 250, 335]), Int32Array.from([80, 170, 260]), Int32Array.from([50, 180, 280]), Int32Array.from([100, 200, 310]), Int32Array.from([60, 180, 275]), Int32Array.from([70, 200, 295]), Int32Array.from([70, 170, 275]), Int32Array.from([60, 200, 290]), Int32Array.from([60, 170, 280]), Int32Array.from([60, 180, 280]), Int32Array.from([90, 210, 295]), Int32Array.from([90, 190, 276]), Int32Array.from([70, 200, 295]), Int32Array.from([50, 160, 270]), Int32Array.from([90, 200, 305]), Int32Array.from([50, 130, 210]), Int32Array.from([80, 200, 300]), Int32Array.from([70, 210, 290])];
     this.handb = Float32Array.from([7.0, 10.0, 7.0, 15.0, 12.0, 8.0, 9.0, 10.0, 5.0, 7.0, 8.0, 10.0, 8.0, 12.0, 7.0, 7.0, 6.0, 10.0, 15.0, 20.0, 10.0, 10.0, 8.0, 7.0, 10.0, 7.0, 15.0, 12.0, 8.0, 9.0, 10.0, 5.0, 7.0, 8.0, 10.0, 8.0, 12.0, 7.0, 7.0]);
     this.handbreset = Float32Array.from([7.0, 10.0, 7.0, 15.0, 12.0, 8.0, 9.0, 10.0, 5.0, 7.0, 8.0, 10.0, 8.0, 12.0, 7.0, 7.0, 6.0, 10.0, 15.0, 20.0, 10.0, 10.0, 8.0, 7.0, 10.0, 7.0, 15.0, 12.0, 8.0, 9.0, 10.0, 5.0, 7.0, 8.0, 10.0, 8.0, 12.0, 7.0, 7.0]);
-    this.airs = Float32Array.from([1.0, 1.2, 0.95, 1.1, 2.2, 1.0, 0.9, 0.8, 1.0, 0.85, 1.15, 0.8, 1.0, 0.75, 1.3, 1.0, 1.2, 1.4, 0.3, 0.65, 0.25, 1.5, 0.5, 1.0, 1.2, 0.95, 1.0, 2.2, 1.0, 0.9, 0.8, 1.0, 0.9, 1.15, 0.8, 1.0, 0.3, 1.3, 1.0]);
+    this.airs = Float32Array.from([1.0, 1.2000000476837158, 0.949999988079071, 1.100000023841858, 2.200000047683716, 1.0, 0.8999999761581421, 0.800000011920929, 1.0, 0.8500000238418579, 1.149999976158142, 0.800000011920929, 1.0, 0.75, 1.2999999523162842, 1.0, 1.2000000476837158, 1.399999976158142, 0.30000001192092896, 0.6499999761581421, 0.25, 1.5, 0.5, 1.0, 1.2000000476837158, 0.949999988079071, 1.0, 2.200000047683716, 1.0, 0.8999999761581421, 0.800000011920929, 1.0, 0.8999999761581421, 1.149999976158142, 0.800000011920929, 1.0, 0.30000001192092896, 1.2999999523162842, 1.0]);
     this.airc = Int32Array.from([70, 80, 40, 83, 30, 50, 40, 90, 40, 45, 55, 10, 50, 0, 100, 60, 70, 100, 10, 95, 0, 110, 15, 70, 30, 40, 40, 30, 50, 40, 90, 40, 50, 75, 10, 50, 0, 100, 60]);
     this.turn = Float64Array.from([6.0, 9.0, 5.0, 5.0, 7.5, 5.0, 4.5, 3.5, 7.0, 5.5, 7.0, 4.5, 6.0, 5.0, 6.0, 6.0, 6.5, 7.0, 4.0, 10.0, 6.0, 6.0, 5.5, 6.0, 9.0, 5.0, 7.0, 8.0, 7.0, 5.0, 5.0, 9.0, 7.0, 7.0, 4.0, 6.0, 5.0, 7.0, 6.0]);
     this.turnreset = Float64Array.from([6.0, 9.0, 5.0, 5.0, 7.5, 5.0, 4.5, 3.5, 7.0, 5.5, 7.0, 4.5, 6.0, 5.0, 6.0, 6.0, 6.5, 7.0, 4.0, 10.0, 6.0, 6.0, 5.5, 6.0, 9.0, 5.0, 7.0, 8.0, 7.0, 5.0, 5.0, 9.0, 7.0, 7.0, 4.0, 6.0, 5.0, 7.0, 6.0]);
-    this.grip = Float32Array.from([27.2, 20.8, 17.6, 21.4, 25.2, 23.0, 19.8, 14.6, 18.4, 23.8, 22.4, 26.6, 24.2, 42.4, 23.6, 32.8, 19.4, 35.0, 37.0, 56.0, 40.0, 35.0, 30.0, 20.0, 27.0, 18.0, 22.0, 19.0, 20.0, 22.0, 20.0, 16.0, 24.0, 22.4, 25.0, 30.0, 27.0, 30.0, 24.0]);
-    this.gripreset = Float32Array.from([27.2, 20.8, 17.6, 21.4, 25.2, 23.0, 19.8, 14.6, 18.4, 23.8, 22.4, 26.6, 24.2, 42.4, 23.6, 32.8, 19.4, 35.0, 37.0, 56.0, 40.0, 35.0, 30.0, 20.0, 27.0, 18.0, 22.0, 19.0, 20.0, 22.0, 20.0, 16.0, 24.0, 22.4, 25.0, 30.0, 27.0, 30.0, 24.0]);
-    this.bounce = Float32Array.from([1.2, 1.05, 1.3, 1.05, 1.3, 1.2, 1.15, 1.1, 1.2, 1.1, 1.15, 0.8, 1.05, 0.8, 1.1, 1.15, 1.1, 1.1, 0.8, 1.0, 0.9, 1.2, 0.9, 1.2, 1.05, 1.3, 1.05, 1.3, 1.2, 1.15, 1.1, 1.2, 1.1, 1.1, 0.8, 1.05, 0.8, 1.1, 1.15]);
-    this.simag = Float32Array.from([0.9, 0.85, 1.05, 0.9, 0.85, 0.9, 1.05, 0.9, 1.0, 1.05, 0.9, 1.1, 0.9, 1.3, 0.9, 1.15, 1.0, 1.0, 0.9, 0.8, 0.8, 0.8, 0.8, 0.9, 0.85, 1.05, 0.9, 0.85, 0.9, 1.05, 0.9, 1.0, 1.05, 0.9, 1.1, 0.9, 1.3, 0.9, 1.15]);
-    this.moment = Float32Array.from([1.25, 0.75, 1.5, 1.0, 0.85, 1.25, 1.325, 1.4, 1.4, 1.5, 1.425, 2.1, 1.3, 3.0, 1.525, 2.1, 2.5, 2.1, 6.0, 3.2, 6.195, 1.55, 11.0, 1.2, 0.75, 1.4, 1.0, 1.1, 1.25, 1.4, 1.3, 1.2, 1.45, 1.375, 2.0, 1.2, 3.0, 1.5, 2.0]);
-    this.strengthreduce = Float32Array.from([1.25, 0.75, 1.5, 1.0, 0.85, 1.25, 1.325, 1.4, 1.4, 1.5, 1.425, 2.1, 1.3, 3.0, 1.525, 2.1, 2.5, 2.1, 6.0, 3.2, 6.195, 1.55, 11.0, 1.2, 0.75, 1.4, 1.0, 1.1, 1.25, 1.4, 1.3, 1.2, 1.45, 1.375, 2.0, 1.2, 3.0, 1.5, 2.0]);
-    this.comprad = Float32Array.from([0.5, 0.4, 0.8, 0.5, 0.3, 0.5, 0.5, 0.5, 0.5, 0.8, 0.5, 1.0, 0.5, 0.6, 0.5, 0.8, 0.6, 0.65, 0.8, 0.85, 1.0, 0.7, 1.0, 0.5, 0.4, 0.8, 0.5, 0.3, 0.5, 0.5, 0.5, 0.5, 0.8, 0.5, 1.0, 0.5, 0.6, 0.5, 0.8]);
+    this.grip = Float32Array.from([27.200000762939453, 20.799999237060547, 17.600000381469727, 21.399999618530273, 25.200000762939453, 23.0, 19.799999237060547, 14.600000381469727, 18.399999618530273, 23.799999237060547, 22.399999618530273, 26.600000381469727, 24.200000762939453, 42.400001525878906, 23.600000381469727, 32.79999923706055, 19.399999618530273, 35.0, 37.0, 56.0, 40.0, 35.0, 30.0, 20.0, 27.0, 18.0, 22.0, 19.0, 20.0, 22.0, 20.0, 16.0, 24.0, 22.399999618530273, 25.0, 30.0, 27.0, 30.0, 24.0]);
+    this.gripreset = Float32Array.from([27.200000762939453, 20.799999237060547, 17.600000381469727, 21.399999618530273, 25.200000762939453, 23.0, 19.799999237060547, 14.600000381469727, 18.399999618530273, 23.799999237060547, 22.399999618530273, 26.600000381469727, 24.200000762939453, 42.400001525878906, 23.600000381469727, 32.79999923706055, 19.399999618530273, 35.0, 37.0, 56.0, 40.0, 35.0, 30.0, 20.0, 27.0, 18.0, 22.0, 19.0, 20.0, 22.0, 20.0, 16.0, 24.0, 22.399999618530273, 25.0, 30.0, 27.0, 30.0, 24.0]);
+    this.bounce = Float32Array.from([1.2000000476837158, 1.0499999523162842, 1.2999999523162842, 1.0499999523162842, 1.2999999523162842, 1.2000000476837158, 1.149999976158142, 1.100000023841858, 1.2000000476837158, 1.100000023841858, 1.149999976158142, 0.800000011920929, 1.0499999523162842, 0.800000011920929, 1.100000023841858, 1.149999976158142, 1.100000023841858, 1.100000023841858, 0.800000011920929, 1.0, 0.8999999761581421, 1.2000000476837158, 0.8999999761581421, 1.2000000476837158, 1.0499999523162842, 1.2999999523162842, 1.0499999523162842, 1.2999999523162842, 1.2000000476837158, 1.149999976158142, 1.100000023841858, 1.2000000476837158, 1.100000023841858, 1.100000023841858, 0.800000011920929, 1.0499999523162842, 0.800000011920929, 1.100000023841858, 1.149999976158142]);
+    this.simag = Float32Array.from([0.8999999761581421, 0.8500000238418579, 1.0499999523162842, 0.8999999761581421, 0.8500000238418579, 0.8999999761581421, 1.0499999523162842, 0.8999999761581421, 1.0, 1.0499999523162842, 0.8999999761581421, 1.100000023841858, 0.8999999761581421, 1.2999999523162842, 0.8999999761581421, 1.149999976158142, 1.0, 1.0, 0.8999999761581421, 0.800000011920929, 0.800000011920929, 0.800000011920929, 0.800000011920929, 0.8999999761581421, 0.8500000238418579, 1.0499999523162842, 0.8999999761581421, 0.8500000238418579, 0.8999999761581421, 1.0499999523162842, 0.8999999761581421, 1.0, 1.0499999523162842, 0.8999999761581421, 1.100000023841858, 0.8999999761581421, 1.2999999523162842, 0.8999999761581421, 1.149999976158142]);
+    this.moment = Float32Array.from([1.25, 0.75, 1.5, 1.0, 0.8500000238418579, 1.25, 1.3250000476837158, 1.399999976158142, 1.399999976158142, 1.5, 1.4249999523162842, 2.0999999046325684, 1.2999999523162842, 3.0, 1.524999976158142, 2.0999999046325684, 2.5, 2.0999999046325684, 6.0, 3.200000047683716, 6.195000171661377, 1.5499999523162842, 11.0, 1.2000000476837158, 0.75, 1.399999976158142, 1.0, 1.100000023841858, 1.25, 1.399999976158142, 1.2999999523162842, 1.2000000476837158, 1.4500000476837158, 1.375, 2.0, 1.2000000476837158, 3.0, 1.5, 2.0]);
+    this.strengthreduce = Float32Array.from([1.25, 0.75, 1.5, 1.0, 0.8500000238418579, 1.25, 1.3250000476837158, 1.399999976158142, 1.399999976158142, 1.5, 1.4249999523162842, 2.0999999046325684, 1.2999999523162842, 3.0, 1.524999976158142, 2.0999999046325684, 2.5, 2.0999999046325684, 6.0, 3.200000047683716, 6.195000171661377, 1.5499999523162842, 11.0, 1.2000000476837158, 0.75, 1.399999976158142, 1.0, 1.100000023841858, 1.25, 1.399999976158142, 1.2999999523162842, 1.2000000476837158, 1.4500000476837158, 1.375, 2.0, 1.2000000476837158, 3.0, 1.5, 2.0]);
+    this.comprad = Float32Array.from([0.5, 0.4000000059604645, 0.800000011920929, 0.5, 0.30000001192092896, 0.5, 0.5, 0.5, 0.5, 0.800000011920929, 0.5, 1.0, 0.5, 0.6000000238418579, 0.5, 0.800000011920929, 0.6000000238418579, 0.6499999761581421, 0.800000011920929, 0.8500000238418579, 1.0, 0.699999988079071, 1.0, 0.5, 0.4000000059604645, 0.800000011920929, 0.5, 0.30000001192092896, 0.5, 0.5, 0.5, 0.5, 0.800000011920929, 0.5, 1.0, 0.5, 0.6000000238418579, 0.5, 0.800000011920929]);
     this.push = Float32Array.from([2.0, 2.0, 3.0, 3.0, 2.0, 2.0, 2.0, 4.0, 2.0, 2.0, 2.0, 4.0, 2.0, 2.0, 2.0, 2.0, 4.0, 2.0, 3.0, 3.0, 7.0, 2.0, 8.5, 2.0, 2.0, 3.0, 3.0, 2.0, 2.0, 2.0, 4.0, 2.0, 2.0, 2.0, 4.0, 2.0, 2.0, 2.0, 2.0]);
     this.push2 = Float32Array.from([2.0, 2.0, 3.0, 3.0, 2.0, 2.0, 2.0, 4.0, 2.0, 2.0, 2.0, 4.0, 2.0, 2.0, 2.0, 2.0, 4.0, 2.0, 3.0, 3.0, 7.0, 2.0, 8.5, 2.0, 2.0, 3.0, 3.0, 2.0, 2.0, 2.0, 4.0, 2.0, 2.0, 2.0, 4.0, 2.0, 2.0, 2.0, 2.0]);
-    this.revpush = Float32Array.from([2.0, 3.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.0, 2.0, 1.0, 2.0, 1.0, 2.0, 2.0, 0.25, 0.4, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 2.0, 3.0, 1.0, 2.0, 2.0, 2.0, 2.0, 1.0, 2.0, 1.0, 2.0, 1.0, 2.0, 2.0, 0.25, 0.4]);
-    this.revpush2 = Float32Array.from([2.0, 3.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.0, 2.0, 1.0, 2.0, 1.0, 2.0, 2.0, 0.25, 0.4, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 2.0, 3.0, 1.0, 2.0, 2.0, 2.0, 2.0, 1.0, 2.0, 1.0, 2.0, 1.0, 2.0, 2.0, 0.25, 0.4]);
+    this.revpush = Float32Array.from([2.0, 3.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.0, 2.0, 1.0, 2.0, 1.0, 2.0, 2.0, 0.25, 0.4000000059604645, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 2.0, 3.0, 1.0, 2.0, 2.0, 2.0, 2.0, 1.0, 2.0, 1.0, 2.0, 1.0, 2.0, 2.0, 0.25, 0.4000000059604645]);
+    this.revpush2 = Float32Array.from([2.0, 3.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.0, 2.0, 1.0, 2.0, 1.0, 2.0, 2.0, 0.25, 0.4000000059604645, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 2.0, 3.0, 1.0, 2.0, 2.0, 2.0, 2.0, 1.0, 2.0, 1.0, 2.0, 1.0, 2.0, 2.0, 0.25, 0.4000000059604645]);
     this.lift = Int32Array.from([0, 30, 0, 0, 0, 30, 10, 40, 20, 0, 0, 0, 10, 0, 30, 0, 35, 30, 0, 30, 40, 10, 0, 0, 30, 0, 20, 0, 30, 0, 0, 20, 0, 0, 0, 10, 0, 30, 0]);
     this.lift2 = Int32Array.from([0, 30, 0, 0, 0, 30, 10, 40, 20, 0, 0, 0, 10, 0, 30, 0, 35, 30, 0, 30, 40, 10, 0, 0, 30, 0, 20, 0, 30, 0, 0, 20, 0, 0, 0, 10, 0, 30, 0]);
     this.revlift = Int32Array.from([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15]);
@@ -226,7 +226,7 @@ export class Madness {
     this.flipy = Int32Array.from([-50, -40, -92, -44, -60, -57, -79, -80, -77, -90, -48, -134, -40, -120, -63, -127, -78, -90, -193, -64, -170, -42, -210, -50, -60, -92, -44, -60, -57, -54, -60, -77, -57, -82, -85, -28, -100, -63, -127]);
     this.msquash = Int32Array.from([7, 4, 7, 2, 8, 4, 6, 2, 3, 8, 4, 10, 3, 20, 3, 8, 3, 3, 8, 2, 1, 1, 2, 7, 4, 7, 2, 8, 4, 6, 2, 3, 8, 4, 10, 3, 20, 3, 8]);
     this.clrad = Int32Array.from([2750, 1800, 2900, 1300, 1650, 3500, 2800, 4000, 3500, 3400, 4500, 50000, 4500, 250000, 2900, 4200, 2550, 2450, 100000, 100000, 100000, 5000, 100000, 3300, 2500, 4700, 3000, 2000, 4500, 3500, 5000, 10000, 9500, 4000, 7000, 10000, 500000, 5500, 4200]);
-    this.dammult = Float32Array.from([0.72, 0.75, 0.55, 0.775, 0.56, 0.7, 0.7, 0.57, 0.6, 0.46, 0.6, 0.25, 0.6, 0.2, 0.3, 0.46, 0.325, 0.26, 0.2, 0.18, 0.185, 0.5, 0.19, 0.8, 1.0, 0.55, 1.0, 0.6, 0.7, 0.72, 0.8, 0.6, 0.46, 0.6, 0.48, 0.6, 0.2, 0.3, 0.46]);
+    this.dammult = Float32Array.from([0.7200000286102295, 0.75, 0.550000011920929, 0.7749999761581421, 0.5600000023841858, 0.699999988079071, 0.699999988079071, 0.5699999928474426, 0.6000000238418579, 0.46000000834465027, 0.6000000238418579, 0.25, 0.6000000238418579, 0.20000000298023224, 0.30000001192092896, 0.46000000834465027, 0.32499998807907104, 0.25999999046325684, 0.20000000298023224, 0.18000000715255737, 0.1850000023841858, 0.5, 0.1899999976158142, 0.800000011920929, 1.0, 0.550000011920929, 1.0, 0.6000000238418579, 0.699999988079071, 0.7200000286102295, 0.800000011920929, 0.6000000238418579, 0.46000000834465027, 0.6000000238418579, 0.47999998927116394, 0.6000000238418579, 0.20000000298023224, 0.30000001192092896, 0.46000000834465027]);
     this.maxmag = Int32Array.from([6000, 4200, 6000, 9500, 6000, 9100, 11000, 7500, 11500, 12000, 18000, 100000, 18000, 110000, 5800, 18000, 11000, 6700, 100000, 130000, 115000, 20000, 360000, 6000, 4200, 7200, 6000, 6000, 9100, 14000, 12000, 12000, 9700, 13000, 10700, 13000, 63000, 5800, 18000]);
     this.healthreset = Int32Array.from([6000, 4200, 6000, 9500, 6000, 9100, 11000, 7500, 11500, 12000, 18000, 100000, 18000, 110000, 5800, 18000, 11000, 6700, 100000, 130000, 115000, 20000, 360000, 6000, 4200, 7200, 6000, 6000, 9100, 14000, 12000, 12000, 9700, 13000, 10700, 13000, 63000, 5800, 18000]);
     this.healthcut = Int32Array.from([6000, 4200, 6000, 9500, 6000, 9100, 11000, 7500, 11500, 12000, 18000, 100000, 18000, 110000, 5800, 18000, 11000, 6700, 100000, 130000, 115000, 20000, 360000, 6000, 4200, 7200, 6000, 6000, 9100, 14000, 12000, 12000, 9700, 13000, 10700, 13000, 63000, 5800, 18000]);
@@ -251,9 +251,9 @@ export class Madness {
     this.pmulti = Float64Array.from([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]);
     this.nitroacelf = [Float32Array.from([11.0, 5.0, 3.0]), Float32Array.from([14.0, 7.0, 5.0]), Float32Array.from([10.0, 5.0, 3.5]), Float32Array.from([12.0, 7.0, 4.0]), Float32Array.from([10.0, 5.0, 3.5]), Float32Array.from([13.0, 6.5, 5.0]), Float32Array.from([12.5, 7.5, 4.0]), Float32Array.from([10.0, 6.0, 3.0]), Float32Array.from([14.5, 7.0, 6.0]), Float32Array.from([12.0, 7.0, 3.5]), Float32Array.from([11.0, 6.0, 3.0]), Float32Array.from([9.0, 5.0, 3.0]), Float32Array.from([13.0, 7.0, 4.5]), Float32Array.from([10.5, 6.0, 3.0]), Float32Array.from([11.0, 7.5, 4.0]), Float32Array.from([12.0, 6.0, 3.5]), Float32Array.from([17.5, 11.5, 9.0]), Float32Array.from([14.5, 7.5, 6.0]), Float32Array.from([13.0, 7.0, 4.5]), Float32Array.from([14.0, 7.0, 5.0]), Float32Array.from([8.0, 3.5, 3.0]), Float32Array.from([15.0, 10.0, 7.0]), Float32Array.from([9.0, 5.0, 3.0]), Float32Array.from([11.0, 5.0, 3.0]), Float32Array.from([14.0, 7.0, 5.0]), Float32Array.from([10.0, 5.0, 3.5]), Float32Array.from([11.0, 6.0, 3.5]), Float32Array.from([10.0, 5.0, 3.5]), Float32Array.from([12.0, 6.0, 3.0]), Float32Array.from([9.0, 7.0, 4.0]), Float32Array.from([11.0, 5.0, 3.0]), Float32Array.from([12.0, 7.0, 4.0]), Float32Array.from([12.0, 7.0, 3.5]), Float32Array.from([11.5, 6.5, 3.5]), Float32Array.from([9.0, 5.0, 3.0]), Float32Array.from([13.0, 7.0, 4.5]), Float32Array.from([7.5, 3.5, 3.0]), Float32Array.from([11.0, 7.5, 4.0]), Float32Array.from([12.0, 6.0, 3.5])];
     this.nitroswits = [Int32Array.from([50, 180, 280]), Int32Array.from([100, 200, 310]), Int32Array.from([60, 180, 271]), Int32Array.from([70, 200, 300]), Int32Array.from([70, 170, 280]), Int32Array.from([60, 200, 290]), Int32Array.from([60, 170, 280]), Int32Array.from([60, 180, 275]), Int32Array.from([90, 210, 295]), Int32Array.from([90, 190, 276]), Int32Array.from([70, 200, 295]), Int32Array.from([50, 160, 270]), Int32Array.from([90, 200, 305]), Int32Array.from([70, 150, 250]), Int32Array.from([80, 200, 300]), Int32Array.from([70, 210, 290]), Int32Array.from([90, 200, 285]), Int32Array.from([140, 225, 320]), Int32Array.from([70, 180, 260]), Int32Array.from([135, 210, 300]), Int32Array.from([50, 130, 210]), Int32Array.from([150, 250, 335]), Int32Array.from([80, 170, 260]), Int32Array.from([50, 180, 280]), Int32Array.from([100, 200, 310]), Int32Array.from([60, 180, 275]), Int32Array.from([70, 200, 295]), Int32Array.from([70, 170, 275]), Int32Array.from([60, 200, 290]), Int32Array.from([60, 170, 280]), Int32Array.from([60, 180, 280]), Int32Array.from([90, 210, 295]), Int32Array.from([90, 190, 276]), Int32Array.from([70, 200, 295]), Int32Array.from([50, 160, 270]), Int32Array.from([90, 200, 305]), Int32Array.from([50, 130, 210]), Int32Array.from([80, 200, 300]), Int32Array.from([70, 210, 290])];
-    this.airsreset = Float32Array.from([1.0, 1.2, 0.95, 1.1, 2.2, 1.0, 0.9, 0.8, 1.0, 0.85, 1.15, 0.8, 1.0, 0.75, 1.3, 1.0, 1.2, 1.4, 0.3, 0.65, 0.25, 1.5, 0.5, 1.0, 1.2, 0.95, 1.0, 2.2, 1.0, 0.9, 0.8, 1.0, 0.9, 1.15, 0.8, 1.0, 0.3, 1.3, 1.0]);
+    this.airsreset = Float32Array.from([1.0, 1.2000000476837158, 0.949999988079071, 1.100000023841858, 2.200000047683716, 1.0, 0.8999999761581421, 0.800000011920929, 1.0, 0.8500000238418579, 1.149999976158142, 0.800000011920929, 1.0, 0.75, 1.2999999523162842, 1.0, 1.2000000476837158, 1.399999976158142, 0.30000001192092896, 0.6499999761581421, 0.25, 1.5, 0.5, 1.0, 1.2000000476837158, 0.949999988079071, 1.0, 2.200000047683716, 1.0, 0.8999999761581421, 0.800000011920929, 1.0, 0.8999999761581421, 1.149999976158142, 0.800000011920929, 1.0, 0.30000001192092896, 1.2999999523162842, 1.0]);
     this.aircreset = Int32Array.from([70, 80, 40, 83, 30, 50, 40, 90, 40, 45, 55, 10, 50, 0, 100, 60, 70, 100, 10, 95, 0, 110, 15, 70, 30, 40, 40, 30, 50, 40, 90, 40, 50, 75, 10, 50, 0, 100, 60]);
-    this.momentreset = Float32Array.from([1.25, 0.75, 1.5, 1.0, 0.85, 1.25, 1.325, 1.4, 1.4, 1.5, 1.425, 2.1, 1.3, 3.0, 1.525, 2.1, 2.5, 2.1, 6.0, 3.2, 6.195, 1.55, 11.0, 1.2, 0.75, 1.4, 1.0, 1.1, 1.25, 1.4, 1.3, 1.2, 1.45, 1.375, 2.0, 1.2, 3.0, 1.5, 2.0]);
+    this.momentreset = Float32Array.from([1.25, 0.75, 1.5, 1.0, 0.8500000238418579, 1.25, 1.3250000476837158, 1.399999976158142, 1.399999976158142, 1.5, 1.4249999523162842, 2.0999999046325684, 1.2999999523162842, 3.0, 1.524999976158142, 2.0999999046325684, 2.5, 2.0999999046325684, 6.0, 3.200000047683716, 6.195000171661377, 1.5499999523162842, 11.0, 1.2000000476837158, 0.75, 1.399999976158142, 1.0, 1.100000023841858, 1.25, 1.399999976158142, 1.2999999523162842, 1.2000000476837158, 1.4500000476837158, 1.375, 2.0, 1.2000000476837158, 3.0, 1.5, 2.0]);
     this.cn = 0;
     this.im = 0;
     this.mxz = 0;
@@ -450,20 +450,20 @@ export class Madness {
                   let powdrain = 0.0;
                   for (let a = 0; a < 6; a = i32(a + 1)) {
                     if (this.xt.specialstats[this.xt.sc[attacker]][18][a] > 0) {
-                      proportion = fr(fr(this.xt.specialstats[this.xt.sc[attacker]][18][a]) * 0.05);
+                      proportion = fr(fr(this.xt.specialstats[this.xt.sc[attacker]][18][a]) * 0.05000000074505806);
                     }
                     if (this.xt.specialstats[this.xt.sc[attacker]][19][a] > 0) {
-                      proportion = fr(fr(this.xt.specialstats[this.xt.sc[attacker]][18][a]) * 0.025);
+                      proportion = fr(fr(this.xt.specialstats[this.xt.sc[attacker]][18][a]) * 0.02500000037252903);
                     }
                   }
                   if (!this.specialact) {
-                    this.spatk = fr(this.spatk - (fr((fr(percentage * proportion)) * 1.2)));
+                    this.spatk = fr(this.spatk - (fr((fr(percentage * proportion)) * 1.2000000476837158)));
                   } else {
-                    this.speclast = fr(this.speclast - (fr((fr(percentage * proportion)) * 1.2)));
-                    this.speclast2 = fr(this.speclast2 - (fr((fr(percentage * proportion)) * 1.2)));
+                    this.speclast = fr(this.speclast - (fr((fr(percentage * proportion)) * 1.2000000476837158)));
+                    this.speclast2 = fr(this.speclast2 - (fr((fr(percentage * proportion)) * 1.2000000476837158)));
                   }
                   if (this.power !== 98.0) {
-                    this.power = fr(this.power - (fr((fr(percentage * powdrain)) * 0.98)));
+                    this.power = fr(this.power - (fr((fr(percentage * powdrain)) * 0.9800000190734863)));
                   } else {
                     this.xtpower = i32(this.xtpower - trunc((fr((fr(percentage * powdrain)) * 2.0))));
                   }
@@ -489,22 +489,22 @@ export class Madness {
                 conto.p[l].hsb[1] = 0.25;
               }
               if ((conto.p[l].bfase > 25) && (conto.p[l].hsb[2] > 0.7)) {
-                conto.p[l].hsb[2] = 0.7;
+                conto.p[l].hsb[2] = 0.699999988079071;
               }
               if ((conto.p[l].bfase > 30) && (conto.p[l].hsb[1] > 0.15)) {
-                conto.p[l].hsb[1] = 0.15;
+                conto.p[l].hsb[1] = 0.15000000596046448;
               }
               if ((conto.p[l].bfase > 35) && (conto.p[l].hsb[2] > 0.6)) {
-                conto.p[l].hsb[2] = 0.6;
+                conto.p[l].hsb[2] = 0.6000000238418579;
               }
               if (conto.p[l].bfase > 40) {
-                conto.p[l].hsb[0] = 0.075;
+                conto.p[l].hsb[0] = 0.07500000298023224;
               }
               if ((conto.p[l].bfase > 50) && (conto.p[l].hsb[2] > 0.5)) {
                 conto.p[l].hsb[2] = 0.5;
               }
               if (conto.p[l].bfase > 60) {
-                conto.p[l].hsb[0] = 0.05;
+                conto.p[l].hsb[0] = 0.05000000074505806;
               }
               let plane = conto.p[l];
               plane.bfase = trunc(fr(fr(plane.bfase) + f2));
@@ -623,20 +623,20 @@ export class Madness {
                 let powdrain = 0.0;
                 for (let a = 0; a < 6; a = i32(a + 1)) {
                   if (this.xt.specialstats[this.xt.sc[attacker]][18][a] > 0) {
-                    proportion = fr(fr(this.xt.specialstats[this.xt.sc[attacker]][18][a]) * 0.05);
+                    proportion = fr(fr(this.xt.specialstats[this.xt.sc[attacker]][18][a]) * 0.05000000074505806);
                   }
                   if (this.xt.specialstats[this.xt.sc[attacker]][19][a] > 0) {
-                    proportion = fr(fr(this.xt.specialstats[this.xt.sc[attacker]][18][a]) * 0.025);
+                    proportion = fr(fr(this.xt.specialstats[this.xt.sc[attacker]][18][a]) * 0.02500000037252903);
                   }
                 }
                 if (!this.specialact) {
-                  this.spatk = fr(this.spatk - (fr((fr(percentage * proportion)) * 1.2)));
+                  this.spatk = fr(this.spatk - (fr((fr(percentage * proportion)) * 1.2000000476837158)));
                 } else {
-                  this.speclast = fr(this.speclast - (fr((fr(percentage * proportion)) * 1.2)));
-                  this.speclast2 = fr(this.speclast2 - (fr((fr(percentage * proportion)) * 1.2)));
+                  this.speclast = fr(this.speclast - (fr((fr(percentage * proportion)) * 1.2000000476837158)));
+                  this.speclast2 = fr(this.speclast2 - (fr((fr(percentage * proportion)) * 1.2000000476837158)));
                 }
                 if (this.power !== 98.0) {
-                  this.power = fr(this.power - (fr((fr(percentage * powdrain)) * 0.98)));
+                  this.power = fr(this.power - (fr((fr(percentage * powdrain)) * 0.9800000190734863)));
                 } else {
                   this.xtpower = i32(this.xtpower - trunc((fr((fr(percentage * powdrain)) * 2.0))));
                 }
@@ -662,22 +662,22 @@ export class Madness {
               conto.p[j].hsb[1] = 0.25;
             }
             if ((conto.p[j].bfase > 25) && (conto.p[j].hsb[2] > 0.7)) {
-              conto.p[j].hsb[2] = 0.7;
+              conto.p[j].hsb[2] = 0.699999988079071;
             }
             if ((conto.p[j].bfase > 30) && (conto.p[j].hsb[1] > 0.15)) {
-              conto.p[j].hsb[1] = 0.15;
+              conto.p[j].hsb[1] = 0.15000000596046448;
             }
             if ((conto.p[j].bfase > 35) && (conto.p[j].hsb[2] > 0.6)) {
-              conto.p[j].hsb[2] = 0.6;
+              conto.p[j].hsb[2] = 0.6000000238418579;
             }
             if (conto.p[j].bfase > 40) {
-              conto.p[j].hsb[0] = 0.075;
+              conto.p[j].hsb[0] = 0.07500000298023224;
             }
             if ((conto.p[j].bfase > 50) && (conto.p[j].hsb[2] > 0.5)) {
               conto.p[j].hsb[2] = 0.5;
             }
             if (conto.p[j].bfase > 60) {
-              conto.p[j].hsb[0] = 0.05;
+              conto.p[j].hsb[0] = 0.05000000074505806;
             }
             let plane = conto.p[j];
             plane.bfase = trunc(fr(fr(plane.bfase) + Math.abs(f2)));
@@ -865,7 +865,7 @@ export class Madness {
               }
               let f3 = 1.0;
               if (this.xt.classicmode && (madness.cn === 36)) {
-                f3 = 1.27;
+                f3 = 1.2699999809265137;
               }
               madness.regx(l, fr((fr((fr((fr((fr((fr((fr((fr((fr((fr((fr(f2 * this.moment[this.cn])) * f3)) * blmult)) * bravery)) * reversestr)) * fearless)) * protection)) * reversedef)) * lowpowdef)) * killstr)) * killdef), conto1, this.im);
               if (madness.colidim) {
@@ -910,7 +910,7 @@ export class Madness {
               }
               let f6 = 1.0;
               if (this.xt.classicmode && (madness.cn === 36)) {
-                f6 = 1.27;
+                f6 = 1.2699999809265137;
               }
               let scz = madness.scz;
               let n4 = l;
@@ -1059,10 +1059,10 @@ export class Madness {
     this.oldfcnt = 0;
     this.strswap = false;
     if (!this.xt.classicmode) {
-      this.dammult[36] = 0.3;
+      this.dammult[36] = 0.30000001192092896;
       this.clrad[36] = 20000;
     } else {
-      this.dammult[36] = 0.225;
+      this.dammult[36] = 0.22499999403953552;
       this.clrad[36] = 30000;
     }
     this.mxz = 0;
@@ -1215,20 +1215,20 @@ export class Madness {
                 let powdrain = 0.0;
                 for (let a = 0; a < 6; a = i32(a + 1)) {
                   if (this.xt.specialstats[this.xt.sc[attacker]][18][a] > 0) {
-                    proportion = fr(fr(this.xt.specialstats[this.xt.sc[attacker]][18][a]) * 0.05);
+                    proportion = fr(fr(this.xt.specialstats[this.xt.sc[attacker]][18][a]) * 0.05000000074505806);
                   }
                   if (this.xt.specialstats[this.xt.sc[attacker]][19][a] > 0) {
-                    proportion = fr(fr(this.xt.specialstats[this.xt.sc[attacker]][18][a]) * 0.025);
+                    proportion = fr(fr(this.xt.specialstats[this.xt.sc[attacker]][18][a]) * 0.02500000037252903);
                   }
                 }
                 if (!this.specialact) {
-                  this.spatk = fr(this.spatk - (fr((fr(percentage * proportion)) * 1.2)));
+                  this.spatk = fr(this.spatk - (fr((fr(percentage * proportion)) * 1.2000000476837158)));
                 } else {
-                  this.speclast = fr(this.speclast - (fr((fr(percentage * proportion)) * 1.2)));
-                  this.speclast2 = fr(this.speclast2 - (fr((fr(percentage * proportion)) * 1.2)));
+                  this.speclast = fr(this.speclast - (fr((fr(percentage * proportion)) * 1.2000000476837158)));
+                  this.speclast2 = fr(this.speclast2 - (fr((fr(percentage * proportion)) * 1.2000000476837158)));
                 }
                 if (this.power !== 98.0) {
-                  this.power = fr(this.power - (fr((fr(percentage * powdrain)) * 0.98)));
+                  this.power = fr(this.power - (fr((fr(percentage * powdrain)) * 0.9800000190734863)));
                 } else {
                   this.xtpower = i32(this.xtpower - trunc((fr((fr(percentage * powdrain)) * 2.0))));
                 }
@@ -1254,22 +1254,22 @@ export class Madness {
               conto.p[j].hsb[1] = 0.25;
             }
             if ((conto.p[j].bfase > 25) && (conto.p[j].hsb[2] > 0.7)) {
-              conto.p[j].hsb[2] = 0.7;
+              conto.p[j].hsb[2] = 0.699999988079071;
             }
             if ((conto.p[j].bfase > 30) && (conto.p[j].hsb[1] > 0.15)) {
-              conto.p[j].hsb[1] = 0.15;
+              conto.p[j].hsb[1] = 0.15000000596046448;
             }
             if ((conto.p[j].bfase > 35) && (conto.p[j].hsb[2] > 0.6)) {
-              conto.p[j].hsb[2] = 0.6;
+              conto.p[j].hsb[2] = 0.6000000238418579;
             }
             if (conto.p[j].bfase > 40) {
-              conto.p[j].hsb[0] = 0.075;
+              conto.p[j].hsb[0] = 0.07500000298023224;
             }
             if ((conto.p[j].bfase > 50) && (conto.p[j].hsb[2] > 0.5)) {
               conto.p[j].hsb[2] = 0.5;
             }
             if (conto.p[j].bfase > 60) {
-              conto.p[j].hsb[0] = 0.05;
+              conto.p[j].hsb[0] = 0.05000000074505806;
             }
             let plane = conto.p[j];
             plane.bfase = trunc(fr(fr(plane.bfase) + Math.abs(f2)));
@@ -1322,18 +1322,18 @@ export class Madness {
     let bouncemod = 1.0;
     if ((this.xt.careermode && (checkpoints.stage === 24)) && (this.cn !== 19)) {
       let gripmod = fr(((fr(this.grip[this.cn] - 28.5))) / 100.0);
-      if (gripmod < 0.55) {
-        gripmod = 0.55;
+      if (gripmod < 0.550000011920929) {
+        gripmod = 0.550000011920929;
       }
       if (gripmod > 1.0) {
         gripmod = 1.0;
       }
-      let gripaffect = fr(((fr(gripmod - 0.55))) / 0.45);
-      bouncemod = fr(1.5 - (fr(gripaffect * 0.45)));
+      let gripaffect = fr(((fr(gripmod - 0.550000011920929))) / 0.44999998807907104);
+      bouncemod = fr(1.5 - (fr(gripaffect * 0.44999998807907104)));
     }
     let bounciness = fr(this.bounce[this.cn] * bouncemod);
-    if (bounciness > 1.35) {
-      bounciness = 1.35;
+    if (bounciness > 1.350000023841858) {
+      bounciness = 1.350000023841858;
     }
     let i2 = conto.grat;
     if (flag) {
@@ -1426,7 +1426,7 @@ export class Madness {
       }
       handbboost = i32((i32((i32(this.aigripsp[this.cn] - ((i32(this.level[this.cn] - 1))))) - shadnegate)) - cheatboost);
     }
-    this.handb[this.cn] = fr(this.handbreset[this.cn] + (fr(fr(handbboost) * 0.1)));
+    this.handb[this.cn] = fr(this.handbreset[this.cn] + (fr(fr(handbboost) * 0.10000000149011612)));
     this.turn[this.cn] = this.turnreset[this.cn] + (handbboost * 0.1);
     if (this.turn[this.cn] > 15.0) {
       this.turn[this.cn] = 15.0;
@@ -1435,15 +1435,15 @@ export class Madness {
     let aircres = 1.0;
     if ((this.xt.careermode && (checkpoints.stage === 24)) && (this.cn !== 19)) {
       let gripmod2 = fr(((fr(this.grip[this.cn] - 28.5))) / 100.0);
-      if (gripmod2 < 0.55) {
-        gripmod2 = 0.55;
+      if (gripmod2 < 0.550000011920929) {
+        gripmod2 = 0.550000011920929;
       }
       if (gripmod2 > 1.0) {
         gripmod2 = 1.0;
       }
-      let gripaffect2 = fr(((fr(gripmod2 - 0.55))) / 0.45);
-      waterdrag = fr(0.2 + (fr(0.6 * gripaffect2)));
-      aircres = 0.5 + (fr(0.35 * gripaffect2));
+      let gripaffect2 = fr(((fr(gripmod2 - 0.550000011920929))) / 0.44999998807907104);
+      waterdrag = fr(0.20000000298023224 + (fr(0.6000000238418579 * gripaffect2)));
+      aircres = 0.5 + (fr(0.3499999940395355 * gripaffect2));
     }
     let stuntlimit = fr(this.airsreset[this.cn] + 1.0);
     let nomorestunts = this.airs[this.cn];
@@ -1579,14 +1579,14 @@ export class Madness {
         let accelmod = 1.0;
         if ((this.xt.careermode && (checkpoints.stage === 24)) && (this.cn !== 19)) {
           let gripmod3 = fr(((fr(this.grip[this.cn] - 28.5))) / 100.0);
-          if (gripmod3 < 0.55) {
-            gripmod3 = 0.55;
+          if (gripmod3 < 0.550000011920929) {
+            gripmod3 = 0.550000011920929;
           }
           if (gripmod3 > 1.0) {
             gripmod3 = 1.0;
           }
-          let gripaffect3 = fr(((fr(gripmod3 - 0.55))) / 0.45);
-          accelmod = fr(0.25 + (fr(0.55 * gripaffect3)));
+          let gripaffect3 = fr(((fr(gripmod3 - 0.550000011920929))) / 0.44999998807907104);
+          accelmod = fr(0.25 + (fr(0.550000011920929 * gripaffect3)));
         }
         if (!this.forcehandb) {
           this.initialspeed = this.speed;
@@ -1628,7 +1628,7 @@ export class Madness {
             let spdportion = Float64Array.from([this.swits[this.cn][0] / this.swits[this.cn][1], this.swits[this.cn][1] / this.swits[this.cn][2]]);
             let accportion = Float32Array.from([fr(this.acelf[this.cn][1] / this.acelf[this.cn][0]), fr(this.acelf[this.cn][2] / this.acelf[this.cn][1])]);
             let increment = Float64Array.from([((0.97 - spdportion[0])) / 100.0, ((0.97 - spdportion[1])) / 100.0]);
-            let accincre = Float32Array.from([fr(((fr(0.97 - accportion[0]))) / 100.0), fr(((fr(0.97 - accportion[1]))) / 100.0)]);
+            let accincre = Float32Array.from([fr(((fr(0.9700000286102295 - accportion[0]))) / 100.0), fr(((fr(0.9700000286102295 - accportion[1]))) / 100.0)]);
             realspeed[0] = fr((this.swits[this.cn][0] + ((accelboost2 * increment[0]) * this.swits[this.cn][1])));
             realspeed[1] = fr((this.swits[this.cn][1] + ((accelboost2 * increment[1]) * this.swits[this.cn][2])));
             realspeed[2] = fr(this.swits[this.cn][2]);
@@ -1773,13 +1773,13 @@ export class Madness {
     let turnmod = 1.0;
     if ((this.xt.careermode && (checkpoints.stage === 24)) && (this.cn !== 19)) {
       let gripmod3 = fr(((fr(this.grip[this.cn] - 28.5))) / 100.0);
-      if (gripmod3 < 0.55) {
-        gripmod3 = 0.55;
+      if (gripmod3 < 0.550000011920929) {
+        gripmod3 = 0.550000011920929;
       }
       if (gripmod3 > 1.0) {
         gripmod3 = 1.0;
       }
-      let gripaffect3 = fr(((fr(gripmod3 - 0.55))) / 0.45);
+      let gripaffect3 = fr(((fr(gripmod3 - 0.550000011920929))) / 0.44999998807907104);
       turnmod = 0.7 + (fr(gripaffect3 * 0.25));
     }
     let turningpower = this.turn[this.cn] * turnmod;
@@ -1832,7 +1832,7 @@ export class Madness {
         } else {
           this.fxz = trunc((fr(fr(conto.wxz) / i3)));
         }
-        conto.xz = trunc(fr(fr(conto.xz) + ((fr(fr(conto.wxz) / i3)))));
+        conto.xz = i32(conto.xz + trunc((fr(fr(conto.wxz) / i3))));
       }
       this.wtouch = false;
       this.gtouch = false;
@@ -1966,16 +1966,16 @@ export class Madness {
           }
           let gripaffect4 = fr(((fr(gripmod4 - 0.5))) / 0.5);
           if (this.roadtyp === 0) {
-            this.speedmulti = fr(0.8 + (fr(0.1 * gripaffect4)));
-            f7 = fr(f7 * (fr(0.35 + (fr(gripaffect4 * 0.5)))));
+            this.speedmulti = fr(0.800000011920929 + (fr(0.10000000149011612 * gripaffect4)));
+            f7 = fr(f7 * (fr(0.3499999940395355 + (fr(gripaffect4 * 0.5)))));
           }
           if (this.roadtyp === 1) {
-            this.speedmulti = fr(0.25 + (fr(0.65 * gripaffect4)));
-            f7 = fr(f7 * (fr(0.6 + (fr(gripaffect4 * 0.1)))));
+            this.speedmulti = fr(0.25 + (fr(0.6499999761581421 * gripaffect4)));
+            f7 = fr(f7 * (fr(0.6000000238418579 + (fr(gripaffect4 * 0.10000000149011612)))));
           }
           if (((this.roadtyp === 2) || (this.roadtyp === 3)) || (this.roadtyp === 4)) {
-            this.speedmulti = fr(0.8 + (fr(0.1 * gripaffect4)));
-            f7 = fr(f7 * (fr(0.25 + (fr(gripaffect4 * 0.2)))));
+            this.speedmulti = fr(0.800000011920929 + (fr(0.10000000149011612 * gripaffect4)));
+            f7 = fr(f7 * (fr(0.25 + (fr(gripaffect4 * 0.20000000298023224)))));
           }
         }
         if (((checkpoints.stage === 18) && (this.cn !== 16)) && !this.xt.bonusstage[3]) {
@@ -1987,19 +1987,19 @@ export class Madness {
             gripmod4 = 1.0;
           }
           let gripaffect4 = fr(((fr(gripmod4 - 0.5))) / 0.5);
-          this.speedmulti = fr(0.45 + (fr(gripaffect4 * 0.45)));
-          this.powermulti = fr(2.5 - (fr(gripaffect4 * 1.3)));
+          this.speedmulti = fr(0.44999998807907104 + (fr(gripaffect4 * 0.44999998807907104)));
+          this.powermulti = fr(2.5 - (fr(gripaffect4 * 1.2999999523162842)));
         }
         if ((checkpoints.stage === 24) && (this.cn !== 19)) {
           let gripmod4 = fr(((fr(this.grip[this.cn] - 28.5))) / 100.0);
-          if (gripmod4 < 0.55) {
-            gripmod4 = 0.55;
+          if (gripmod4 < 0.550000011920929) {
+            gripmod4 = 0.550000011920929;
           }
           if (gripmod4 > 1.0) {
             gripmod4 = 1.0;
           }
-          let gripaffect4 = fr(((fr(gripmod4 - 0.55))) / 0.45);
-          this.speedmulti = fr(0.8 + (fr(gripaffect4 * 0.2)));
+          let gripaffect4 = fr(((fr(gripmod4 - 0.550000011920929))) / 0.44999998807907104);
+          this.speedmulti = fr(0.800000011920929 + (fr(gripaffect4 * 0.20000000298023224)));
         }
       }
       let j5 = i32(-trunc((fr((fr(this.speed * this.m.sin(conto.xz))) * this.m.cos(this.pzy)))));
@@ -2071,7 +2071,7 @@ export class Madness {
           if ((this.dcnt > (fr((fr(40.0 * f7)) / this.grip[this.cn]))) || this.capsized) {
             let f10 = 1.0;
             if (this.roadtyp !== 0) {
-              f10 = 1.2;
+              f10 = 1.2000000476837158;
             }
             if (this.m.random() > 0.075) {
               conto.dust(l5, af[l5], af3[l5], af2[l5], this.scx[l5], this.scz[l5], fr(f10 * this.simag[this.cn]), true, trunc(this.tilt));
@@ -2081,10 +2081,10 @@ export class Madness {
             }
           } else {
             if ((this.roadtyp === 1) && (this.m.random() > 0.08499999999999999)) {
-              conto.dust(l5, af[l5], af3[l5], af2[l5], this.scx[l5], this.scz[l5], fr(1.1 * this.simag[this.cn]), false, trunc(this.tilt));
+              conto.dust(l5, af[l5], af3[l5], af2[l5], this.scx[l5], this.scz[l5], fr(1.100000023841858 * this.simag[this.cn]), false, trunc(this.tilt));
             }
             if ((((this.roadtyp === 2) || (this.roadtyp === 3))) && (this.m.random() > 0.06999999999999999)) {
-              conto.dust(l5, af[l5], af3[l5], af2[l5], this.scx[l5], this.scz[l5], fr(1.15 * this.simag[this.cn]), false, trunc(this.tilt));
+              conto.dust(l5, af[l5], af3[l5], af2[l5], this.scx[l5], this.scz[l5], fr(1.149999976158142 * this.simag[this.cn]), false, trunc(this.tilt));
             }
           }
         } else {
@@ -2156,9 +2156,9 @@ export class Madness {
         this.wtouch = true;
         this.gtouch = true;
         if (!flag5 && (this.scy[l6] !== 7.0)) {
-          let f11 = fr(this.scy[l6] / 333.33);
+          let f11 = fr(this.scy[l6] / 333.3299865722656);
           if (f11 > 0.3) {
-            f11 = 0.3;
+            f11 = 0.30000001192092896;
           }
           if (this.roadtyp === 0) {
             f11 = fr(f11 + 1.1);
@@ -2179,11 +2179,11 @@ export class Madness {
         f12 = fr(Math.abs(this.m.sin(this.pxy)) + Math.abs(this.m.sin(this.pzy)));
         f12 = fr(f12 / 3.0);
         if (f12 > 0.4) {
-          f12 = 0.4;
+          f12 = 0.4000000059604645;
         }
         f12 = fr(f12 + bounciness);
         if (f12 < 1.1) {
-          f12 = 1.1;
+          f12 = 1.100000023841858;
         }
         this.regy(l6, Math.abs(fr(this.scy[l6] * f12)), conto, 1);
         if (this.scy[l6] > 0.0) {
@@ -2209,9 +2209,9 @@ export class Madness {
           if (this.xt.careermode) {
             if (((this.xt.averagelevel >= 8) && (checkpoints.stage !== 14)) && (checkpoints.stage !== 10)) {
               if (this.xt.averagelevel <= 58) {
-                wallmulti = fr(1.0 + (fr(fr(((i32(this.xt.averagelevel - 8)))) * 0.06)));
+                wallmulti = fr(1.0 + (fr(fr(((i32(this.xt.averagelevel - 8)))) * 0.05999999865889549)));
               } else {
-                wallmulti = fr(4.0 + (fr(fr(((i32(this.xt.averagelevel - 58)))) * 0.04)));
+                wallmulti = fr(4.0 + (fr(fr(((i32(this.xt.averagelevel - 58)))) * 0.03999999910593033)));
               }
             }
             if (this.xt.bonusstage[3]) {
@@ -2235,14 +2235,14 @@ export class Madness {
               sumgrip = fr(sumgrip + gripadd);
             }
             let avgstartgrip = fr(sumgrip / fr(this.xt.nplayers));
-            let expectgrip = fr(avgstartgrip + (fr(fr(((i32(this.xt.averagelevel - 1)))) * 0.2)));
+            let expectgrip = fr(avgstartgrip + (fr(fr(((i32(this.xt.averagelevel - 1)))) * 0.20000000298023224)));
             if (this.grip[this.cn] >= expectgrip) {
               let mainboistat = fr(((fr(this.grip[this.cn] - 10.0))) / 20.0);
               let targetstat = fr(((fr(expectgrip - 10.0))) / 20.0);
               let difference = fr(((fr(mainboistat - targetstat))) * 37.0);
               reddmg = fr(1.0 - (fr(difference / 20.0)));
-              if (reddmg < 0.2) {
-                reddmg = 0.2;
+              if (reddmg < 0.20000000298023224) {
+                reddmg = 0.20000000298023224;
               }
             } else {
               let mainboistat = fr(((fr(this.grip[this.cn] - 10.0))) / 20.0);
@@ -2260,8 +2260,8 @@ export class Madness {
             if (thelevel > 20) {
               thelevel = 20;
             }
-            if ((this.xt.wallimmunity > 0) && (totaldmgmod > (fr(0.35 + (fr(fr(thelevel) * 0.05)))))) {
-              totaldmgmod = fr(0.35 + (fr(fr(thelevel) * 0.05)));
+            if ((this.xt.wallimmunity > 0) && (totaldmgmod > (fr(0.3499999940395355 + (fr(fr(thelevel) * 0.05000000074505806)))))) {
+              totaldmgmod = fr(0.3499999940395355 + (fr(fr(thelevel) * 0.05000000074505806)));
             }
           }
           if ((((trackers.xy[j6] === 0) && (trackers.zy[j6] === 0)) && (trackers.y[j6] < trunc(this.groundlevel))) && (af3[i7] > (i32(trackers.y[j6] - 5)))) {
@@ -2269,9 +2269,9 @@ export class Madness {
             this.wtouch = true;
             this.gtouch = true;
             if (!flag5 && (this.scy[i7] !== 7.0)) {
-              let f13 = fr(this.scy[i7] / 333.33);
+              let f13 = fr(this.scy[i7] / 333.3299865722656);
               if (f13 > 0.3) {
-                f13 = 0.3;
+                f13 = 0.30000001192092896;
               }
               if (this.roadtyp === 0) {
                 f13 = fr(f13 + 1.1);
@@ -2292,11 +2292,11 @@ export class Madness {
             f14 = fr(Math.abs(this.m.sin(this.pxy)) + Math.abs(this.m.sin(this.pzy)));
             f14 = fr(f14 / 3.0);
             if (f14 > 0.4) {
-              f14 = 0.4;
+              f14 = 0.4000000059604645;
             }
             f14 = fr(f14 + bounciness);
             if (f14 < 1.1) {
-              f14 = 1.1;
+              f14 = 1.100000023841858;
             }
             this.regy(i7, Math.abs(fr(this.scy[i7] * f14)), conto, 1);
             if (this.scy[i7] > 0.0) {
@@ -2319,14 +2319,14 @@ export class Madness {
             f15 = fr(Math.abs(this.m.cos(this.pxy)) + Math.abs(this.m.cos(this.pzy)));
             f15 = fr(f15 / 4.0);
             if (f15 > 0.3) {
-              f15 = 0.3;
+              f15 = 0.30000001192092896;
             }
             if (flag5) {
               f15 = 0.0;
             }
             f15 = fr(f15 + ((bounciness - 0.2)));
             if (f15 < 1.1) {
-              f15 = 1.1;
+              f15 = 1.100000023841858;
             }
             this.regz(i7, Math.abs(fr((fr((fr(this.scz[i7] * f15)) * fr(trackers.dam[j6]))) * totaldmgmod)), conto, 1);
             let scz4 = this.scz;
@@ -2350,14 +2350,14 @@ export class Madness {
             f16 = fr(Math.abs(this.m.cos(this.pxy)) + Math.abs(this.m.cos(this.pzy)));
             f16 = fr(f16 / 4.0);
             if (f16 > 0.3) {
-              f16 = 0.3;
+              f16 = 0.30000001192092896;
             }
             if (flag5) {
               f16 = 0.0;
             }
             f16 = fr(f16 + ((bounciness - 0.2)));
             if (f16 < 1.1) {
-              f16 = 1.1;
+              f16 = 1.100000023841858;
             }
             this.regz(i7, -Math.abs(fr((fr((fr(this.scz[i7] * f16)) * fr(trackers.dam[j6]))) * totaldmgmod)), conto, 1);
             let scz5 = this.scz;
@@ -2381,14 +2381,14 @@ export class Madness {
             f17 = fr(Math.abs(this.m.cos(this.pxy)) + Math.abs(this.m.cos(this.pzy)));
             f17 = fr(f17 / 4.0);
             if (f17 > 0.3) {
-              f17 = 0.3;
+              f17 = 0.30000001192092896;
             }
             if (flag5) {
               f17 = 0.0;
             }
             f17 = fr(f17 + ((bounciness - 0.2)));
             if (f17 < 1.1) {
-              f17 = 1.1;
+              f17 = 1.100000023841858;
             }
             this.regx(i7, Math.abs(fr((fr((fr(this.scx[i7] * f17)) * fr(trackers.dam[j6]))) * totaldmgmod)), conto, 1);
             let scx4 = this.scx;
@@ -2412,14 +2412,14 @@ export class Madness {
             f18 = fr(Math.abs(this.m.cos(this.pxy)) + Math.abs(this.m.cos(this.pzy)));
             f18 = fr(f18 / 4.0);
             if (f18 > 0.3) {
-              f18 = 0.3;
+              f18 = 0.30000001192092896;
             }
             if (flag5) {
               f18 = 0.0;
             }
             f18 = fr(f18 + ((bounciness - 0.2)));
             if (f18 < 1.1) {
-              f18 = 1.1;
+              f18 = 1.100000023841858;
             }
             this.regx(i7, -Math.abs(fr((fr((fr(this.scx[i7] * f18)) * fr(trackers.dam[j6]))) * totaldmgmod)), conto, 1);
             let scx5 = this.scx;
@@ -2453,7 +2453,7 @@ export class Madness {
               this.wtouch = true;
               this.gtouch = false;
               if (!flag5 && (this.roadtyp !== 0)) {
-                let f22 = 1.4;
+                let f22 = 1.399999976158142;
                 conto.dust(i7, af[i7], af3[i7], af2[i7], this.scx[i7], this.scz[i7], fr(f22 * this.simag[this.cn]), true, 0);
               }
             }
@@ -2486,7 +2486,7 @@ export class Madness {
             this.wtouch = true;
             this.gtouch = false;
             if (!flag5 && (this.roadtyp !== 0)) {
-              let f26 = 1.4;
+              let f26 = 1.399999976158142;
               conto.dust(i7, af[i7], af3[i7], af2[i7], this.scx[i7], this.scz[i7], fr(f26 * this.simag[this.cn]), true, 0);
             }
           }
@@ -3159,7 +3159,7 @@ export class Madness {
       } else {
         this.tilt = 0.0;
       }
-      conto.xy = i32(conto.xy + trunc(this.tilt));
+      conto.xy = trunc(fr(fr(conto.xy) + this.tilt));
       if (this.gtouch) {
         conto.y = trunc(conto.y - ((this.tilt / 1.5)));
       }

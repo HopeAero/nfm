@@ -386,8 +386,10 @@ public class J2JS {
             if (v instanceof Character ch) return Integer.toString(ch);
             if (v instanceof String s) return jsString(s);
             if (v instanceof Float f) {
-                String s = Float.toString(f);
-                return s.endsWith(".0") ? s.substring(0, s.length() - 2) + ".0" : s.replace("E", "e");
+                // The float's exact value as a double: 1.1f is 1.100000023841858,
+                // not 1.1 -- `fr(1.1 * x)` and `fr(1.1f * x)` can round differently.
+                String s = Double.toString((double) f);
+                return s.replace("E", "e");
             }
             if (v instanceof Double d) return Double.toString(d).replace("E", "e");
             if (v instanceof Long lg) return Long.toString(lg);

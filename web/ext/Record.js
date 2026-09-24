@@ -219,28 +219,28 @@ export class Record {
             }
             if (!conto.p[l].nocol && (conto.p[l].glass !== 1)) {
               if ((conto.p[l].bfase > 20) && (conto.p[l].hsb[1] > 0.2)) {
-                conto.p[l].hsb[1] = 0.2;
+                conto.p[l].hsb[1] = 0.20000000298023224;
               }
               if (conto.p[l].bfase > 30) {
                 if (conto.p[l].hsb[2] < 0.5) {
                   conto.p[l].hsb[2] = 0.5;
                 }
                 if (conto.p[l].hsb[1] > 0.1) {
-                  conto.p[l].hsb[1] = 0.1;
+                  conto.p[l].hsb[1] = 0.10000000149011612;
                 }
               }
               if (conto.p[l].bfase > 40) {
-                conto.p[l].hsb[1] = 0.05;
+                conto.p[l].hsb[1] = 0.05000000074505806;
               }
               if (conto.p[l].bfase > 50) {
                 if (conto.p[l].hsb[2] > 0.8) {
-                  conto.p[l].hsb[2] = 0.8;
+                  conto.p[l].hsb[2] = 0.800000011920929;
                 }
-                conto.p[l].hsb[0] = 0.075;
-                conto.p[l].hsb[1] = 0.05;
+                conto.p[l].hsb[0] = 0.07500000298023224;
+                conto.p[l].hsb[1] = 0.05000000074505806;
               }
               if (conto.p[l].bfase > 60) {
-                conto.p[l].hsb[0] = 0.05;
+                conto.p[l].hsb[0] = 0.05000000074505806;
               }
               let plane = conto.p[l];
               plane.bfase = trunc(fr(fr(plane.bfase) + f2));
@@ -466,28 +466,28 @@ export class Record {
           }
           if (!conto.p[j].nocol && (conto.p[j].glass !== 1)) {
             if ((conto.p[j].bfase > 20) && (conto.p[j].hsb[1] > 0.2)) {
-              conto.p[j].hsb[1] = 0.2;
+              conto.p[j].hsb[1] = 0.20000000298023224;
             }
             if (conto.p[j].bfase > 30) {
               if (conto.p[j].hsb[2] < 0.5) {
                 conto.p[j].hsb[2] = 0.5;
               }
               if (conto.p[j].hsb[1] > 0.1) {
-                conto.p[j].hsb[1] = 0.1;
+                conto.p[j].hsb[1] = 0.10000000149011612;
               }
             }
             if (conto.p[j].bfase > 40) {
-              conto.p[j].hsb[1] = 0.05;
+              conto.p[j].hsb[1] = 0.05000000074505806;
             }
             if (conto.p[j].bfase > 50) {
               if (conto.p[j].hsb[2] > 0.8) {
-                conto.p[j].hsb[2] = 0.8;
+                conto.p[j].hsb[2] = 0.800000011920929;
               }
-              conto.p[j].hsb[0] = 0.075;
-              conto.p[j].hsb[1] = 0.05;
+              conto.p[j].hsb[0] = 0.07500000298023224;
+              conto.p[j].hsb[1] = 0.05000000074505806;
             }
             if (conto.p[j].bfase > 60) {
-              conto.p[j].hsb[0] = 0.05;
+              conto.p[j].hsb[0] = 0.05000000074505806;
             }
             let plane = conto.p[j];
             plane.bfase = trunc(fr(fr(plane.bfase) + Math.abs(f2)));
@@ -815,28 +815,28 @@ export class Record {
           }
           if (!conto.p[j].nocol && (conto.p[j].glass !== 1)) {
             if ((conto.p[j].bfase > 20) && (conto.p[j].hsb[1] > 0.2)) {
-              conto.p[j].hsb[1] = 0.2;
+              conto.p[j].hsb[1] = 0.20000000298023224;
             }
             if (conto.p[j].bfase > 30) {
               if (conto.p[j].hsb[2] < 0.5) {
                 conto.p[j].hsb[2] = 0.5;
               }
               if (conto.p[j].hsb[1] > 0.1) {
-                conto.p[j].hsb[1] = 0.1;
+                conto.p[j].hsb[1] = 0.10000000149011612;
               }
             }
             if (conto.p[j].bfase > 40) {
-              conto.p[j].hsb[1] = 0.05;
+              conto.p[j].hsb[1] = 0.05000000074505806;
             }
             if (conto.p[j].bfase > 50) {
               if (conto.p[j].hsb[2] > 0.8) {
-                conto.p[j].hsb[2] = 0.8;
+                conto.p[j].hsb[2] = 0.800000011920929;
               }
-              conto.p[j].hsb[0] = 0.075;
-              conto.p[j].hsb[1] = 0.05;
+              conto.p[j].hsb[0] = 0.07500000298023224;
+              conto.p[j].hsb[1] = 0.05000000074505806;
             }
             if (conto.p[j].bfase > 60) {
-              conto.p[j].hsb[0] = 0.05;
+              conto.p[j].hsb[0] = 0.05000000074505806;
             }
             let plane = conto.p[j];
             plane.bfase = trunc(fr(fr(plane.bfase) + Math.abs(f2)));

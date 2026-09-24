@@ -623,10 +623,10 @@ export class ContO {
     }
     f1 = fr(f1 / 1.5);
     f2 = fr(f2 / 1.5);
-    f2 = fr(f2 * (fr(1.0 + (fr(((fr(f1 - 2.0))) * 0.1786)))));
+    f2 = fr(f2 * (fr(1.0 + (fr(((fr(f1 - 2.0))) * 0.1785999983549118)))));
     let f3 = fr((50.0 + (100.0 * localRandom.nextDouble())));
-    arrayOfInt1[0] = i32(-trunc((fr((fr(f3 * f1)) * 0.7071))));
-    arrayOfInt2[0] = trunc((fr((fr(f3 * f1)) * 0.7071)));
+    arrayOfInt1[0] = i32(-trunc((fr((fr(f3 * f1)) * 0.707099974155426))));
+    arrayOfInt2[0] = trunc((fr((fr(f3 * f1)) * 0.707099974155426)));
     f3 = fr((50.0 + (100.0 * localRandom.nextDouble())));
     arrayOfInt1[1] = 0;
     arrayOfInt2[1] = trunc((fr(f3 * f1)));
@@ -680,12 +680,12 @@ export class ContO {
     this.disp = 90;
     let arrayOfInt6 = intArray(3);
     let f4 = -1.0;
-    let f5 = fr(((fr((fr(f1 / f2)) - 0.33))) / 33.4);
+    let f5 = fr(((fr((fr(f1 / f2)) - 0.33000001311302185))) / 33.400001525878906);
     if (f5 < 0.005) {
       f5 = 0.0;
     }
     if (f5 > 0.057) {
-      f5 = 0.057;
+      f5 = 0.05700000002980232;
     }
     for (let n = 0; n < 4; n = i32(n + 1)) {
       let i2 = Math.imul(n, 2);
@@ -713,7 +713,7 @@ export class ContO {
       arrayOfInt8[5] = arrayOfInt5[i2];
       arrayOfInt8[4] = arrayOfInt5[i32(i2 + 1)];
       arrayOfInt8[3] = arrayOfInt5[i3];
-      for (f3 = fr((((0.17 - f5)) * localRandom.nextDouble())); Math.abs(fr(f4 - f3)) < (0.03 - (fr(f5 * 0.176))); f3 = (f4 = fr((((0.17 - f5)) * localRandom.nextDouble())))) {
+      for (f3 = fr((((0.17 - f5)) * localRandom.nextDouble())); Math.abs(fr(f4 - f3)) < (0.03 - (fr(f5 * 0.17599999904632568))); f3 = (f4 = fr((((0.17 - f5)) * localRandom.nextDouble())))) {
       }
       for (let i4 = 0; i4 < 3; i4 = i32(i4 + 1)) {
         arrayOfInt6[i4] = idiv(((i32(this.m.cgrnd[i4] + this.m.cpol[i4]))), 2);
@@ -1452,9 +1452,9 @@ export class ContO {
   fixit(g) {
     if (this.fcnt === 1) {
       for (let i = 0; i < this.npl; i = i32(i + 1)) {
-        this.p[i].hsb[0] = 0.57;
-        this.p[i].hsb[2] = 0.8;
-        this.p[i].hsb[1] = 0.8;
+        this.p[i].hsb[0] = 0.5699999928474426;
+        this.p[i].hsb[2] = 0.800000011920929;
+        this.p[i].hsb[1] = 0.800000011920929;
         let color = Color.getHSBColor(this.p[i].hsb[0], this.p[i].hsb[1], this.p[i].hsb[2]);
         let l = trunc((fr(fr(color.getRed()) + (fr(fr(color.getRed()) * ((fr(fr(this.m.snap[0]) / 100.0))))))));
         if (l > 255) {

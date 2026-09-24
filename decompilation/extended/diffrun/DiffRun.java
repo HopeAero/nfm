@@ -97,6 +97,8 @@ public class DiffRun {
 
     // -Ddiffrun.trace=Class.method: that method calls det.Det.enter/exit (see there)
     static final String TRACE = System.getProperty("diffrun.trace", "");
+    // -Ddiffrun.trace.writes=true: every PUTFIELD in a game class logs to det.Det.w*
+    static final boolean WRITES = Boolean.getBoolean("diffrun.trace.writes");
 
     static byte[] transform(byte[] bytes) {
         ClassReader cr = new ClassReader(bytes);
@@ -104,7 +106,7 @@ public class DiffRun {
         String traceCls = TRACE.contains(".") ? TRACE.substring(0, TRACE.indexOf('.')) : "";
         String traceMethod = TRACE.contains(".") ? TRACE.substring(TRACE.indexOf('.') + 1) : "";
         boolean traced = cr.getClassName().equals(traceCls);
-        ClassWriter cw = new ClassWriter(traced ? ClassWriter.COMPUTE_MAXS : 0);
+        ClassWriter cw = new ClassWriter(traced || WRITES ? ClassWriter.COMPUTE_MAXS : 0);
         Remapper dates = new Remapper() {
             @Override public String map(String n) { return n.equals("java/util/Date") ? "det/Det$DetDate" : n; }
         };
@@ -133,6 +135,23 @@ public class DiffRun {
                             super.visitMethodInsn(Opcodes.INVOKESTATIC, "det/Det", "track", "(Ljava/lang/Object;)V", false);
                         }
                         super.visitInsn(op);
+                    }
+                    @Override public void visitFieldInsn(int op, String owner, String fname, String fdesc) {
+                        if (WRITES && op == Opcodes.PUTFIELD) {
+                            char c = fdesc.charAt(0);
+                            String m, sig;
+                            switch (c) {
+                                case 'J': m = "wJ"; sig = "(JLjava/lang/String;)V"; break;
+                                case 'D': m = "wD"; sig = "(DLjava/lang/String;)V"; break;
+                                case 'F': m = "wF"; sig = "(FLjava/lang/String;)V"; break;
+                                case 'L': case '[': m = "wA"; sig = "(Ljava/lang/Object;Ljava/lang/String;)V"; break;
+                                default: m = "wI"; sig = "(ILjava/lang/String;)V";
+                            }
+                            super.visitInsn(c == 'J' || c == 'D' ? Opcodes.DUP2 : Opcodes.DUP);
+                            super.visitLdcInsn(fname);
+                            super.visitMethodInsn(Opcodes.INVOKESTATIC, "det/Det", m, sig, false);
+                        }
+                        super.visitFieldInsn(op, owner, fname, fdesc);
                     }
                     @Override public void visitMethodInsn(int op, String owner, String n, String d, boolean itf) {
                         if (op == Opcodes.INVOKESTATIC && (
@@ -401,6 +420,7 @@ public class DiffRun {
             A.det.getField("traceOut").set(null, new java.io.BufferedWriter(new java.io.OutputStreamWriter(
                     to.endsWith(".gz") ? new java.util.zip.GZIPOutputStream(new java.io.FileOutputStream(to), 1 << 16) : new java.io.FileOutputStream(to),
                     java.nio.charset.StandardCharsets.UTF_8)));
+            A.det.getField("logWrites").setBoolean(null, WRITES);
             A.det.getField("tracing").setBoolean(null, true);
         }
         int firstState = -1, firstPixel = -1, stateFrames = 0, pixelFrames = 0;

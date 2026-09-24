@@ -390,7 +390,7 @@ export class Control {
           }
           if (checkpoints.stage === 5) {
             if (xtgraphics.classicmode) {
-              f = 0.2;
+              f = 0.20000000298023224;
             }
           }
           if ((i32(checkpoints.pos[madness.im] - checkpoints.pos[0])) < -1) {
@@ -562,7 +562,7 @@ export class Control {
           }
           f = 0.0;
           if (checkpoints.stage === 1) {
-            f = 0.9;
+            f = 0.8999999761581421;
           }
           this.mustland = fr(f + fr(((fr(this.m.random() / 2.0)) - 0.25)));
           f = 1.0;
@@ -1189,19 +1189,19 @@ export class Control {
             if (madness.im === 10) {
               if (this.trickprf > 0.7) {
                 if (xtgraphics.classicmode) {
-                  this.trickprf = 0.7;
+                  this.trickprf = 0.699999988079071;
                 }
               }
             }
           }
           if (checkpoints.stage === 6) {
             if (this.trickprf > 0.3) {
-              this.trickprf = 0.3;
+              this.trickprf = 0.30000001192092896;
             }
           }
           if (checkpoints.stage === 8) {
             if (this.trickprf > 0.2) {
-              this.trickprf = 0.2;
+              this.trickprf = 0.20000000298023224;
             }
           }
           Label_5740: {
@@ -1216,7 +1216,7 @@ export class Control {
                   }
                 }
                 if (this.trickprf > 0.3) {
-                  this.trickprf = 0.3;
+                  this.trickprf = 0.30000001192092896;
                 }
               }
             }
@@ -1244,7 +1244,7 @@ export class Control {
           if (checkpoints.stage === 13) {
             if (this.trickprf > 0.4) {
               if (xtgraphics.classicmode) {
-                this.trickprf = 0.4;
+                this.trickprf = 0.4000000059604645;
               }
             }
           }
@@ -1823,7 +1823,7 @@ export class Control {
                                         if (checkpoints.stage > 3) {
                                           f3 = 0.0;
                                         } else {
-                                          f3 = 0.2;
+                                          f3 = 0.20000000298023224;
                                         }
                                       }
                                       Label_9518: {
@@ -1918,7 +1918,7 @@ export class Control {
                                           }
                                         }
                                       }
-                                      f3 = 0.2;
+                                      f3 = 0.20000000298023224;
                                     }
                                   }
                                   if (checkpoints.stage === 11) {
@@ -1930,7 +1930,7 @@ export class Control {
                                             break Label_10033;
                                           }
                                         }
-                                        f3 = 0.7;
+                                        f3 = 0.699999988079071;
                                       }
                                       Label_10127: {
                                         if (madness.cn !== 11) {
@@ -1955,7 +1955,7 @@ export class Control {
                                             if ((i32(checkpoints.clear[madness.im] + 2)) >= checkpoints.clear[0]) {
                                               f3 = 0.0;
                                             } else {
-                                              f3 = 0.6;
+                                              f3 = 0.6000000238418579;
                                             }
                                           }
                                         }
@@ -2074,7 +2074,7 @@ export class Control {
                                                 }
                                               }
                                               if (checkpoints.clear[0] < 3) {
-                                                f3 = 0.2;
+                                                f3 = 0.20000000298023224;
                                               } else {
                                                 f3 = 0.5;
                                               }
@@ -2100,7 +2100,7 @@ export class Control {
                                             if (i4 !== 0) {
                                               f3 = 0.0;
                                             } else if (checkpoints.clear[0] < 3) {
-                                              f3 = 0.15;
+                                              f3 = 0.15000000596046448;
                                             } else {
                                               f3 = 0.5;
                                             }
@@ -2176,7 +2176,7 @@ export class Control {
                                                       if (madness.cn !== 24) {
                                                         if (madness.cn !== 35) {
                                                           if (madness.cn !== 37) {
-                                                            f3 = 0.7;
+                                                            f3 = 0.699999988079071;
                                                             break Label_11478;
                                                           }
                                                         }
@@ -2302,9 +2302,9 @@ export class Control {
                                             }
                                           }
                                         }
-                                        f3 = fr(0.8 - (fr(fr(checkpoints.wasted) * 0.1)));
-                                        if (f3 < 0.2) {
-                                          f3 = 0.2;
+                                        f3 = fr(0.800000011920929 - (fr(fr(checkpoints.wasted) * 0.10000000149011612)));
+                                        if (f3 < 0.20000000298023224) {
+                                          f3 = 0.20000000298023224;
                                         }
                                         break Label_12264;
                                       }
@@ -2325,7 +2325,7 @@ export class Control {
                                             Label_12152: {
                                               if (checkpoints.wasted < 4) {
                                                 if (checkpoints.clear[0] < 3) {
-                                                  f3 = 0.15;
+                                                  f3 = 0.15000000596046448;
                                                   break Label_12152;
                                                 }
                                               }
@@ -2397,7 +2397,7 @@ export class Control {
                                     }
                                   }
                                   if (this.m.random() > this.m.random()) {
-                                    this.aim = fr(0.76 + (fr(this.m.random() * 0.76)));
+                                    this.aim = fr(0.7599999904632568 + (fr(this.m.random() * 0.7599999904632568)));
                                   }
                                 }
                               }
@@ -2438,7 +2438,7 @@ export class Control {
                               if (checkpoints.stage === 12) {
                                 if (xtgraphics.classicmode) {
                                   if (this.m.random() > this.m.random()) {
-                                    this.aim = 0.7;
+                                    this.aim = 0.699999988079071;
                                   }
                                   if (this.bulistc) {
                                     if (this.attack > 150) {
@@ -2477,7 +2477,7 @@ export class Control {
                                       }
                                       this.attack = idiv(this.attack, 3);
                                     } else {
-                                      this.aim = 0.76;
+                                      this.aim = 0.7599999904632568;
                                       this.attack = 150;
                                     }
                                   }
@@ -2673,7 +2673,7 @@ export class Control {
                   this.aim = fr((fr(this.m.random() / 2.0)) + 0.75);
                   if (conto.floorguardian) {
                     if (!conto.guardswitch) {
-                      this.aim = fr((fr(this.m.random() / 2.0)) + 0.95);
+                      this.aim = fr((fr(this.m.random() / 2.0)) + 0.949999988079071);
                       this.acr = 0;
                       this.attack = 30;
                     } else {
@@ -2823,7 +2823,7 @@ export class Control {
                                     break Label_16875;
                                   }
                                 }
-                                if (madness.moment[madness.cn] >= 1.35) {
+                                if (madness.moment[madness.cn] >= 1.350000023841858) {
                                   this.attack = 150;
                                   this.acr = xtgraphics.randomcar[madness.im];
                                 }
@@ -5191,7 +5191,7 @@ export class Control {
                               }
                               Label_57646: {
                                 Label_57506: {
-                                  if (this.m.random() > (fr(this.trickprf + 0.3))) {
+                                  if (this.m.random() > (fr(this.trickprf + 0.30000001192092896))) {
                                     if (this.stuntf !== 4) {
                                       if (this.stuntf !== 6) {
                                         if (this.stuntf !== 8) {
@@ -5256,7 +5256,7 @@ export class Control {
                             }
                           }
                         }
-                        if (this.m.random() > (fr(this.trickprf + 0.3))) {
+                        if (this.m.random() > (fr(this.trickprf + 0.30000001192092896))) {
                           if (this.stuntf !== 13) {
                             if (this.m.random() <= this.m.random()) {
                               this.uddirect = 1;

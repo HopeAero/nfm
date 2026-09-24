@@ -58,7 +58,9 @@ function decode(v, ref) {
 }
 
 /** Rebuild the "before" graph. Returns {get(id), idOf(obj), touched:Set} */
-export function rebuild(pre) {
+let writes = null, writeStack = 0;   // PUTFIELD-order log of the port's field writes
+
+export function rebuild(pre, track = true) {
   const raw = new Map(), proxied = new Map(), idOf = new Map(), touched = new Set();
   for (const [id, o] of Object.entries(pre)) {
     let t;
@@ -66,13 +68,24 @@ export function rebuild(pre) {
     else t = Object.create((CLASSES[o.c] || Object).prototype);
     raw.set(+id, t);
     idOf.set(t, +id);
+    // Without tracking (no fixture, no write log) the port runs on the plain
+    // objects: ~100x faster than through the recording proxies.
+    if (!track) { proxied.set(+id, t); continue; }
     proxied.set(+id, new Proxy(t, {
       get(tg, k) {
         touched.add(+id);
         const v = tg[k];
         return typeof v === 'function' && ArrayBuffer.isView(tg) ? v.bind(tg) : v;
       },
-      set(tg, k, v) { touched.add(+id); tg[k] = v; return true; },
+      set(tg, k, v) {
+        touched.add(+id);
+        tg[k] = v;
+        if (writes && !ArrayBuffer.isView(tg) && !Array.isArray(tg)) {
+          writes.push([k, v === null || v === undefined ? null : typeof v === 'object' || typeof v === 'function' ? `<${v.constructor?.name ?? '?'}>` : typeof v === 'boolean' ? (v ? 1 : 0) : v]);
+          if (writeStack && writes.length === writeStack) writes.stack = new Error().stack;
+        }
+        return true;
+      },
       has(tg, k) { touched.add(+id); return k in tg; },
     }));
   }
@@ -133,16 +146,37 @@ function changed(pre, post) {
   return s;
 }
 
-export function run(rec, method) {
-  const g = rebuild(rec.pre);
+export function run(rec, method, track = true) {
+  const g = rebuild(rec.pre, track || !!rec.writes);
   const roots = rec.roots.map((r) => decode(r, g.get));
   g.touched.clear();
+  writes = rec.writes ? [] : null;
   setSeed(rec.xs >>> 0);
   System.now = rec.nanos;
   let err = '';
   try { roots[0][method](...roots.slice(1)); } catch (e) { err = e.stack?.split('\n').slice(0, 3).join(' | ') || String(e); }
   const touched = new Set(g.touched);   // before compare() walks the proxies too
-  return { g, touched, err, diffs: err ? [] : compare(rec.post, rec.roots, g) };
+  const portWrites = writes;
+  writes = null;
+  if (rec.writes && portWrites) {
+    // Java logs booleans as ints, floats as their widened doubles: same as JSON here
+    const norm = (x) => (typeof x === 'string' && x.startsWith('<') ? x.replace(/<.*\./, '<') : x);
+    let i = 0;
+    while (i < rec.writes.length && i < portWrites.length && rec.writes[i][0] === portWrites[i][0] && (norm(rec.writes[i][1]) === norm(portWrites[i][1]) || (Number.isNaN(rec.writes[i][1]) && Number.isNaN(portWrites[i][1])))) i++;
+    if (i < rec.writes.length || i < portWrites.length) {
+      const ctx = (a) => JSON.stringify(a.slice(Math.max(0, i - 4), i + 3));
+      console.log(`  first differing write #${i} of ${rec.writes.length} (port ${portWrites.length})
+    jar : ${ctx(rec.writes)}
+    port: ${ctx(portWrites)}`);
+      if (!writeStack) {
+        writeStack = i + 1;                       // rerun, grabbing the stack at that write
+        const again = run(rec, method);
+        writeStack = 0;
+        console.log('    port stack at that write:\n' + (again.stack || '').split('\n').slice(2, 7).join('\n'));
+      }
+    }
+  }
+  return { g, touched, err, stack: portWrites?.stack, diffs: err ? [] : compare(rec.post, rec.roots, g) };
 }
 
 if (process.argv[1] && process.argv[1].endsWith('ext-trace.mjs')) {
@@ -158,7 +192,7 @@ if (process.argv[1] && process.argv[1].endsWith('ext-trace.mjs')) {
     const rec = JSON.parse(line);
     process.stdout.write(`call ${rec.call} ... `);
     const t0 = Date.now();
-    const { touched, err, diffs } = run(rec, method);
+    const { touched, err, diffs } = run(rec, method, !!fixture);
     process.stdout.write(`(${((Date.now() - t0) / 1000).toFixed(1)}s) `);
     n++;
     if (!err && !diffs.length) ok++;
