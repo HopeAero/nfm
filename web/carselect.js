@@ -104,6 +104,12 @@ function runScreen(control, tick) {
         let r;
         try { r = await tick(); } finally { busy = false; }
         if (r !== undefined) { done(r); return; }
+        // One tick per animation frame, never a catch-up burst. Each tick draws
+        // the whole stage, so on the heaviest previews (NFM 1 9/10, NFM 2 15/16:
+        // 2000-2500 polygons) a late frame made the next one run 2-6 ticks back
+        // to back and stall 200-300 ms. The Java's loop does not catch up
+        // either: it sleeps max(10, budget - elapsed) and simply runs slower.
+        acc = Math.min(acc, TICK_MS - 1);
       }
     };
     raf = requestAnimationFrame(frame);
