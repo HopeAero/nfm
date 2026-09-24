@@ -3,7 +3,7 @@
 // fix the transpiler or the source and regenerate.
 
 import { floatArray, fr, i32, idiv, intArray, jround, objArray, random, trunc } from '../java.js';
-import { Color, Cursor, DataInputStream, File, Font, MediaTracker, MemoryImageSource, Panel, PixelGrabber, Polygon, RenderingHints, StringBuilder, System, Thread, Toolkit, URL, ZipInputStream, jstr } from './jawt.js';
+import { Arrays, BigDecimal, BufferedWriter, Color, Cursor, DataInputStream, File, FileWriter, Font, MediaTracker, MemoryImageSource, Panel, PixelGrabber, Polygon, RenderingHints, StringBuilder, System, Thread, Toolkit, URL, ZipInputStream, jstr } from './jawt.js';
 import { RadicalMidi } from './RadicalMidi.js';
 import { RadicalMod } from './RadicalMod.js';
 

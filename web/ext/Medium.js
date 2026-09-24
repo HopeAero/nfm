@@ -3,7 +3,7 @@
 // fix the transpiler or the source and regenerate.
 
 import { floatArray, fr, i32, idiv, intArray, objArray, random, trunc } from '../java.js';
-import { Color, Random, StringBuilder, System } from './jawt.js';
+import { Arrays, Color, Random, StringBuilder, System } from './jawt.js';
 
 export class Medium {
   constructor() {

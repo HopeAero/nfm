@@ -1033,7 +1033,14 @@ replay (`web/tools/ext-trace.mjs`, DiffRun `-Ddiffrun.trace=Class.method`).
       Extended's own car select (`fase -9` -> `inishcarselect`, `fase 7`), as
       the base port opens the game's; Enter -> stage preview -> START -> race.
       Career shows levels, stat points, Change Stats and Bonus Cars. Esc on it
-      returns to the launcher (the jar's car select has no way out).
+      returns to the launcher (the jar's car select has no way out). The stage
+      preview's CHANGE CAR and RETURN TO MENU work (car select / launcher).
+- [x] **Fixed after the first hands-on run (2026-09-24):** night stages (10, 14)
+      froze on `Arrays`; black smoke/silhouettes from `PixelGrabber` on the
+      offscreen frame; BACK past the first classic car crashed (the page chose
+      a car outside classic's 23-38). See WORK.md.
+- [ ] Watch: once, in career, a run ended on the stage preview (stage 4, after
+      8 and 11) with no Enter sent; not reproduced in three repeats.
 - [ ] **Stage pick for Extended:** classic mode rolls a stage 1-17 on Enter,
       as the jar does; career takes `?stage=` or its unlocked stage. The
       launcher has no Extended stage list yet.

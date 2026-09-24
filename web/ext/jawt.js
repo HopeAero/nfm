@@ -173,6 +173,17 @@ export class PixelGrabber {
   grabPixels() {
     const { img, x, y, w, h, pix, off, scan } = this;
     if (!(img instanceof Image)) return true;   // a replay's placeholder: not game state
+    if (img.pixels.length < img.width * img.height) {
+      // an offscreen image (createImage(w, h)): its pixels are what has been drawn on its
+      // canvas, opaque as Java's offscreen buffer is. blendude and the car select's smoke
+      // blend over the frame this way; reading nothing made them black.
+      const d = img.canvas.getContext('2d').getImageData(x, y, w, h).data;
+      for (let r = 0; r < h; r++) for (let c = 0; c < w; c++) {
+        const i = 4 * (r * w + c);
+        pix[off + r * scan + c] = 0xff000000 | (d[i] << 16) | (d[i + 1] << 8) | d[i + 2];
+      }
+      return true;
+    }
     for (let r = 0; r < h; r++) for (let c = 0; c < w; c++) pix[off + r * scan + c] = img.pixels[(y + r) * img.width + x + c];
     return true;
   }
@@ -219,6 +230,23 @@ export class Applet extends Panel {
   showStatus() {}
   /** The page sets `canvas`; Cursor.HAND_CURSOR (12) over a link, else the arrow. */
   setCursor(c) { if (this.canvas) this.canvas.style.cursor = c?.type === 12 ? 'pointer' : 'default'; }
+}
+
+/**
+ * java.util.Arrays.sort on the primitive arrays the game sorts. A typed array
+ * sorts as Java does: numerically, -0.0 before 0.0, NaN last.
+ */
+export const Arrays = {
+  sort(a) {
+    if (ArrayBuffer.isView(a)) a.sort();
+    else throw new Error('jawt: Arrays.sort of a non-primitive array');
+  },
+};
+
+/** new BigDecimal(double).doubleValue() is the double itself: all xtGraphics does with one. */
+export class BigDecimal {
+  constructor(v) { this.v = v; }
+  doubleValue() { return this.v; }
 }
 
 /** java.awt.Polygon: the menus build their buttons point by point. */
@@ -395,5 +423,9 @@ function unported(name) {
   return class { constructor() { throw new Error(`jawt: ${name} is not ported`); } static [Symbol.hasInstance]() { return false; } };
 }
 export const RenderingHints = unported('RenderingHints');
+// ponytail: file writing (save data, bot recordings) is not ported; saving goes to localStorage later
+export const BufferedWriter = unported('BufferedWriter');
+export const FileWriter = unported('FileWriter');
+export const ZipOutputStream = unported('ZipOutputStream');
 export const FileOutputStream = unported('FileOutputStream');
 export const FileInputStream = unported('FileInputStream');

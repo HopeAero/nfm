@@ -3,6 +3,7 @@
 // fix the transpiler or the source and regenerate.
 
 import { fr, i32, idiv, intArray, random, trunc } from '../java.js';
+import { Arrays } from './jawt.js';
 
 export class Control {
   constructor(medium, contva) {

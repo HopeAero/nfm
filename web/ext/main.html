@@ -57,10 +57,21 @@ gs.readdata = function (xt, madness, checkpoints) {
   xt.betalimit = 100;
   xt.statpoints.fill(999);
   xt.carpoints = 999;
+  // What the jar's menu does on Career Mode / Classic Mode (xtGraphics.java:15198):
+  // classic races only Extended's own cars, 23-38 (its car select stops BACK at 23),
+  // so a lastcar below 23 becomes 38. Setting sc[0] = 0 here once let BACK walk to -1.
+  if (q.has('car')) xt.lastcar = +q.get('car');
+  // the menu stores laststage = checkpoints.stage before it opens (GameSparker.java:3207):
+  // with no save that is CheckPoints' own 1
+  xt.laststage = q.has('stage') ? +q.get('stage') : (xt.laststage || checkpoints.stage);
   xt.careermode = q.get('mode') === 'career';
   xt.classicmode = !xt.careermode;
-  checkpoints.stage = +(q.get('stage') ?? 1);
-  xt.sc[0] = +(q.get('car') ?? 0);
+  if (xt.classicmode && xt.lastcar < 23) xt.lastcar = 38;
+  xt.sc[0] = xt.lastcar;
+  xt.justcs = -1;
+  xt.resetfase = false;
+  xt.flipo = 0;
+  checkpoints.stage = xt.laststage;
   xt.fase = -9;
   // Extended's main menu is not the way out yet: back to the launcher, as the base race returns
   xt.maini = () => { location.href = '../../index.html'; };

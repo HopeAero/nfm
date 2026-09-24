@@ -3,7 +3,7 @@
 // fix the transpiler or the source and regenerate.
 
 import { floatArray, fr, i32, idiv, intArray, jround, objArray, trunc } from '../java.js';
-import { Applet, BufferedReader, ByteArrayInputStream, Color, Cursor, DataInputStream, Date, File, FileInputStream, FileOutputStream, InputStreamReader, Integer, RenderingHints, StringBuilder, System, Thread, URL, ZipEntry, ZipInputStream, charAt, jstr } from './jawt.js';
+import { Applet, BufferedReader, ByteArrayInputStream, Color, Cursor, DataInputStream, Date, File, FileInputStream, FileOutputStream, InputStreamReader, Integer, RenderingHints, StringBuilder, System, Thread, URL, ZipEntry, ZipInputStream, ZipOutputStream, charAt, jstr } from './jawt.js';
 import { Bots } from './Bots.js';
 import { CheckPoints } from './CheckPoints.js';
 import { ContO } from './ContO.js';

@@ -3,7 +3,7 @@
 // fix the transpiler or the source and regenerate.
 
 import { floatArray, fr, i32, idiv, intArray, objArray, random, trunc } from '../java.js';
-import { ByteArrayInputStream, Color, DataInputStream, Integer, Random, StringBuilder, System, charAt, jstr } from './jawt.js';
+import { Arrays, ByteArrayInputStream, Color, DataInputStream, Integer, Random, StringBuilder, System, charAt, jstr } from './jawt.js';
 import { Plane } from './Plane.js';
 import { Wheels } from './Wheels.js';
 
