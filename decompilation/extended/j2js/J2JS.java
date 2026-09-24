@@ -359,7 +359,12 @@ public class J2JS {
             if (e instanceof NewClassTree nc) return newClass(nc);
             if (e instanceof NewArrayTree na) return newArray(na, type(na));
             if (e instanceof TypeCastTree c) return conv(raw(c.getExpression()), tc(c.getExpression()), tc(c));
-            if (e instanceof AssignmentTree as) return lvalue(as.getVariable()) + " = " + storeConv(as.getVariable(), as.getExpression());
+            // plain `=`: JS evaluates a[k++] once, as Java does, so side effects are fine here
+            if (e instanceof AssignmentTree as) {
+                ExpressionTree v = strip(as.getVariable());
+                String lv = v instanceof ArrayAccessTree aa ? raw(aa.getExpression()) + "[" + raw(aa.getIndex()) + "]" : lvalue(v);
+                return lv + " = " + storeConv(as.getVariable(), as.getExpression());
+            }
             if (e instanceof CompoundAssignmentTree ca) return compound(ca);
             if (e instanceof UnaryTree u) return unary(u);
             if (e instanceof BinaryTree b) return binary(b);
@@ -625,6 +630,15 @@ public class J2JS {
 
         String compound(CompoundAssignmentTree ca) {
             char tx = tc(ca.getVariable()), te = tc(ca.getExpression());
+            ExpressionTree tv = strip(ca.getVariable());
+            // a[k++] op= e: Java evaluates the index once -- bind it to a parameter
+            if (tv instanceof ArrayAccessTree aa && sideEffects(aa.getIndex()) && !sideEffects(aa.getExpression())) {
+                String arr = raw(aa.getExpression());
+                String op = opOf(ca.getKind());
+                char p = promote(tx, te);
+                String v = arith(op, arr + "[$i]", tx, ca.getExpression(), p);
+                return "(($i) => (" + arr + "[$i] = " + conv(v, p, tx) + "))(" + raw(aa.getIndex()) + ")";
+            }
             String lv = lvalue(ca.getVariable());
             String op = opOf(ca.getKind());
             if (tx == 'O' || !isNum(tx)) {                 // String +=

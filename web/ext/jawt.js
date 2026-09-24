@@ -103,6 +103,10 @@ export class StringBuilder {
 export const System = {
   out: { println: (...a) => console.log(...a) },
   gc() {},
+  // the game's clock; tests set `now` (ns) to replay a captured call
+  now: 0,
+  nanoTime() { return System.now; },
+  currentTimeMillis() { return Math.trunc(System.now / 1e6); },
 };
 
 /** Java's String.valueOf / concatenation of a float ('F') or double ('D'). */
@@ -124,3 +128,22 @@ export function jstr(x, t = 'D') {
   }
   return s.includes('.') || s.includes('e') ? s : s + '.0';
 }
+
+// ---- placeholders ------------------------------------------------------------
+// Names the generated xtGraphics imports but the ported code paths do not use
+// yet. Constructing or calling one throws, so a path that starts to need it
+// says so instead of silently doing nothing.
+function unported(name) {
+  return class { constructor() { throw new Error(`jawt: ${name} is not ported`); } static [Symbol.hasInstance]() { return false; } };
+}
+export const Cursor = unported('Cursor');
+export const File = unported('File');
+export const Font = unported('Font');
+export const MediaTracker = unported('MediaTracker');
+export const Polygon = unported('Polygon');
+export const RenderingHints = unported('RenderingHints');
+export const Thread = unported('Thread');
+export const Toolkit = unported('Toolkit');
+export const URL = unported('URL');
+export const ZipInputStream = unported('ZipInputStream');
+export const FileInputStream = unported('FileInputStream');

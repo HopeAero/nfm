@@ -44,7 +44,9 @@ import jdk.internal.org.objectweb.asm.commons.Remapper;
  * script: comma-separated `frame:key[:hold]` or `frame:click:x:y`, e.g. `200:10,260:1004:120` presses
  * Enter at frame 200 and holds Up from 260 for 120 frames.
  *
- * -Ddiffrun.debug=true: everything unlocked and 999 stat/car points (see Inst.debug). Keys are AWT Event
+ * -Ddiffrun.debug=true: everything unlocked and 999 stat/car points (see Inst.debug).
+ * -Ddiffrun.trace=Madness.drive [-Ddiffrun.trace.from/every/max/out]: capture sampled
+ *   calls of one method in copy A as before/after object graphs (det.Det.enter/exit). Keys are AWT Event
  * codes (Enter 10, Up 1004, Down 1005, Left 1006, Right 1007, Space 32).
  */
 public class DiffRun {
@@ -93,17 +95,38 @@ public class DiffRun {
     static final Set<String> TRACKED = new HashSet<>(Arrays.asList(
             "xtGraphics", "Medium", "Madness", "ContO", "Control", "CheckPoints", "Record", "Contva", "Bots", "Trackers"));
 
+    // -Ddiffrun.trace=Class.method: that method calls det.Det.enter/exit (see there)
+    static final String TRACE = System.getProperty("diffrun.trace", "");
+
     static byte[] transform(byte[] bytes) {
         ClassReader cr = new ClassReader(bytes);
         boolean tracked = TRACKED.contains(cr.getClassName());
-        ClassWriter cw = new ClassWriter(0);
+        String traceCls = TRACE.contains(".") ? TRACE.substring(0, TRACE.indexOf('.')) : "";
+        String traceMethod = TRACE.contains(".") ? TRACE.substring(TRACE.indexOf('.') + 1) : "";
+        boolean traced = cr.getClassName().equals(traceCls);
+        ClassWriter cw = new ClassWriter(traced ? ClassWriter.COMPUTE_MAXS : 0);
         Remapper dates = new Remapper() {
             @Override public String map(String n) { return n.equals("java/util/Date") ? "det/Det$DetDate" : n; }
         };
         ClassVisitor cv = new ClassVisitor(Opcodes.ASM9, new ClassRemapper(cw, dates)) {
             @Override public MethodVisitor visitMethod(int acc, String name, String desc, String sig, String[] exc) {
                 boolean ctor = tracked && name.equals("<init>");
-                return new MethodVisitor(Opcodes.ASM9, super.visitMethod(acc, name, desc, sig, exc)) {
+                MethodVisitor base = super.visitMethod(acc, name, desc, sig, exc);
+                if (traced && name.equals(traceMethod)) {
+                    base = new jdk.internal.org.objectweb.asm.commons.AdviceAdapter(Opcodes.ASM9, base, acc, name, desc) {
+                        @Override protected void onMethodEnter() {
+                            loadThis();
+                            loadArgArray();
+                            super.visitMethodInsn(Opcodes.INVOKESTATIC, "det/Det", "enter", "(Ljava/lang/Object;[Ljava/lang/Object;)V", false);
+                        }
+                        @Override protected void onMethodExit(int opcode) {
+                            if (opcode == Opcodes.ATHROW) return;
+                            loadThis();
+                            super.visitMethodInsn(Opcodes.INVOKESTATIC, "det/Det", "exit", "(Ljava/lang/Object;)V", false);
+                        }
+                    };
+                }
+                return new MethodVisitor(Opcodes.ASM9, base) {
                     @Override public void visitInsn(int op) {
                         if (ctor && op == Opcodes.RETURN) {   // register the finished object
                             super.visitVarInsn(Opcodes.ALOAD, 0);
@@ -127,7 +150,7 @@ public class DiffRun {
                 };
             }
         };
-        cr.accept(cv, 0);
+        cr.accept(cv, traced ? ClassReader.EXPAND_FRAMES : 0);   // AdviceAdapter needs expanded frames
         return cw.toByteArray();
     }
 
@@ -370,6 +393,16 @@ public class DiffRun {
 
         Inst A = new Inst("A", a, lib), B = new Inst("B", b, lib);
         A.boot(-4000); B.boot(-3000);
+        if (!TRACE.isEmpty()) {   // trace copy A only; B runs the same code untraced
+            A.det.getField("traceFrom").setInt(null, Integer.getInteger("diffrun.trace.from", 0));
+            A.det.getField("traceEvery").setInt(null, Integer.getInteger("diffrun.trace.every", 1));
+            A.det.getField("traceMax").setInt(null, Integer.getInteger("diffrun.trace.max", 20));
+            String to = System.getProperty("diffrun.trace.out", "trace.jsonl.gz");   // gzip: one capture is ~200 MB of JSON
+            A.det.getField("traceOut").set(null, new java.io.BufferedWriter(new java.io.OutputStreamWriter(
+                    to.endsWith(".gz") ? new java.util.zip.GZIPOutputStream(new java.io.FileOutputStream(to), 1 << 16) : new java.io.FileOutputStream(to),
+                    java.nio.charset.StandardCharsets.UTF_8)));
+            A.det.getField("tracing").setBoolean(null, true);
+        }
         int firstState = -1, firstPixel = -1, stateFrames = 0, pixelFrames = 0;
         for (int f = 0; f < frames; f++) {
             boolean ra = A.waitFrame(), rb = B.waitFrame();
@@ -424,6 +457,7 @@ public class DiffRun {
         }
         System.out.println("RESULT frames=" + frames + " stateDivergentFrames=" + stateFrames + " (first " + firstState + ")"
                 + " pixelDivergentFrames=" + pixelFrames + " (first " + firstPixel + ")");
+        if (!TRACE.isEmpty()) ((java.io.Writer) A.det.getField("traceOut").get(null)).close();
         A.stop(); B.stop();
         System.exit(0);
     }
