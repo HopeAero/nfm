@@ -1057,8 +1057,12 @@ replay (`web/tools/ext-trace.mjs`, DiffRun `-Ddiffrun.trace=Class.method`).
       steps the generated `GameSparker.run()` one frame per tick and fast-forwards
       the jar's pre-race screens unseen (see WORK.md). `web/ext/main.html` stays as
       the dev page with Extended's own car select until the launcher has one.
-- [ ] **Interpolation** for Extended (the base race renders between ticks): it
-      needs the `interpolating` hooks the base port hand-wrote into ContO/Medium.
+- [x] **Interpolation for Extended (2026-09-24):** 60 fps at 18-20 ticks/s, as the
+      base race. `web/ext/interp.js` redraws the scene from blended transforms
+      between ticks, saving and restoring what the drawing writes (lists checked
+      against the generated source by `interp.test.js`), randoms from the draw
+      bank. `?selftest=N` proves it: the same hash with and without redraws.
+      `?res=` now gives the base race's pixel width (1600 at 2).
 - [ ] **The base shell's race features** for Extended: pause menu, finish
       screen, highlights, Spanish HUD sprites. Today the jar's own finish runs.
 - [ ] **Deploy:** `deploy.sh` needs `rsync`, which this Windows machine lacks.

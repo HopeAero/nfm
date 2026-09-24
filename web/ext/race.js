@@ -22,6 +22,8 @@ import { Panel, System, knownFiles, preload } from './jawt.js';
 import { MUSIC_FILES } from './musicfiles.js';
 import { JGraphics, JGraphics2D } from './jgraphics.js';
 import { GameSparker } from './GameSparker.js';
+import { makeInterp } from './interp.js';
+import { random } from '../java.js';
 
 const W = 870, H = 480;   // Extended's game space (the base game's is 800x450)
 const BOTS = [5, 9, 10, 11, 13, 14, 18, 20, 21].map((n) => `data/Files/Bots/stage${n}.radq`);
@@ -54,10 +56,11 @@ export async function bootExtended(params, log, onExit) {
   const res = Math.max(1, Math.min(4, parseFloat(params.get('res') || '2')));
   const textRes = Math.max(1, Math.min(4, parseFloat(params.get('textres') || '1')));
   const AA = params.get('aa') !== null ? params.get('aa') === '1' : res <= 1;
-  glCanvas.width = Math.round(W * res);
-  glCanvas.height = Math.round(H * res);
-  textCanvas.width = Math.round(W * textRes);
-  textCanvas.height = Math.round(H * textRes);
+  // ?res= means what it means on the base race: 800*res pixels across (1600 at
+  // the default 2). Extended's wider game space keeps its own aspect under it.
+  const px = (r) => [Math.round(800 * r), Math.round(800 * r * H / W)];
+  [glCanvas.width, glCanvas.height] = px(res);
+  [textCanvas.width, textCanvas.height] = px(textRes);
   const rd = new JGraphics2D(glCanvas, textCanvas, W, H, { antialias: AA, fill: params.get('fill') || 'trap' });
 
   // ---- assets: synchronous for the Java, so fetched first -------------------
@@ -73,14 +76,23 @@ export async function bootExtended(params, log, onExit) {
   gs.rd = gs.sg = rd;               // what init() would take from its offscreen image
   gs.offImage = Panel.offscreen(W, H);
   gs.exwist = false;
-  // run() calls repaint() and then reads the frame back (blendude(offImage) at
-  // starcnt 36, the head over night stages). The frame lives in the WebGL
-  // canvas here: flush the batch so far and copy both layers into offImage.
-  gs.repaint = () => {
+  // In the jar rd draws INTO offImage and repaint() shows it; run() repaints
+  // every frame and a few screens read offImage back (blendude at starcnt 36,
+  // the pause screen's fleximage). Here the frame lives in the WebGL canvas, so
+  // offImage is only made current when something reads it: flush the batch so
+  // far, copy both layers, and clear the GL buffer so the frame's own end()
+  // does not paint that part twice (translucent faces would double up).
+  let offStale = false;
+  gs.repaint = () => { offStale = true; };
+  gs.offImage.beforeRead = () => {
+    if (!offStale) return;
+    offStale = false;
     rd.end();
     const ctx = gs.offImage.canvas.getContext('2d');
     ctx.drawImage(glCanvas, 0, 0, W, H);
     ctx.drawImage(textCanvas, 0, 0, W, H);
+    rd.gl.clearColor(0, 0, 0, 1);
+    rd.gl.clear(rd.gl.COLOR_BUFFER_BIT);
   };
   let xt = null, checkpoints = null;
   gs.readdata = function (x, madness, cp) {
@@ -113,6 +125,12 @@ export async function bootExtended(params, log, onExit) {
   };
   // ponytail: no saving yet (writedata needs ZipOutputStream); localStorage when careers matter
   gs.writedata = () => {};
+  // run()'s placed objects (aconto2) are a local; loadstage gets them first
+  let placed = null, medium = null;
+  gs.loadstage = function (aconto, ...rest) {
+    placed = aconto; medium = rest[1];
+    return GameSparker.prototype.loadstage.call(this, aconto, ...rest);
+  };
   window.gs = gs;                  // for the console
 
   const frame = gs.run();          // the jar's loop; each next() is one frame
@@ -139,13 +157,16 @@ export async function bootExtended(params, log, onExit) {
   stage.addEventListener('mousedown', (e) => gs.mouseDown({}, ...at(e)));
   stage.addEventListener('mousemove', (e) => gs.mouseMove({}, ...at(e)));
 
-  // ---- the race loop: the base race's fixed tick, drawn at tick rate ----------
+  // ---- the race loop: the base race's fixed tick ------------------------------
   // 53 ms is the jar's own budget (GameSparker.run: 530 ms per 10 frames on a
-  // modern JVM). No interpolation yet: it needs hooks in ContO/Medium that the
-  // base port wrote by hand and Extended's generated classes do not have.
+  // modern JVM). Between ticks the scene is redrawn at display rate from
+  // blended positions (interp.js); ?interp=0 draws only on a tick, as the jar.
   const TICK_MS = parseFloat(params.get('tickms') || '53');
+  const INTERPOLATE = params.get('interp') !== '0';
+  const interp = makeInterp({ rd, gs, xt, medium, get placed() { return placed; } });
   const MAX_CATCHUP = 3;
-  let acc = 0, last = performance.now(), frames = 0, ticks = 0, lastFpsAt = last;
+  const SHOW_STATS = params.get('stats') === '1';
+  let acc = 0, last = performance.now(), frames = 0, ticks = 0, lastFpsAt = last, tickMs = 0, redrawMs = 0;
   const loop = (now) => {
     requestAnimationFrame(loop);
     acc = Math.min(acc + (now - last), TICK_MS * MAX_CATCHUP);
@@ -154,9 +175,19 @@ export async function bootExtended(params, log, onExit) {
     while (acc >= TICK_MS) {
       acc -= TICK_MS;
       rd.begin();                  // a catch-up tick's picture is replaced by the next one's
+      interp.beforeTick();
+      const t0 = performance.now();
       frame.next();
+      tickMs += performance.now() - t0;
+      interp.afterTick();
       ticks++;
       stepped = true;
+    }
+    // Racing only: the jar's other screens (its finish, a replay's fades) draw once per frame.
+    if (INTERPOLATE && xt.fase === 0) {
+      const t0 = performance.now();
+      if (interp.redraw(acc / TICK_MS)) stepped = true;
+      redrawMs += performance.now() - t0;
     }
     if (!stepped) return;
     rd.end();
@@ -164,9 +195,46 @@ export async function bootExtended(params, log, onExit) {
       const dt = now - lastFpsAt;
       const buf = `${rd.gl.drawingBufferWidth}x${rd.gl.drawingBufferHeight}`;
       log(`${(frames * 1000 / dt).toFixed(0)} fps  ${(ticks * 1000 / dt).toFixed(1)} tick/s  ${rd.inputVerts}/${rd.vertexCount} verts`
-        + `  fan=${rd.fanPolys} concave=${rd.concavePolys}/${rd.concaveVerts}v  ${buf}  fase=${xt.fase}`);
-      frames = 0; ticks = 0; lastFpsAt = now;
+        + `  fan=${rd.fanPolys} concave=${rd.concavePolys}/${rd.concaveVerts}v  ${buf}  fase=${xt.fase}`
+        + (SHOW_STATS ? `
+  frame ${(tickMs / Math.max(1, ticks)).toFixed(1)}ms/tick (draw+sim, the jar's frame)`
+          + `  redraw ${(redrawMs / Math.max(1, frames)).toFixed(1)}ms/frame  [interp=${INTERPOLATE ? 1 : 0}]` : ''));
+      frames = 0; ticks = 0; lastFpsAt = now; tickMs = 0; redrawMs = 0;
     }
   };
+  // ?selftest=N: N ticks flat out, with two redraws between ticks unless interp=0,
+  // then a hash of every car and of the random stream. Equal hashes with and
+  // without interp mean the redraws leave the simulation alone.
+  const selftest = +params.get('selftest') || 0;
+  if (selftest) {
+    gs.u[0].up = true;
+    let bad = 0, redraws = 0;
+    for (let k = 0; k < selftest; k++) {
+      gs.u[0].left = k % 60 < 20;           // turns, so headings blend across frames
+      gs.u[0].right = k % 60 >= 40;
+      rd.begin();
+      interp.beforeTick();
+      frame.next();
+      interp.afterTick();
+      if (INTERPOLATE) for (const t of [0.33, 0.66]) {
+        interp.redraw(t);
+        redraws++;
+        // an object that vanishes from a redraw submits nothing: compare with the tick's scene
+        if (interp.sceneVerts > 0 && rd.inputVerts < interp.sceneVerts * 0.8) bad++;
+      }
+    }
+    const state = [];
+    for (let i = 0; i < xt.nplayers; i++) {
+      const o = placed[i];
+      state.push(o.x, o.y, o.z, o.xz, o.xy, o.zy, o.dist);
+    }
+    state.push(random(), medium.trn, medium.cntrn, ...medium.rand);
+    const text = state.join(',');
+    let h = 0x811c9dc5;
+    for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 0x01000193);
+    log(`selftest ${selftest} ticks interp=${INTERPOLATE ? 1 : 0}: ${(h >>> 0).toString(16)}  car0 ${placed[0].x},${placed[0].z}`
+      + `  redraws missing >20% of the tick's scene: ${bad}/${redraws}`);
+    return;
+  }
   requestAnimationFrame(loop);
 }

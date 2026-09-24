@@ -184,6 +184,7 @@ export class PixelGrabber {
     const { img, x, y, w, h, pix, off, scan } = this;
     if (!(img instanceof Image)) return true;   // a replay's placeholder: not game state
     if (img.pixels.length < img.width * img.height) {
+      img.beforeRead?.();           // the race shell brings its offscreen frame up to date
       // an offscreen image (createImage(w, h)): its pixels are what has been drawn on its
       // canvas, opaque as Java's offscreen buffer is. blendude and the car select's smoke
       // blend over the frame this way; reading nothing made them black.
