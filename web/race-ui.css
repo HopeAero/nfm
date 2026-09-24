@@ -1,0 +1,176 @@
+.race-menu[hidden], .race-menu [hidden] { display: none; }
+#stage.race-menu-open:not(.race-menu-online) canvas { filter: grayscale(1) brightness(1.04) blur(1px); }
+#stage.race-menu-open + #log { display: none; }
+.race-menu {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  color: #fff;
+  font: 700 italic 18px/1 Arial, sans-serif;
+}
+.race-menu__panel {
+  position: absolute;
+  left: 281px;
+  top: 8px;
+  width: 237px;
+  height: 188px;
+  box-sizing: border-box;
+  background: #3e82ce;
+  border: 3px double #f4a452;
+  box-shadow: 0 0 0 1px #111, 0 7px 20px #0005;
+}
+.race-menu--online .race-menu__panel { background: rgb(30 67 110 / 82%); }
+.race-menu__art {
+  position: absolute;
+  inset: -3px;
+  z-index: 2;
+  width: 237px;
+  height: 188px;
+  pointer-events: none;
+  image-rendering: auto;
+}
+.race-menu--art-bg .race-menu__art { z-index: 0; }
+.race-menu--art-bg .race-menu__title,
+.race-menu--art-bg .race-menu__footer { z-index: 1; }
+.race-menu__title, .race-menu__footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  color: #b8d7ff;
+  font: italic 700 14px/1 "Arial Black", Arial, sans-serif;
+  letter-spacing: .16em;
+  text-align: center;
+}
+.race-menu__title { top: 5px; }
+.race-menu__footer { bottom: 5px; }
+.race-menu--art .race-menu__title, .race-menu--art .race-menu__footer,
+.race-menu--art .race-menu__choice span { visibility: hidden; }
+.race-menu__choice {
+  position: absolute;
+  z-index: 1;
+  height: 22px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  color: #fff;
+  font: 900 italic 18px/20px "Arial Black", Arial, sans-serif;
+  text-align: center;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.race-menu__choice--0 { left: 45px; top: 34px; width: 137px; }
+.race-menu__choice--1 { left: 36px; top: 62px; width: 155px; }
+.race-menu__choice--2 { left: 19px; top: 88px; width: 190px; }
+.race-menu__choice--3 { left: 57px; top: 114px; width: 109px; }
+html:lang(es) .race-menu__choice--3 { left: 29px; width: 170px; font-size: 16px; }
+.race-menu__choice.is-selected, .race-menu__choice:hover {
+  background: #408fdf;
+  border-color: #0059df;
+}
+.race-menu__choice:focus-visible { outline: 1px solid #e1c8ff; }
+.race-menu--online .race-menu__choice--0 { top: 56px; }
+.race-menu--online .race-menu__choice--1 { left: 57px; top: 94px; width: 109px; }
+/* xtGraphics.cantreply(): fillRoundRect(200, 73, 400, 23, 7, 20) in
+   (64, 143, 223) with a (0, 89, 223) outline, and the text centred in white
+   over a 1px black shadow (drawcs type 1). Game-space pixels, like the rest
+   of the menu. */
+.race-menu__notice {
+  position: absolute;
+  left: 200px;
+  top: 73px;
+  width: 400px;
+  min-height: 23px;
+  box-sizing: border-box;
+  padding: 4px 8px;
+  border: 1px solid rgb(0, 89, 223);
+  border-radius: 4px / 10px;
+  background: rgb(64, 143, 223);
+  color: #fff;
+  text-shadow: 1px 1px 0 #000;
+  font: bold 11px/1.3 Arial, sans-serif;
+  text-align: center;
+  /* Over the pause panel: the Java draws it onto the frozen pause screen. */
+  z-index: 2;
+}
+.race-menu__guide {
+  position: absolute;
+  left: 202px;
+  top: 45px;
+  width: 396px;
+  box-sizing: border-box;
+  padding: 22px;
+  border: 3px double #f4a452;
+  background: rgb(30 67 110 / 96%);
+  box-shadow: 0 7px 20px #0007;
+  font: normal 14px/1.4 Arial, sans-serif;
+}
+.race-menu__guide h2 { margin: 0 0 12px; font: 700 italic 22px/1 Arial, sans-serif; }
+.race-menu__guide p { margin: 8px 0; }
+.race-menu__guide button {
+  margin-top: 10px;
+  padding: 7px 10px;
+  border: 1px solid #b8d7ff;
+  background: #408fdf;
+  color: #fff;
+  font: 700 13px Arial, sans-serif;
+  cursor: pointer;
+}
+.race-menu__replay {
+  position: absolute;
+  left: 224px;
+  bottom: 14px;
+  width: 352px;
+  box-sizing: border-box;
+  padding: 12px 16px 10px;
+  border: 2px solid #f4a452;
+  background: rgb(20 39 63 / 88%);
+  box-shadow: 0 3px 16px #0008;
+  text-align: center;
+  font: 12px/1.3 Arial, sans-serif;
+}
+#stage.race-menu-highlight .race-menu__replay {
+  left: 184px;
+  bottom: 20px;
+  width: 432px;
+  padding: 15px 20px 13px;
+  border-width: 2px;
+  background: rgb(12 25 42 / 91%);
+  box-shadow: 0 8px 32px #0009;
+  backdrop-filter: blur(5px);
+}
+#stage.race-menu-highlight .race-menu__replay-title {
+  color: #fff;
+  font-size: 18px;
+  letter-spacing: .1em;
+  text-shadow: 0 2px 8px #000;
+}
+.race-menu__replay-title {
+  margin-bottom: 7px;
+  color: #b8d7ff;
+  font: 700 italic 15px/1 Arial, sans-serif;
+  letter-spacing: .14em;
+}
+.race-menu__replay-track {
+  height: 7px;
+  overflow: hidden;
+  border: 1px solid #b8d7ff;
+  background: #101820;
+}
+.race-menu__replay-track i {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: #408fdf;
+  transition: width 50ms linear;
+}
+.race-menu__replay-status { margin-top: 4px; color: #fff; }
+.race-menu__replay-hint { margin: 4px 0 6px; color: #d8e8fa; }
+.race-menu__replay button {
+  padding: 5px 9px;
+  border: 1px solid #b8d7ff;
+  background: #408fdf;
+  color: #fff;
+  font: 700 12px Arial, sans-serif;
+  cursor: pointer;
+}

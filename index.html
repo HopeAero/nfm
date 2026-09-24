@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Need for Madness</title>
+<!-- The slab tokens, the backdrop and the three animations, shared with
+     web/careditor.html. Loaded first so anything below can override it. -->
+<link rel="stylesheet" href="./web/styles.css">
+<link rel="stylesheet" href="./web/race-ui.css">
+<style>
+/* ---------------------------------------------------------------------------
+   The launcher: menu, single player, multiplayer browser, lobby, settings, and
+   the race itself. ONE page, because the lobby holds a live WebRTC connection
+   that a navigation would tear down -- see netlobby.js. `data-page` on <body>
+   says which screen is up, `race` being the one where the canvases show.
+
+   The visual language is the `slab` theme from web/menu-mockups.html: flat
+   outlines, no drop shadows, and the selected box inverts, strobes its border
+   and runs a hazard rail down its edge. Every selectable box is `.item`, so
+   one `.is-sel` rule covers a menu row, a tall car pane, an option row and the
+   chat input alike -- a treatment that only worked on one-line rows would fail
+   visibly here.
+--------------------------------------------------------------------------- */
+:root {
+  --fs-title: 3rem;     /* the wordmark */
+  --fs-item:  1.5rem;   /* menu rows, row labels */
+  --fs-value: 1.5rem;   /* the thing left/right changes */
+  --fs-label: 1rem;     /* small caps mono: CAR, STAGE, PLAYERS */
+  --fs-meta:  1rem;     /* secondary lines, table cells */
+  --fs-stat:  1rem;     /* stat bar names */
+  --fs-chat:  1rem;     /* player list + chat log */
+  --k-title: 1.55; --k-item: 1.04;
+  /* --ink / --paper / --hi / --warn are in web/styles.css */
+}
+html, body { height: 100%; }
+body {
+  margin: 0; overflow: hidden; background: var(--paper); color: var(--ink);
+  font: 16px/1.4 "Arial Black", "Helvetica Neue", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- shell ---------------------------------------------------------- */
+.page {
+  position: relative; z-index: 2; height: 100%;
+  display: none; flex-direction: column; align-items: center; justify-content: center;
+  gap: 1rem; padding: 2.4rem 1rem 3.2rem;
+  overflow-y: auto; scrollbar-width: none;
+}
+.page::-webkit-scrollbar { width: 0; }
+.page > * { flex: none; }
+body[data-page="menu"]  #page-menu  { display: flex; }
+body[data-page="gm"]    #page-gm    { display: flex; }
+body[data-page="sp"]    #page-sp    { display: flex; }
+body[data-page="opts"]  #page-opts  { display: flex; }
+body[data-page="mp"]    #page-mp    { display: flex; }
+body[data-page="lobby"] #page-lobby { display: flex; }
+body[data-page="set"]   #page-set   { display: flex; }
+
+.brand { display: flex; flex-direction: column; align-items: center; gap: .2rem; }
+#face { height: 5rem; image-rendering: pixelated; filter: grayscale(1) contrast(2); }
+#face:not([src]) { display: none; }
+.title { margin: 0; font-size: calc(var(--fs-title) * var(--k-title)); line-height: .85;
+         letter-spacing: -.04em; text-transform: uppercase; text-align: center; }
+.sub { margin: .35rem 0 0; font-weight: 700; letter-spacing: .3em; font-size: .7rem;
+       background: var(--ink); color: var(--paper); padding: .25rem .5rem; }
+
+.menu { list-style: none; margin: 0; padding: 0; display: grid; gap: .35rem; width: min(34rem, 94vw); }
+.item {
+  position: relative; cursor: pointer; user-select: none;
+  display: flex; align-items: center; gap: .9rem;
+  padding: .85rem 1.1rem .85rem 2rem;   /* the left inset is the hazard rail's */
+  font-size: calc(var(--fs-item) * var(--k-item)); font-weight: 900;
+  letter-spacing: -.01em; text-transform: uppercase;
+  background: var(--paper); border: 3px solid var(--ink); color: var(--ink);
+}
+.item .label { flex: 1; }
+.item.is-sel {
+  background: var(--ink); color: var(--hi);
+  animation: slabStrobe .28s steps(2) infinite;
+  overflow: hidden;                     /* the rail runs past the box; clip it */
+}
+/* The hazard rail; its arithmetic is with the keyframes in web/styles.css. */
+.item.is-sel::before {
+  content: ""; position: absolute; top: -32px; bottom: -32px; left: 0; width: 18px;
+  background: repeating-linear-gradient(45deg, var(--hi) 0 8px, var(--ink) 8px 16px);
+  animation: hazard .7s linear infinite;
+}
+.item.off { opacity: .45; cursor: default; }
+
+/* ---- shared page furniture ------------------------------------------ */
+.wrap { width: min(54rem, 96vw); display: grid; gap: .55rem; }
+.phead {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+  font: 600 calc(var(--fs-label) * 1.18)/1 ui-monospace, Menlo, Consolas, monospace;
+  letter-spacing: .16em; text-transform: uppercase; margin-bottom: .2rem;
+}
+.rows { list-style: none; margin: 0; padding: 0; display: grid; gap: .5rem; }
+/* A UA scrollbar cuts across the design and the 3px borders overhang by
+   design, which made panels scroll that had nothing to scroll. */
+.scroll { scrollbar-width: none; -ms-overflow-style: none; padding: 4px; }
+.scroll::-webkit-scrollbar { width: 0; height: 0; }
+.panel { padding: .6rem .75rem .7rem; background: var(--paper); border: 3px dashed var(--ink); }
+.ptitle, .gtitle {
+  font: 700 var(--fs-label)/1 ui-monospace, Menlo, Consolas, monospace; letter-spacing: .2em;
+  text-transform: uppercase; opacity: .55;
+}
+.gtitle { display: flex; justify-content: space-between; align-items: baseline; margin: .1rem .3rem .5rem; }
+
+/* value rows: left/right changes the value, Enter does nothing */
+.pvalue { display: flex; align-items: center; gap: .7rem; font-size: var(--fs-value); font-weight: 700; }
+.pvalue .val { flex: 1; }
+.ar { opacity: .22; font-size: calc(var(--fs-value) * .78); transition: opacity .12s, transform .12s; }
+.is-sel .ar { opacity: 1; }
+.is-sel .ar.l { animation: nudgeL .9s ease-in-out infinite; }
+.is-sel .ar.r { animation: nudgeR .9s ease-in-out infinite; }
+@keyframes nudgeL { 50% { transform: translateX(-4px); } }
+@keyframes nudgeR { 50% { transform: translateX(4px); } }
+
+/* ---- single player --------------------------------------------------- */
+.pane { align-items: stretch; gap: 1.1rem; padding: .8rem 1rem .8rem 2rem; text-transform: none; }
+.thumb { flex: none; width: 12rem; aspect-ratio: 16 / 9; align-self: center;
+         position: relative; overflow: hidden; border: 3px solid var(--ink); background: #0b0d13; }
+.thumb canvas { position: absolute; display: block; }
+/* `display: block` above outranks the UA rule behind the `hidden` attribute --
+   a class plus a type beats an attribute -- so the flat fallback map stayed
+   visible on top of the 3D one for every stage after the one that drew it. */
+.thumb canvas[hidden] { display: none; }
+/* A build takes long enough to see, and the frame still holds the LAST stage
+   while it runs. Dimming says so, rather than letting the old map read as the
+   new one's answer. */
+.thumb.busy canvas { opacity: .3; }
+/* The car lands at (402, 264) in the game's 800x450 projection space, and that
+   space is ABSOLUTE -- the projection centre and focus point are screen
+   coordinates, so moving the camera would stop showing what the game's own
+   car-select screen shows. Crop to the part the car occupies instead; the 2x
+   backing store keeps it sharp under the ~3x magnification. */
+.thumb-car canvas { width: 308%; left: -105%; top: -131%; }
+.thumb-map canvas { width: 100%; height: 100%; left: 0; top: 0; object-fit: cover; }
+.pbody { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: .3rem; min-width: 0; }
+.ar.solo { align-self: center; flex: none; }
+.pmeta { font: 500 var(--fs-meta)/1.3 ui-monospace, Menlo, Consolas, monospace; opacity: .55; }
+.pstats { flex: none; width: calc(var(--fs-stat) * 9.4 + 7rem); display: grid; gap: .3rem; align-content: center; }
+.pstat { display: grid; grid-template-columns: calc(var(--fs-stat) * 9.4) 1fr; align-items: center; gap: .5rem;
+         font: 500 var(--fs-stat)/1 ui-monospace, Menlo, Consolas, monospace; }
+.pstat span { opacity: .6; }
+/* The track's dimness is in the COLOUR, not in opacity -- opacity on the track
+   multiplies the fill inside it and the two could never differ. */
+.pstat .track { display: block; height: 7px; background: color-mix(in srgb, currentColor 16%, transparent); }
+.pstat .track i { display: block; height: 100%; background: currentColor; width: var(--v); }
+.pane.go { justify-content: center; text-transform: uppercase; letter-spacing: .18em; padding: .85rem 1rem; }
+.pane.go .label { flex: none; }
+@media (max-width: 46rem) { .pstats { display: none; } }
+
+/* ---- option rows ------------------------------------------------------ */
+.orow { padding: .55rem .9rem .55rem 2rem; font-size: calc(var(--fs-item) * .87);
+        font-weight: 600; text-transform: none; gap: .9rem; }
+.slabel { flex: none; width: 11rem; font: 600 var(--fs-label)/1 ui-monospace, Menlo, Consolas, monospace; opacity: .7; }
+.rhint { font: 500 var(--fs-label)/1 ui-monospace, Menlo, Consolas, monospace; opacity: .5; }
+.orow .pvalue { flex: 1; font-size: calc(var(--fs-value) * .81); }
+
+/* ---- multiplayer browser -------------------------------------------- */
+.grow { gap: .8rem; text-transform: none; font-size: calc(var(--fs-item) * .87); padding: .6rem .9rem .6rem 2rem; }
+.grow .gname { flex: 1; font-weight: 700; font-size: calc(var(--fs-item) * .96);
+               white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.grow .gcell { flex: none; font: 600 var(--fs-meta)/1 ui-monospace, Menlo, Consolas, monospace; opacity: .7; }
+.grow .gcell.w6 { width: 3.6rem; text-align: right; }
+.grow .gcell.w12 { width: calc(var(--fs-meta) * 13); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.namerow .pvalue { flex: 1; }
+.mplist { list-style: none; margin: 0; padding: 4px; max-height: 22rem; overflow: auto; display: grid; gap: .4rem; }
+.empty { font: 500 var(--fs-meta)/1.5 ui-monospace, Menlo, Consolas, monospace; opacity: .55; padding: .8rem .3rem; }
+.editbox {
+  flex: 1; font: 700 calc(var(--fs-value) * .81)/1 inherit; color: inherit;
+  background: color-mix(in srgb, currentColor 10%, transparent);
+  border: 0; border-bottom: 2px solid currentColor; padding: .25rem .3rem; min-width: 0; outline: none;
+  text-transform: none;
+}
+
+/* ---- lobby ----------------------------------------------------------- */
+.lobbygrid { display: grid; grid-template-columns: 1.5fr 1fr; gap: .55rem; align-items: stretch; }
+@media (max-width: 52rem) { .lobbygrid { grid-template-columns: 1fr; } }
+.lobbygrid .panel { display: flex; flex-direction: column; min-height: 16rem; }
+.plist { list-style: none; margin: 0; padding: 0; display: grid; gap: .25rem;
+         align-content: start; flex: 1; min-height: 0; overflow: auto; }
+.prow { display: flex; align-items: center; gap: .6rem; padding: .35rem .5rem;
+        font: 600 var(--fs-chat)/1.2 ui-monospace, Menlo, Consolas, monospace; }
+.prow .pn { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.prow .pcar { opacity: .6; font-size: calc(var(--fs-chat) * .87); }
+.prow.me { background: color-mix(in srgb, currentColor 10%, transparent); }
+.chatlog { display: grid; gap: .2rem; align-content: end; flex: 1; min-height: 0; overflow: auto;
+           font: 500 calc(var(--fs-chat) * .91)/1.35 ui-monospace, Menlo, Consolas, monospace; }
+.chatlog b { opacity: .75; font-weight: 700; }
+.chatlog div { opacity: .85; }
+.chatrow { padding: .5rem .8rem .5rem 2rem; text-transform: none; font-size: calc(var(--fs-item) * .83); }
+.chatrow .ph { opacity: .5; font: 500 var(--fs-label) ui-monospace, Menlo, Consolas, monospace; }
+.roomcode { font: 900 calc(var(--fs-value) * 1.1)/1 ui-monospace, Menlo, Consolas, monospace;
+            letter-spacing: .25em; background: var(--ink); color: var(--hi); padding: .2rem .5rem; }
+
+/* ---- footer hint + transient message --------------------------------- */
+.hint {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 3;
+  padding: .5rem 1rem; text-align: center; color: var(--ink); opacity: .8;
+  font: 500 .72rem/1.4 ui-monospace, Menlo, Consolas, monospace; letter-spacing: .08em;
+}
+.hint kbd { font: inherit; border: 1px solid currentColor; border-radius: 3px; padding: 0 .3em; }
+#say {
+  position: fixed; z-index: 4; left: 50%; bottom: 3rem; transform: translateX(-50%);
+  font: 600 .78rem/1 ui-monospace, Menlo, Consolas, monospace; letter-spacing: .12em;
+  padding: .45rem .8rem; background: var(--ink); color: var(--paper);
+  opacity: 0; transition: opacity .2s; pointer-events: none; max-width: 90vw; text-align: center;
+}
+#say.on { opacity: 1; }
+
+/* ---- the race -------------------------------------------------------- */
+/* Backing store is 2x while the CSS box stays 800x450, so the GPU rasterizes
+   at double resolution; game space is always 800x450 because the vertex shader
+   divides by u_size. */
+#stage { position: fixed; inset: 0; margin: auto; width: 800px; height: 450px;
+         transform-origin: center center; z-index: 5; display: none; }
+#stage canvas { position: absolute; left: 0; top: 0; width: 800px; height: 450px; }
+/* The 2D overlay carries drawString/drawImage and must sit on top of the
+   WebGL geometry -- the HUD is always foreground. */
+#overlay { pointer-events: none; }
+body[data-page="race"] { background: #000; }
+body[data-page="race"] #stage { display: block; }
+body[data-page="race"] #bg, body[data-page="race"] .hint { display: none; }
+#log {
+  position: fixed; left: 0; bottom: 0; right: 0; z-index: 6;
+  font: 12px/1.6 ui-monospace, Menlo, Consolas, monospace;
+  color: #9f9; background: rgba(0,0,0,.65); padding: 2px 8px; white-space: pre;
+  display: none;
+}
+body[data-page="race"] #log { display: block; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* every selection stays READABLE; it just stops flashing */
+  .item.is-sel, .item.is-sel::before, .is-sel .ar, #bg::before {
+    animation: none !important;
+  }
+}
+</style>
+</head>
+<body data-page="menu">
+
+<div id="bg"></div>
+
+<!-- 1 : main menu -->
+<div class="page" id="page-menu">
+  <div class="brand">
+    <img id="face" alt="">
+    <div>
+      <h1 class="title">Need for<br>Madness</h1>
+      <p class="sub" id="brandsub">loading…</p>
+    </div>
+  </div>
+  <ul class="menu" id="menu" role="menu" aria-label="Main menu"></ul>
+</div>
+
+<!-- 1b : single player: NFM 1 / NFM 2 career or free play (the Java's maini2) -->
+<div class="page" id="page-gm">
+  <div class="brand">
+    <div><h1 class="title">Single Player</h1></div>
+  </div>
+  <ul class="menu" id="gm-rows" role="menu" aria-label="Single Player"></ul>
+</div>
+
+<!-- 2 : single player -->
+<div class="page" id="page-sp">
+  <div class="wrap">
+    <div class="phead"><span>Single Player</span><span>Esc — back</span></div>
+    <ul class="rows" id="sp-rows">
+      <li class="item pane" data-row="car">
+        <span class="thumb thumb-car"><canvas id="carview" width="1600" height="900"></canvas></span>
+        <span class="pbody">
+          <span class="ptitle">Car</span>
+          <span class="pvalue"><b class="ar l">◂</b><span class="val" data-val="car"></span></span>
+          <span class="pmeta" data-meta="car"></span>
+        </span>
+        <span class="pstats" id="carbars"></span>
+        <b class="ar r solo">▸</b>
+      </li>
+      <li class="item pane" data-row="stage">
+        <!-- The thumbnail is 12rem wide -- 192 CSS px -- so a 384x216 backing
+             store covers a HiDPI display. This view is fill-bound: the camera
+             looks straight down at a stage that fills the frame and there is
+             no depth buffer, so every triangle is rasterised whether or not
+             something later covers it, and the 1600x900 this replaced was
+             shading nine times the pixels the frame can show. -->
+        <span class="thumb thumb-map">
+          <canvas id="mapview" width="384" height="216"></canvas>
+          <!-- A canvas keeps one context type for life, so the flat fallback
+               map needs its own element rather than a 2D context on the GL one. -->
+          <canvas id="mapflat" width="384" height="216" hidden></canvas>
+        </span>
+        <span class="pbody">
+          <span class="ptitle">Stage</span>
+          <span class="pvalue"><b class="ar l">◂</b><span class="val" data-val="stage"></span><b class="ar r">▸</b></span>
+          <span class="pmeta" data-meta="stage"></span>
+        </span>
+      </li>
+      <li class="item pane" data-act="opts">
+        <span class="pbody">
+          <span class="ptitle">Race Options</span>
+          <span class="pvalue"><span class="val" id="optsum"></span><b class="ar r">▸</b></span>
+          <span class="pmeta">Enter to open</span>
+        </span>
+      </li>
+      <li class="item pane go" data-act="go"><span class="label">Start Race</span></li>
+    </ul>
+  </div>
+</div>
+
+<!-- 3 : race options -->
+<div class="page" id="page-opts">
+  <div class="wrap" style="width:min(40rem,94vw)">
+    <div class="phead"><span>Race Options</span><span>Esc — back</span></div>
+    <ul class="rows" id="opt-rows"></ul>
+  </div>
+</div>
+
+<!-- 4 : multiplayer browser -->
+<div class="page" id="page-mp">
+  <div class="wrap">
+    <div class="phead"><span>Multiplayer</span><span>Esc — back</span></div>
+    <ul class="rows" id="mp-rows">
+      <li class="item namerow orow" data-act="name">
+        <span class="slabel">Your name</span>
+        <span class="pvalue"><span class="val" id="nameval"></span></span>
+        <span class="rhint">Enter to change</span>
+      </li>
+      <li class="panel">
+        <div class="gtitle"><span>Games</span><span id="gcount">looking…</span></div>
+        <ul class="mplist" id="gamelist"></ul>
+      </li>
+      <li class="item grow" data-row="visibility" data-act="host">
+        <span class="gname">Host a game</span>
+        <span class="pvalue"><b class="ar l">◂</b><span class="val" data-val="visibility"></span><b class="ar r">▸</b></span>
+      </li>
+      <li class="item grow" data-act="joincode">
+        <span class="gname">Join by code</span>
+        <span class="rhint">Enter to type a code</span>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- 5 : lobby -->
+<div class="page" id="page-lobby">
+  <div class="wrap">
+    <div class="phead">
+      <span id="lobby-name">lobby</span>
+      <span><span class="roomcode" id="lobby-code"></span> &nbsp;Esc — leave</span>
+    </div>
+    <div class="lobbygrid">
+      <div class="panel">
+        <div class="gtitle"><span>Chat</span><span>lobby only</span></div>
+        <div class="chatlog scroll" id="chatlog"></div>
+      </div>
+      <div class="panel">
+        <div class="gtitle"><span>Players</span><span id="pcount"></span></div>
+        <ul class="plist scroll" id="plist"></ul>
+      </div>
+    </div>
+    <ul class="rows" id="lobby-rows">
+      <li class="item orow" data-row="car">
+        <span class="slabel">Your car</span>
+        <span class="pvalue"><b class="ar l">◂</b><span class="val" data-val="car"></span><b class="ar r">▸</b></span>
+      </li>
+      <li class="item orow" data-row="stage" data-host="1">
+        <span class="slabel">Stage</span>
+        <span class="pvalue"><b class="ar l">◂</b><span class="val" data-val="stage"></span><b class="ar r">▸</b></span>
+      </li>
+      <li class="item orow" data-row="players" data-host="1">
+        <span class="slabel">Cars on track</span>
+        <span class="pvalue"><b class="ar l">◂</b><span class="val" data-val="players"></span><b class="ar r">▸</b></span>
+      </li>
+      <li class="item chatrow" data-act="chat">
+        <span class="slabel">Say something</span>
+        <span class="ph">press Enter to type…</span>
+      </li>
+      <li class="item pane go" data-act="start"><span class="label" id="startlabel">Start Race</span></li>
+    </ul>
+  </div>
+</div>
+
+<!-- 6 : settings -->
+<div class="page" id="page-set">
+  <div class="wrap" style="width:min(40rem,94vw)">
+    <div class="phead"><span>Settings</span><span>Esc — back</span></div>
+    <ul class="rows" id="set-rows"></ul>
+  </div>
+</div>
+
+<!-- the race -->
+<div id="stage">
+  <canvas id="gl" width="800" height="450"></canvas>
+  <canvas id="overlay" width="800" height="450"></canvas>
+</div>
+<div id="log"></div>
+
+<div id="say"></div>
+<p class="hint" id="hint"></p>
+
+<script type="module" src="./web/launcher.js"></script>
+</body>
+</html>

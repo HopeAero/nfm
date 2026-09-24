@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<title>Need for Madness — Spanish UI sprite comparison</title>
+<style>
+  body { margin: 20px; background: #253649; color: #fff; font: 14px Arial; }
+  .row { display: flex; gap: 18px; align-items: center; margin: 0 0 10px; min-height: 50px; }
+  .name { width: 145px; flex: none; }
+  .sprite { width: 275px; height: 52px; display: flex; align-items: center; background: #5389bd; }
+  .sprite img, .sprite canvas { transform: scale(1.4); transform-origin: left center; image-rendering: auto; }
+  .sprite.dark { background: #171717; }
+  h1 { font-size: 20px; }
+</style>
+<h1>Original → español</h1>
+<div id="list"></div>
+<script type="module">
+  import { readZip, setFpath } from '../vfs.js';
+  import { spanishSprite } from '../ui-sprites-es.js';
+  setFpath('../../');
+  const zip = await readZip('data/images.zip');
+  const names = ['selectcar.gif', 'select.gif', 'back.gif', 'next.gif',
+    '1.gif', '2.gif', '3.gif', '4.gif', '5.gif', '6.gif', '7.gif', '8.gif',
+    '0c.gif', 'damage.gif', 'power.gif',
+    'position.gif', 'speed.gif', 'wasted.gif', 'lap.gif', 'congrad.gif',
+    'gameov.gif', 'continue.gif', 'gameh.gif', 'wgame.gif', 'youwon.gif',
+    'youlost.gif', 'yourwasted.gif', 'youwastedem.gif'];
+  for (const name of names) {
+    const original = await createImageBitmap(new Blob([zip.get(name)], { type: 'image/gif' }));
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.innerHTML = `<div class="name">${name}</div><div class="sprite"></div><div class="sprite"></div>`;
+    const canvases = row.querySelectorAll('.sprite');
+    if (/^(congrad|gameov|continue|select|back|next|gameh|wgame)/.test(name)) {
+      canvases.forEach((el) => el.classList.add('dark'));
+    }
+    const old = document.createElement('canvas');
+    old.width = original.width; old.height = original.height;
+    old.getContext('2d').drawImage(original, 0, 0);
+    canvases[0].append(old);
+    const art = spanishSprite(name, original);
+    const translated = document.createElement('canvas');
+    translated.width = art.width; translated.height = art.height;
+    translated.getContext('2d').drawImage(art, 0, 0);
+    canvases[1].append(translated);
+    document.getElementById('list').append(row);
+  }
+  document.body.dataset.ready = 'true';
+</script>
+</html>

@@ -1,0 +1,27 @@
+*.bak
+web/baseline.jar
+web/nfm.jar
+
+# npm deps for the JS port
+js/node_modules/
+
+# mycars/ is a runtime dir: the game and the port extract models into it.
+# Only the two cars that shipped with the game are tracked.
+mycars/*.rad
+!mycars/Example, MAX Revenge.rad
+!mycars/Simple Car.rad
+
+# Pre-rendered soundtrack: 257 MB of FLAC/Opus produced by tools/bake-music.sh.
+# Superseded by web/music.js playing the modules directly (3.3 MB, already in
+# music/). Kept on disk as a fallback, never committed -- regenerate with the
+# script if it is ever needed.
+music-baked/
+
+# The port's npm dir (the rule above predates the js/ -> web/ rename)
+web/node_modules/
+
+# Playwright MCP session logs and snapshots (51 MB, per session)
+.playwright-mcp/
+
+# Python bytecode from the decompilation tools
+__pycache__/

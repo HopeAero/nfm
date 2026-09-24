@@ -1,0 +1,67 @@
+RESETO_FORCA=0.08049845
+RESETO_POWER=98.0
+--- MULTI-TICK DRIFT PROBE (300 TICKS) ---
+TICK_1: x=1000 y=207 z=-5000 xz=45 zy=0 xy=0 speed=10.000000 pzy=0 pxy=0
+TICK_2: x=1000 y=221 z=-5000 xz=45 zy=0 xy=0 speed=20.000000 pzy=0 pxy=0
+TICK_3: x=1000 y=242 z=-5000 xz=45 zy=0 xy=0 speed=30.000000 pzy=0 pxy=0
+TICK_4: x=1000 y=250 z=-5000 xz=45 zy=0 xy=0 speed=40.000000 pzy=0 pxy=0
+TICK_5: x=1000 y=250 z=-5000 xz=41 zy=0 xy=0 speed=12.485304 pzy=0 pxy=0
+TICK_6: x=991 y=250 z=-4991 xz=38 zy=0 xy=-1 speed=21.760450 pzy=0 pxy=0
+TICK_7: x=978 y=251 z=-4973 xz=33 zy=0 xy=-1 speed=30.942846 pzy=0 pxy=0
+TICK_8: x=960 y=250 z=-4947 xz=27 zy=0 xy=0 speed=40.033421 pzy=0 pxy=0
+TICK_9: x=942 y=250 z=-4911 xz=20 zy=0 xy=0 speed=49.033085 pzy=0 pxy=0
+TICK_10: x=926 y=250 z=-4865 xz=13 zy=0 xy=0 speed=57.942753 pzy=0 pxy=0
+TICK_11: x=913 y=250 z=-4809 xz=6 zy=0 xy=-1 speed=66.763321 pzy=0 pxy=0
+TICK_12: x=905 y=251 z=-4743 xz=-1 zy=0 xy=-1 speed=75.495689 pzy=0 pxy=0
+TICK_13: x=906 y=251 z=-4668 xz=-8 zy=0 xy=-2 speed=84.140732 pzy=0 pxy=0
+TICK_14: x=917 y=251 z=-4585 xz=-15 zy=0 xy=-2 speed=92.223923 pzy=0 pxy=0
+TICK_15: x=940 y=251 z=-4495 xz=-22 zy=0 xy=-2 speed=99.875122 pzy=0 pxy=0
+TICK_16: x=975 y=252 z=-4401 xz=-29 zy=0 xy=-3 speed=107.175011 pzy=0 pxy=0
+TICK_17: x=1023 y=252 z=-4307 xz=-36 zy=0 xy=-3 speed=114.178459 pzy=0 pxy=0
+TICK_18: x=1084 y=252 z=-4214 xz=-43 zy=0 xy=-4 speed=120.925133 pzy=0 pxy=0
+TICK_19: x=1157 y=252 z=-4126 xz=-50 zy=0 xy=-4 speed=127.444992 pzy=0 pxy=0
+TICK_20: x=1242 y=253 z=-4044 xz=-57 zy=0 xy=-4 speed=133.761459 pzy=0 pxy=0
+TICK_21: x=1340 y=253 z=-3971 xz=-64 zy=0 xy=-5 speed=139.893295 pzy=0 pxy=0
+TICK_22: x=1450 y=253 z=-3910 xz=-71 zy=0 xy=-5 speed=145.855911 pzy=0 pxy=0
+TICK_23: x=1571 y=254 z=-3860 xz=-78 zy=0 xy=-6 speed=151.662170 pzy=0 pxy=0
+TICK_24: x=1704 y=254 z=-3822 xz=-85 zy=0 xy=-6 speed=157.322937 pzy=0 pxy=0
+TICK_25: x=1849 y=254 z=-3796 xz=-92 zy=0 xy=-6 speed=162.847580 pzy=0 pxy=0
+TICK_26: x=2005 y=252 z=-3781 xz=-99 zy=0 xy=-4 speed=168.244217 pzy=0 pxy=0
+TICK_27: x=2171 y=253 z=-3778 xz=-106 zy=0 xy=-4 speed=173.519943 pzy=0 pxy=0
+TICK_28: x=2338 y=253 z=-3786 xz=-113 zy=0 xy=-5 speed=178.681076 pzy=0 pxy=0
+TICK_29: x=2502 y=253 z=-3805 xz=-120 zy=0 xy=-5 speed=183.733215 pzy=0 pxy=0
+TICK_30: x=2661 y=253 z=-3835 xz=-127 zy=-1 xy=-5 speed=188.681396 pzy=0 pxy=0
+TICK_31: x=2812 y=254 z=-3876 xz=-134 zy=0 xy=-6 speed=193.530151 pzy=0 pxy=0
+TICK_32: x=2952 y=254 z=-3928 xz=-141 zy=0 xy=-6 speed=198.283630 pzy=0 pxy=0
+TICK_33: x=3081 y=254 z=-3991 xz=-148 zy=0 xy=-7 speed=202.945587 pzy=0 pxy=0
+TICK_34: x=3199 y=254 z=-4065 xz=-155 zy=0 xy=-7 speed=200.029953 pzy=0 pxy=0
+TICK_35: x=3306 y=255 z=-4149 xz=-162 zy=-1 xy=-7 speed=204.593872 pzy=0 pxy=0
+TICK_36: x=3403 y=255 z=-4244 xz=-169 zy=-1 xy=-8 speed=197.874084 pzy=0 pxy=0
+TICK_37: x=3489 y=253 z=-4350 xz=-176 zy=0 xy=-5 speed=202.387390 pzy=0 pxy=0
+TICK_38: x=3564 y=253 z=-4467 xz=-183 zy=0 xy=-5 speed=196.267548 pzy=0 pxy=0
+TICK_39: x=3628 y=254 z=-4594 xz=-190 zy=0 xy=-6 speed=200.775284 pzy=0 pxy=0
+TICK_40: x=3682 y=254 z=-4732 xz=-197 zy=0 xy=-6 speed=196.267548 pzy=0 pxy=0
+TICK_41: x=3725 y=254 z=-4881 xz=-204 zy=0 xy=-7 speed=200.775284 pzy=0 pxy=0
+TICK_42: x=3757 y=254 z=-5041 xz=-211 zy=0 xy=-7 speed=196.267548 pzy=0 pxy=0
+TICK_43: x=3778 y=255 z=-5209 xz=-218 zy=0 xy=-7 speed=200.775284 pzy=0 pxy=0
+TICK_44: x=3789 y=253 z=-5367 xz=-225 zy=0 xy=-5 speed=196.267548 pzy=0 pxy=0
+TICK_45: x=3789 y=253 z=-5514 xz=-232 zy=0 xy=-4 speed=200.775284 pzy=0 pxy=0
+TICK_46: x=3778 y=253 z=-5650 xz=-239 zy=0 xy=-5 speed=196.267548 pzy=0 pxy=0
+TICK_47: x=3756 y=254 z=-5775 xz=-246 zy=1 xy=-6 speed=200.775284 pzy=0 pxy=0
+TICK_48: x=3723 y=254 z=-5889 xz=-253 zy=0 xy=-6 speed=196.267548 pzy=0 pxy=0
+TICK_49: x=3680 y=254 z=-5993 xz=-260 zy=-1 xy=-7 speed=200.775284 pzy=0 pxy=0
+TICK_50: x=3626 y=255 z=-6086 xz=-267 zy=0 xy=-7 speed=196.267548 pzy=0 pxy=0
+TICK_100: x=3625 y=253 z=-6157 xz=-617 zy=0 xy=-5 speed=196.267548 pzy=0 pxy=0
+TICK_200: x=3709 y=253 z=-5761 xz=-1317 zy=0 xy=-6 speed=196.267548 pzy=0 pxy=0
+TICK_300: x=3636 y=253 z=-5322 xz=-2017 zy=0 xy=-5 speed=196.267548 pzy=0 pxy=0
+--- COAST TEST ---
+after 80 throttle: speed=196.26755
+  coast t+50: speed=73.10459 skid=0 mtouch=true
+  coast t+100: speed=48.10459 skid=0 mtouch=true
+  coast t+150: speed=23.104591 skid=0 mtouch=true
+  coast t+200: speed=0.0 skid=0 mtouch=true
+  coast t+250: speed=0.0 skid=0 mtouch=true
+  coast t+300: speed=0.0 skid=0 mtouch=true
+PY_OVERFLOW=705032704
+PY_NEG=-179869184
+RPY_VAL=1011050

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="es"><meta charset="utf-8"><title>Pause art preview</title>
+<link rel="stylesheet" href="../race-ui.css">
+<style>
+  body { margin: 0; background: #333; }
+  #stage { position: relative; width: 800px; height: 450px; background: linear-gradient(#9ba6a9 40%, #7d8286 41%, #999); }
+</style>
+<div id="stage"></div>
+<script type="module">
+  import { setLang, translateDocument } from '../i18n.js';
+  import { createRaceMenu } from '../race-ui.js';
+  import { readZip, setFpath } from '../vfs.js';
+  import { spanishPauseBackground } from '../ui-sprites-es.js';
+  setLang('es');
+  setFpath('../../');
+  const zip = await readZip('data/images.zip');
+  const original = await createImageBitmap(new Blob([zip.get('paused.gif')], { type: 'image/gif' }));
+  const background = spanishPauseBackground(original);
+  const source = new OffscreenCanvas(original.width, original.height);
+  source.getContext('2d').drawImage(original, 0, 0);
+  const a = source.getContext('2d').getImageData(0, 0, original.width, original.height).data;
+  const b = background.getContext('2d').getImageData(0, 0, original.width, original.height).data;
+  for (let y = 0; y < original.height; y++) {
+    for (let x = 0; x < original.width; x++) {
+      if (x >= 6 && x < 231 && y >= 6 && y < 182) continue;
+      const p = (y * original.width + x) * 4;
+      for (let c = 0; c < 4; c++) {
+        if (a[p + c] !== b[p + c]) throw new Error(`pause border changed at ${x},${y}`);
+      }
+    }
+  }
+  const menu = createRaceMenu(document.getElementById('stage'), {
+    multiplayer: false, pauseArt: URL.createObjectURL(await background.convertToBlob()),
+    pauseArtBackgroundOnly: true, onLeave() {}, onReplay() {},
+    onSkipReplay() {}, onToggle() {},
+  });
+  translateDocument();
+  menu.show();
+  document.body.dataset.border = 'exact';
+</script>
+</html>

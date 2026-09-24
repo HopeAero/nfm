@@ -1,0 +1,11 @@
+# Game assets must stay byte-identical to the original (AGENTS.md): never
+# convert their line endings, whatever the user's core.autocrlf says.
+data/**     -text
+stages/**   -text
+mystages/** -text
+mycars/**   -text
+music/**    -text
+java/**     -text
+*.radq      binary
+*.jar       binary
+*.zip       binary
