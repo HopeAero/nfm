@@ -51,10 +51,14 @@ export class CanvasGraphics {
 
   // --- state ---------------------------------------------------------------
 
-  setColor(r, g, b) {
-    this.r = r; this.g = g; this.b = b;
+  /** A fourth argument is the colour's own alpha (new Color(r,g,b,a)); the
+   *  canvas multiplies it with globalAlpha, as Java2D does with a composite. */
+  setColor(r, g, b, a = 255) {
+    this.r = r; this.g = g; this.b = b; this.ca = a / 255;
     this._style();
   }
+
+  setColorOf(c) { this.setColor(c.r, c.g, c.b, c.a); }
 
   setComposite(alpha) {
     this.a = alpha;
@@ -62,7 +66,7 @@ export class CanvasGraphics {
   }
 
   _style() {
-    const c = `rgb(${this.r},${this.g},${this.b})`;
+    const c = this.ca === undefined || this.ca === 1 ? `rgb(${this.r},${this.g},${this.b})` : `rgba(${this.r},${this.g},${this.b},${this.ca})`;
     this.ctx.fillStyle = c;
     this.ctx.strokeStyle = c;
   }

@@ -53,7 +53,7 @@ rm -f "$STAGE"/web/stagemaker/*.test.js
 # web/ext/: the Extended Edition modules (extended-mode branch), same glob
 # problem; ext/data/ is its game data, the original .radq files unmodified.
 mkdir -p "$STAGE/web/ext"
-cp "$SRC"/web/ext/*.js "$STAGE/web/ext/"
+cp "$SRC"/web/ext/*.js "$SRC"/web/ext/*.html "$STAGE/web/ext/"
 rm -f "$STAGE"/web/ext/*.test.js
 cp -r "$SRC/ext" "$STAGE/"
 # music/ holds the tracker modules web/music.js fetches per stage (3.3 MB).

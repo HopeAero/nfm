@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Visor de modelos Extended</title>
+<!-- A developer page, not part of the game: draws Extended Mode's models with
+     the transpiled ContO/Plane (web/ext/) on the Canvas2D Graphics, so the
+     engine can be looked at before the race exists. Everything unlocked, every
+     effect switchable. -->
+<style>
+  :root { --bg: #16161a; --fg: #e8e6e3; --mute: #9a968f; --line: #333; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 14px system-ui, sans-serif; display: flex; flex-wrap: wrap; gap: 16px; padding: 16px; }
+  canvas { background: #000; width: min(870px, 100vw - 32px); height: auto; image-rendering: pixelated; }
+  aside { display: grid; gap: 8px; align-content: start; min-width: 240px; }
+  select, button, label { font: inherit; }
+  select, button { background: #222; color: var(--fg); border: 1px solid var(--line); padding: 6px 8px; }
+  small { color: var(--mute); }
+</style>
+</head>
+<body>
+<canvas id="c" width="870" height="480"></canvas>
+<aside>
+  <label>Modelo <select id="model"></select></label>
+  <label>Efecto <select id="effect"></select></label>
+  <label><input type="checkbox" id="spin" checked> Girar</label>
+  <small id="info">cargando…</small>
+</aside>
+<script type="module">
+import { detectFpath } from '../vfs.js';
+import { CanvasGraphics } from '../canvas-graphics.js';
+import { readRadq } from './radq.js';
+import { ContO } from './ContO.js';
+import { Medium } from './Medium.js';
+import { Trackers } from './Trackers.js';
+import { AS, modelCode } from './models.js';
+
+const EFFECTS = {
+  'ninguno': '',
+  'fuego (setfire)': 'call:setfire',
+  'teletransporte': 'c.teleported=true;c.telefade=128',
+  'pieza invisible': 'c.invisiblepiece=100',
+  'brillo': 'c.glowlines=true;c.glowcustom=true;c.glowcolour=[255,40,40];c.playerglow=true',
+  'congelado': 'c.spatk=true;c.freeze=true',
+  'fantasma + llamas verdes': 'c.shadowcar=true;c.greenflame=true;c.flameheight=3',
+  'iluminado': 'c.lightup=true;c.outoftrack=true;c.floorguardian=true;c.dmgcolours=[200,60,60];c.spec=[90,20,160]',
+  'electricidad': 'c.elec=true',
+  'reparación': 'c.fix=true',
+  'nieve': 'm.showsnow=true;m.snowno=40;m.snowheight=300',
+  'sol (drawsun)': 'call:drawsun',
+};
+
+await detectFpath('../../');   // this page is one level below web/
+const models = await readRadq('ext/data/models.radq');
+const g = new CanvasGraphics(document.getElementById('c'), 870, 480);
+const m = new Medium(), t = new Trackers();
+const bases = new Map();
+for (const [name, bytes] of models) bases.set(name, new ContO(0, bytes, m, t, null, modelCode(name)));
+
+const $model = document.getElementById('model'), $effect = document.getElementById('effect');
+const names = [...bases.keys()].sort((a, b) => modelCode(a) - modelCode(b));
+$model.innerHTML = names.map((n) => `<option>${n}</option>`).join('');
+$effect.innerHTML = Object.keys(EFFECTS).map((n) => `<option>${n}</option>`).join('');
+
+let c, calls = [];
+function setup() {
+  c = new ContO(1, bases.get($model.value), 100, 60, 800, 30);
+  c.m = new Medium();
+  calls = [];
+  for (const part of EFFECTS[$effect.value].split(';').filter(Boolean)) {
+    if (part.startsWith('call:')) { const f = c[part.slice(5)]; if (f.length) calls.push(f); else f.call(c); continue; }
+    const [k, v] = part.split('=');
+    const val = v === 'true' ? true : v === 'false' ? false : v.startsWith('[') ? Int32Array.from(JSON.parse(v)) : Number(v);
+    (k.startsWith('c.') ? c : c.m)[k.slice(2)] = val;
+  }
+  document.getElementById('info').textContent = `${$model.value} · código ${modelCode($model.value)} · ${c.npl} caras`;
+}
+$model.onchange = $effect.onchange = setup;
+setup();
+
+function frame() {
+  g.setColor(40, 44, 52); g.fillRect(0, 0, 870, 480);
+  if (document.getElementById('spin').checked) c.xz = (c.xz + 2) % 360;
+  c.d(g);
+  for (const f of calls) f.call(c, g);
+  requestAnimationFrame(frame);
+}
+frame();
+</script>
+</body>
+</html>

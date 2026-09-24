@@ -33,7 +33,14 @@ library the generated code calls, with Java's semantics where they matter).
 | --- | --- |
 | `radq.test.js` | every entry's CRC in all 15 `ext/data/` archives |
 | `ContO.test.js` | all 129 models, every ContO and Plane field, bit for bit, vs `madness.jar` (`contO.expected.json.gz` from `web/tools/ExtContOProbe.java`, `Math.random` seeded on both sides) |
+| `draw.test.js` | `ContO.d`/`Plane.d`/`Plane.s` call for call vs the jar (`draw.expected.json.gz` from `web/tools/ExtDrawProbe.java` + `RecG.java`): 129 models x 4 poses (170k calls), and 39 cars x 17 effect setups x 6 frames -- fire, teleport, invisibility, glow, freeze, ghost, lightup, electricity, repair, snow, rainbow, sun (~3M calls, 160k translucent colours; stored as hashes) |
 
-Drawing (`ContO.d`, `Plane.d`, `Medium.d`) is generated but not yet wired to
-the renderer or verified: Extended draws with per-colour alpha, which
-`web/graphics.js` does not take yet.
+`Medium.d` (sky, ground, clouds, mountains) is generated but verified only
+with the stage loader (step 4): its inputs come from loadstage.
+
+Extended draws with per-colour alpha (`new Color(r, g, b, a)`);
+`graphics.js`/`canvas-graphics.js` `setColor` take an optional fourth
+argument, multiplied with the composite as in Java2D, and `setColorOf(c)`.
+
+`viewer.html` draws any model with any effect on the Canvas2D Graphics: a
+developer page, not part of the game.
