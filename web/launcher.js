@@ -36,7 +36,7 @@ const STAGE_COUNT = 32;
 const STORE_KEY = 'nfm.launcher';
 const DEFAULTS = {
   name: '', car: 'Formula 7', stage: 1, players: 7, opponents: 'stage',
-  sfxvol: 100, musicvol: 100, res: 2, interp: true, ghost: false, unlockall: false, hud: 'auto',
+  sfxvol: 100, musicvol: 100, res: 2, interp: true, ghost: false, unlockall: false, hud: 'auto', devmode: false,
   visibility: 'public', lang: 'en',
 };
 let S = { ...DEFAULTS };
@@ -141,6 +141,14 @@ const V = {
     set: (i) => { S.unlockall = !!i; save(); },
     text: () => (S.unlockall ? 'on — every stage and car' : 'off — win races to unlock'),
   },
+  // Test switches in a page's URL (?stage=, ?selftest=, ?stats=, ...) count
+  // only with this on; the editors' Test Drive links always work (devmode.js).
+  devmode: {
+    list: () => [false, true],
+    get: () => (S.devmode ? 1 : 0),
+    set: (i) => { S.devmode = !!i; save(); },
+    text: () => (S.devmode ? 'on — URL test options work' : 'off'),
+  },
 };
 
 let pendingLang = null;
@@ -161,6 +169,7 @@ const SET_ROWS = [['sfxvol', 'Sound'], ['musicvol', 'Music'],
                   ['res', 'Resolution'], ['interp', 'Smooth frames'],
                   ['ghost', 'Replay recording'], ['hud', 'HUD on dark skies'],
                   ['unlockall', 'Unlock everything'],
+                  ['devmode', 'Developer mode'],
                   ['lang', 'Language']];
 
 const valueBits = (k) =>

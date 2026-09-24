@@ -48,6 +48,7 @@ const ES = {
   'automatic — colours by contrast': 'automático — colores por contraste',
   'boxes — as the original': 'cajas — como el original',
   'on — every stage and car': 'sí — todas las pistas y autos',
+  'Developer mode': 'Modo desarrollador', 'on — URL test options work': 'sí — funcionan las opciones de prueba por URL',
   'off — win races to unlock': 'no — gana carreras para desbloquear',
   'Single Player': 'Un jugador', 'Multiplayer': 'Multijugador', 'Car Maker': 'Creador de autos', 'Stage Maker': 'Creador de pistas',
   'Extended Edition': 'Edición Extendida', 'Classic Race': 'Carrera clásica', 'Career Mode': 'Modo carrera',

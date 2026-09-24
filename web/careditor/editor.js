@@ -18,6 +18,7 @@
 // keyboard code below is on the preview canvas, which is not a form control.
 
 import * as rad from './rad.js';
+import { devMode } from '../devmode.js';
 import { crashOnce, roofCrash } from './damage.js';
 import { scrubber } from './scrub.js';
 import { physicsHelp, crashHelp, crashTestHelp, STAT_HELP, CLASS_HELP,
@@ -796,7 +797,7 @@ physics(50,50,50,50,0,0,0,0,0,50,50,50,50,50,0,0)
     overlay.width = 700; overlay.height = 550;
     rd = new Graphics2D($('view'), overlay, 700, 550);
 
-    if (new URLSearchParams(location.search).get('debug')) {
+    if (devMode() && new URLSearchParams(location.search).get('debug')) {
       window.editor = { cm, rad, view, source, setSource };
     }
 

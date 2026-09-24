@@ -7,6 +7,7 @@
 // vsync pacing instead, so the whole adaptive block goes away.
 
 import { Graphics2D } from './graphics.js';
+import { pageParams } from './devmode.js';
 import { Medium } from './Medium.js';
 import { Trackers } from './Trackers.js';
 import { CheckPoints } from './CheckPoints.js';
@@ -114,7 +115,9 @@ async function negotiate(mode, params, cfg, keep) {
 export async function boot(opts = {}) {
   // Launched from the launcher, its observer already covers this page.
   if (!opts.params) translateDocument();
-  const params = opts.params || new URLSearchParams(location.search);
+  // A query string's test switches need developer mode (devmode.js); the
+  // editors' Test Drive links always work.
+  const params = opts.params || pageParams(log);
   // ?ext=classic|career: Extended Mode's race, in this same page and render
   // surface; its classes and frame are its own (web/ext/race.js).
   if (params.get('ext')) return (await import('./ext/race.js')).bootExtended(params, log, opts.onExit);
