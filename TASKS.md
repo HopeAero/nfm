@@ -1029,7 +1029,14 @@ replay (`web/tools/ext-trace.mjs`, DiffRun `-Ddiffrun.trace=Class.method`).
       `readdata` hands over `xtGraphics`/`CheckPoints`, then `fase = 6476` as
       stage select's START does. The launcher's Extended Edition -> Classic
       Race / Career Mode opens it. 7-car race on stage 1 with the full HUD.
-- [ ] **Launcher car and stage pick for Extended** (it opens stage 1, car 0).
+- [x] **Car select (2026-09-24):** the launcher's Extended entries open
+      Extended's own car select (`fase -9` -> `inishcarselect`, `fase 7`), as
+      the base port opens the game's; Enter -> stage preview -> START -> race.
+      Career shows levels, stat points, Change Stats and Bonus Cars. Esc on it
+      returns to the launcher (the jar's car select has no way out).
+- [ ] **Stage pick for Extended:** classic mode rolls a stage 1-17 on Enter,
+      as the jar does; career takes `?stage=` or its unlocked stage. The
+      launcher has no Extended stage list yet.
 - [ ] **Sound and music:** `getAudioClip` is silent; `ext/` has no `sounds/`
       or `music/` yet. The base port's BassoonTracker/WebAudio path is the model.
 - [ ] **Saving:** `writedata` is a no-op (needs `ZipOutputStream`); `localStorage`.

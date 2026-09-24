@@ -41,11 +41,13 @@ status.remove();
 System.live = true;
 Panel.graphicsFor = (c, w, h) => new JGraphics(c, w, h);
 const gs = new GameSparker();
-// Straight into a race, as web/main.html?car=&stage= does for the base game:
-// the launcher picks, the Extended menus are skipped (they come last).
-// ?mode=classic|career&stage=N&car=M. run() hands readdata its xtGraphics and
-// CheckPoints; from there this does what stage select's START does (fase 6476:
-// randomno sets the field size, then fase 2 loads the stage).
+// Into Extended's own car select, then the race, as the base port's launcher
+// opens the game's car select; Extended's other menus are skipped (they come
+// last). ?mode=classic|career[&stage=N][&car=M]. run() hands readdata its
+// xtGraphics and CheckPoints; fase -9 is what the menu does to open the car
+// select (inishcarselect, then fase 7); its Enter sets fase 6476 (randomno sizes
+// the field, fase 2 loads the stage). Classic mode rolls a stage 1-17 there,
+// as the jar does, unless ?stage= asks for one.
 const q = new URLSearchParams(location.search);
 gs.readdata = function (xt, madness, checkpoints) {
   GameSparker.prototype.readdata.call(this, xt, madness, checkpoints);
@@ -59,7 +61,16 @@ gs.readdata = function (xt, madness, checkpoints) {
   xt.classicmode = !xt.careermode;
   checkpoints.stage = +(q.get('stage') ?? 1);
   xt.sc[0] = +(q.get('car') ?? 0);
-  xt.fase = 6476;
+  xt.fase = -9;
+  // Extended's main menu is not the way out yet: back to the launcher, as the base race returns
+  xt.maini = () => { location.href = '../../index.html'; };
+  if (q.has('stage')) {
+    const pick = xt.carselect;
+    xt.carselect = function (...a) {
+      pick.apply(this, a);
+      if (this.fase === 6476) checkpoints.stage = +q.get('stage');
+    };
+  }
   window.xt = xt; window.checkpoints = checkpoints;   // for the console
 };
 // ponytail: no saving yet (writedata needs ZipOutputStream); localStorage when careers matter
@@ -73,7 +84,11 @@ gs.start();
 const KEYS = { ArrowUp: 1004, ArrowDown: 1005, ArrowLeft: 1006, ArrowRight: 1007, Enter: 10, Escape: 27, Backspace: 8, Tab: 9,
   Home: 1000, End: 1001, PageUp: 1002, PageDown: 1003, F1: 1008, F2: 1009, F3: 1010, F4: 1011, F5: 1012, F6: 1013, F7: 1014, F8: 1015, F9: 1016, F10: 1017, F11: 1018, F12: 1019 };
 const code = (e) => KEYS[e.key] ?? (e.key.length === 1 ? e.key.charCodeAt(0) : 0);
-addEventListener('keydown', (e) => { const k = code(e); if (k) { gs.keyDown({}, k); e.preventDefault(); } });
+addEventListener('keydown', (e) => {
+  // Esc on the car select leaves for the launcher, as the base port's car select does
+  if (e.key === 'Escape' && window.xt?.fase === 7) { location.href = '../../index.html'; return; }
+  const k = code(e); if (k) { gs.keyDown({}, k); e.preventDefault(); }
+});
 addEventListener('keyup', (e) => { const k = code(e); if (k) { gs.keyUp({}, k); e.preventDefault(); } });
 const at = (e) => { const r = canvas.getBoundingClientRect(); return [Math.round((e.clientX - r.left) * 870 / r.width), Math.round((e.clientY - r.top) * 480 / r.height)]; };
 canvas.addEventListener('mousedown', (e) => { gs.mouseDown({}, ...at(e)); canvas.focus(); });
