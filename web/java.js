@@ -176,20 +176,24 @@ export function RGBtoHSB(r, g, b, out) {
   let cmin = r < g ? r : g;
   if (b < cmin) cmin = b;
 
-  brightness = cmax / 255.0;
-  saturation = cmax !== 0 ? (cmax - cmin) / cmax : 0.0;
+  // All float in the JDK -- (float) cmax / 255.0f, etc. -- so every step
+  // rounds to float32. This once ran in double and came out an ulp off the
+  // jar's hue for some colours (found by web/ext/ContO.test.js).
+  const f = Math.fround;
+  brightness = f(cmax / 255.0);
+  saturation = cmax !== 0 ? f((cmax - cmin) / cmax) : 0.0;
 
   if (saturation === 0) {
     hue = 0;
   } else {
-    const redc = (cmax - r) / (cmax - cmin);
-    const greenc = (cmax - g) / (cmax - cmin);
-    const bluec = (cmax - b) / (cmax - cmin);
-    if (r === cmax) hue = bluec - greenc;
-    else if (g === cmax) hue = 2.0 + redc - bluec;
-    else hue = 4.0 + greenc - redc;
-    hue = hue / 6.0;
-    if (hue < 0) hue = hue + 1.0;
+    const redc = f((cmax - r) / (cmax - cmin));
+    const greenc = f((cmax - g) / (cmax - cmin));
+    const bluec = f((cmax - b) / (cmax - cmin));
+    if (r === cmax) hue = f(bluec - greenc);
+    else if (g === cmax) hue = f(f(2.0 + redc) - bluec);
+    else hue = f(f(4.0 + greenc) - redc);
+    hue = f(hue / 6.0);
+    if (hue < 0) hue = f(hue + 1.0);
   }
 
   out[0] = hue;
