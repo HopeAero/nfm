@@ -1419,11 +1419,14 @@ export class Medium {
     if (this.zy < -90) {
       this.zy = -90;
     }
+    // base port: no int cast -- an interpolated frame's blended heading keeps its
+    // fraction (the cast dropped it, so turns stepped a degree per redraw: the
+    // shaking); integer headings behave as the Java's
     if (this.xz > 360) {
-      this.xz = i32(this.xz - 360);
+      this.xz -= 360;
     }
     if (this.xz < 0) {
-      this.xz = i32(this.xz + 360);
+      this.xz += 360;
     }
     if (this.y > 0) {
       this.y = 0;

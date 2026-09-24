@@ -1067,6 +1067,9 @@ replay (`web/tools/ext-trace.mjs`, DiffRun `-Ddiffrun.trace=Class.method`).
       turns and cost double on tick frames. `?selftest=N` hashes cars AND
       effect state; interp=0 and 1 must agree (stage 4, car 30, 400 ticks:
       `8215cdd7`). 60 fps, worst frame 6-14 ms, 0 over budget on stage 4.
+- [x] **Shaking in turns fixed (2026-09-24):** Medium.d's `i32(xz +/- 360)` dropped
+      the fraction of the blended camera heading on every redraw; now `xz += 360`
+      as the base port's Medium.d. See WORK.md.
 - [ ] **The base shell's race features** for Extended: pause menu, finish
       screen, highlights, Spanish HUD sprites. Today the jar's own finish runs.
 - [ ] **Deploy:** `deploy.sh` needs `rsync`, which this Windows machine lacks.
