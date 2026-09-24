@@ -185,7 +185,7 @@ $('gm-rows').innerHTML = GM.map((t, i) =>
   `<li class="item" role="menuitem" data-act="gm:${(i + 1) % 3}"><span class="label">${t}</span></li>`).join('');
 
 // Extended Edition: NFM2 Extended Mode v2.8's two race modes (its xtGraphics
-// menu's Classic Mode and career, opselect 2 and 1), raced by web/ext/main.html.
+// menu's Classic Mode and career, opselect 2 and 1), raced by web/ext/race.js.
 const EXT = [['classic', 'Classic Race'], ['career', 'Career Mode']];
 $('ext-rows').innerHTML = EXT.map(([k, t]) =>
   `<li class="item" role="menuitem" data-act="ext:${k}"><span class="label">${t}</span></li>`).join('');
@@ -483,12 +483,15 @@ addEventListener('pointerdown', unlockMenuMusic);
  * same keys, so the menu adds no second way to configure a race. */
 function raceParams(extra = {}) {
   const p = new URLSearchParams();
-  const car = CARS[V.car.get()];
-  if (car?.custom) p.set('mycar', car.name);
-  else if (car) p.set('car', String(car.slot));
-  p.set('stage', String(S.stage));
-  p.set('players', String(S.players));
-  if (S.opponents === 'same') p.set('cars', 'same');
+  // An Extended race (extra.ext) has its own cars, stages and field size.
+  if (!extra.ext) {
+    const car = CARS[V.car.get()];
+    if (car?.custom) p.set('mycar', car.name);
+    else if (car) p.set('car', String(car.slot));
+    p.set('stage', String(S.stage));
+    p.set('players', String(S.players));
+    if (S.opponents === 'same') p.set('cars', 'same');
+  }
   p.set('sfxvol', String(S.sfxvol));
   p.set('musicvol', String(S.musicvol));
   p.set('res', String(S.res));
@@ -859,8 +862,9 @@ function fire() {
       if (+arg === 4) return void (location.href = './web/stagemaker.html');
       return goPage('set');
     case 'gm':    return void startCarSelect(+arg);
-    // ponytail: straight into stage 1 with car 0; an Extended car/stage pick comes next
-    case 'ext':   return void (location.href = `./web/ext/main.html?mode=${arg}`);
+    // Extended's race in the same shell as the base race (web/ext/race.js).
+    // ponytail: the jar's default car and stage; the launcher's pickers come next
+    case 'ext':   return void startRace(null, { ext: arg });
     case 'opts':  return goPage('opts');
     case 'lang':  return applyLang();
     case 'back':  return goPage(BACK[pageName()]);

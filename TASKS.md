@@ -1050,9 +1050,17 @@ replay (`web/tools/ext-trace.mjs`, DiffRun `-Ddiffrun.trace=Class.method`).
       `web/ext/musicfiles.js` so `loadmusic` takes the jar's path. The base
       port's BassoonTracker (modules) and an `HTMLAudioElement` (ogg) are the model.
 - [ ] **Saving:** `writedata` is a no-op (needs `ZipOutputStream`); `localStorage`.
-- [ ] **Renderer:** the race draws on Canvas2D (`web/ext/jgraphics.js` over
-      `canvas-graphics.js`). Move the 3D to `graphics.js` (WebGL) as the base
-      race does, keeping the submission order.
+- [x] **The race in the base shell (2026-09-24):** `web/main.html?ext=classic|career`
+      (and the launcher's Extended Edition entries, through the same `boot()`)
+      runs Extended's race on the base race's page, WebGL surface (`?res=`,
+      `?textres=`, `?aa=`), fixed-tick rAF loop and stats line. `web/ext/race.js`
+      steps the generated `GameSparker.run()` one frame per tick and fast-forwards
+      the jar's pre-race screens unseen (see WORK.md). `web/ext/main.html` stays as
+      the dev page with Extended's own car select until the launcher has one.
+- [ ] **Interpolation** for Extended (the base race renders between ticks): it
+      needs the `interpolating` hooks the base port hand-wrote into ContO/Medium.
+- [ ] **The base shell's race features** for Extended: pause menu, finish
+      screen, highlights, Spanish HUD sprites. Today the jar's own finish runs.
 - [ ] **Deploy:** `deploy.sh` needs `rsync`, which this Windows machine lacks.
 - [ ] **Extended's own menus, last** (as in the base port, the launcher stands
       in for them). They already run from the transpiled `xtGraphics`; images

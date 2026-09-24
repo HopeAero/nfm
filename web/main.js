@@ -115,6 +115,9 @@ export async function boot(opts = {}) {
   // Launched from the launcher, its observer already covers this page.
   if (!opts.params) translateDocument();
   const params = opts.params || new URLSearchParams(location.search);
+  // ?ext=classic|career: Extended Mode's race, in this same page and render
+  // surface; its classes and frame are its own (web/ext/race.js).
+  if (params.get('ext')) return (await import('./ext/race.js')).bootExtended(params, log, opts.onExit);
   const base = await detectFpath(params.get('path'));
 
   // ---- netplay handshake --------------------------------------------------

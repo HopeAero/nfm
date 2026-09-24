@@ -49,9 +49,12 @@ developer page, not part of the game.
 
 ```
 python3 web/tools/serve.py 8123
-http://localhost:8123/web/ext/main.html?mode=classic&stage=1&car=0   # or mode=career
+http://localhost:8123/web/main.html?ext=classic&stage=1&car=23      # the race, in the base shell
+http://localhost:8123/web/ext/main.html?mode=classic                 # dev page: Extended's own car select
 ```
-or the launcher's Extended Edition -> Classic Race / Career Mode. The page
+The launcher's Extended Edition -> Classic Race / Career Mode runs the first
+(`web/ext/race.js`: the base page, WebGL, stats line and tick loop around
+the generated `GameSparker.run()`). The dev page
 preloads the archives and fonts (`ext/fonts/`, the two `.ttf` from
 `madness.jar`), then runs the jar's own `GameSparker.run()` with Extended's
 menus skipped (see `main.html` and WORK.md). `jgraphics.js` is the Graphics:
