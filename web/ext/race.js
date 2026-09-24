@@ -126,9 +126,9 @@ export async function bootExtended(params, log, onExit) {
   // ponytail: no saving yet (writedata needs ZipOutputStream); localStorage when careers matter
   gs.writedata = () => {};
   // run()'s placed objects (aconto2) are a local; loadstage gets them first
-  let placed = null, medium = null;
+  let placed = null, medium = null, record = null;
   gs.loadstage = function (aconto, ...rest) {
-    placed = aconto; medium = rest[1];
+    placed = aconto; medium = rest[1]; record = rest[6];
     return GameSparker.prototype.loadstage.call(this, aconto, ...rest);
   };
   window.gs = gs;                  // for the console
@@ -166,6 +166,9 @@ export async function bootExtended(params, log, onExit) {
   const interp = makeInterp({ rd, gs, xt, medium, get placed() { return placed; } });
   const MAX_CATCHUP = 3;
   const SHOW_STATS = params.get('stats') === '1';
+  // ?spike=MS: log every frame whose JS work exceeds MS, with what it did (the base race's ?spike=)
+  const SPIKE_MS = parseFloat(params.get('spike') || '0');
+  window.spikes = [];
   let acc = 0, last = performance.now(), frames = 0, ticks = 0, lastFpsAt = last, tickMs = 0, redrawMs = 0, tickAt = last;
   // ?stats=1: where a frame's time goes, split by frames with a tick and without
   const st = { tickFrames: 0, tickWork: 0, plainFrames: 0, plainWork: 0, worst: 0, over: 0 };
@@ -202,6 +205,11 @@ export async function bootExtended(params, log, onExit) {
     const work = performance.now() - w0;
     if (ticked) { st.tickFrames++; st.tickWork += work; } else { st.plainFrames++; st.plainWork += work; }
     if (work > st.worst) st.worst = work;
+    if (SPIKE_MS && work > SPIKE_MS) {
+      const e = { at: Math.round(now), work: +work.toFixed(1), ticked, cntf: record?.cntf, verts: rd.inputVerts, heap: performance.memory ? Math.round(performance.memory.usedJSHeapSize / 1048576) : undefined };
+      window.spikes.push(e);
+      console.log('spike', JSON.stringify(e));
+    }
     if (work > 16.7) st.over++;
     if (++frames >= 5 && now - lastFpsAt >= 500) {
       const dt = now - lastFpsAt;

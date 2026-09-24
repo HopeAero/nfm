@@ -1038,7 +1038,6 @@ export class ContO {
         if ((this.checkpoint !== 0) && ((i32(this.checkpoint - 1)) === this.m.checkpoint)) {
           l = -1;
         }
-        let ai = intArray(this.npl);
         let ai2 = intArray(this.npl);
         let i4 = 0;
         do {
@@ -1046,32 +1045,14 @@ export class ContO {
             this.pdust(i4, g, -1);
           }
         } while (++i4 < 4);
+        // ext-patch face-order: the jar's pairwise rank count is this stable sort --
+        // av descending, ties by index -- in O(n log n) (web/tools/ext-patches.mjs)
         for (let j4 = 0; j4 < this.npl; j4 = i32(j4 + 1)) {
-          ai[j4] = 0;
+          ai2[j4] = j4;
         }
-        for (let k3 = 0; k3 < this.npl; k3 = i32(k3 + 1)) {
-          for (let i5 = i32(k3 + 1); i5 < this.npl; i5 = i32(i5 + 1)) {
-            if (this.p[k3].av !== this.p[i5].av) {
-              if (this.p[k3].av < this.p[i5].av) {
-                let array = ai;
-                let n = k3;
-                ++array[n];
-              } else {
-                let array2 = ai;
-                let n2 = i5;
-                ++array2[n2];
-              }
-            } else if (k3 > i5) {
-              let array3 = ai;
-              let n3 = k3;
-              ++array3[n3];
-            } else {
-              let array4 = ai;
-              let n4 = i5;
-              ++array4[n4];
-            }
-          }
-          ai2[ai[k3]] = k3;
+        {
+          const p = this.p;
+          ai2.sort((a, b) => (p[b].av - p[a].av) || (a - b));
         }
         for (let l4 = 0; l4 < this.npl; l4 = i32(l4 + 1)) {
           if (((((((this.m.switchfase === 0) || (this.m.switchfase === 10)) || (this.m.switchfase === 20))) && this.m.effect[2]) && !this.m.trk) && (this.p[ai2[l4]].embos === 0)) {
@@ -1153,11 +1134,13 @@ export class ContO {
 
   rot(ai, ai1, i, j, k, l) {
     if (k !== 0) {
+      // ext-patch rot-hoist: one table read per rotation, not four per vertex (web/tools/ext-patches.mjs)
+      const cos = this.m.cos(k), sin = this.m.sin(k);
       for (let i2 = 0; i2 < l; i2 = i32(i2 + 1)) {
         let j2 = ai[i2];
         let k2 = ai1[i2];
-        ai[i2] = i32(i + trunc((fr((fr(fr(((i32(j2 - i)))) * this.m.cos(k))) - (fr(fr(((i32(k2 - j)))) * this.m.sin(k)))))));
-        ai1[i2] = i32(j + trunc((fr((fr(fr(((i32(j2 - i)))) * this.m.sin(k))) + (fr(fr(((i32(k2 - j)))) * this.m.cos(k)))))));
+        ai[i2] = i32(i + trunc((fr((fr(fr(((i32(j2 - i)))) * cos)) - (fr(fr(((i32(k2 - j)))) * sin))))));
+        ai1[i2] = i32(j + trunc((fr((fr(fr(((i32(j2 - i)))) * sin)) + (fr(fr(((i32(k2 - j)))) * cos))))));
       }
     }
   }

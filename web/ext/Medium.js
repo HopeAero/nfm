@@ -1966,11 +1966,13 @@ export class Medium {
 
   rot(ai, ai1, i, j, k, l) {
     if (k !== 0) {
+      // ext-patch rot-hoist: one table read per rotation, not four per vertex (web/tools/ext-patches.mjs)
+      const cos = this.cos(k), sin = this.sin(k);
       for (let i2 = 0; i2 < l; i2 = i32(i2 + 1)) {
         let j2 = ai[i2];
         let k2 = ai1[i2];
-        ai[i2] = i32(i + trunc((fr((fr(fr(((i32(j2 - i)))) * this.cos(k))) - (fr(fr(((i32(k2 - j)))) * this.sin(k)))))));
-        ai1[i2] = i32(j + trunc((fr((fr(fr(((i32(j2 - i)))) * this.sin(k))) + (fr(fr(((i32(k2 - j)))) * this.cos(k)))))));
+        ai[i2] = i32(i + trunc((fr((fr(fr(((i32(j2 - i)))) * cos)) - (fr(fr(((i32(k2 - j)))) * sin))))));
+        ai1[i2] = i32(j + trunc((fr((fr(fr(((i32(j2 - i)))) * sin)) + (fr(fr(((i32(k2 - j)))) * cos))))));
       }
     }
   }

@@ -1288,11 +1288,13 @@ export class Plane {
 
   rot(ai, ai1, i, j, k, l) {
     if (k !== 0) {
+      // ext-patch rot-hoist: one table read per rotation, not four per vertex (web/tools/ext-patches.mjs)
+      const cos = this.m.cos(k), sin = this.m.sin(k);
       for (let i2 = 0; i2 < l; i2 = i32(i2 + 1)) {
         let j2 = ai[i2];
         let k2 = ai1[i2];
-        ai[i2] = i32(i + trunc((fr((fr(fr(((i32(j2 - i)))) * this.m.cos(k))) - (fr(fr(((i32(k2 - j)))) * this.m.sin(k)))))));
-        ai1[i2] = i32(j + trunc((fr((fr(fr(((i32(j2 - i)))) * this.m.sin(k))) + (fr(fr(((i32(k2 - j)))) * this.m.cos(k)))))));
+        ai[i2] = i32(i + trunc((fr((fr(fr(((i32(j2 - i)))) * cos)) - (fr(fr(((i32(k2 - j)))) * sin))))));
+        ai1[i2] = i32(j + trunc((fr((fr(fr(((i32(j2 - i)))) * sin)) + (fr(fr(((i32(k2 - j)))) * cos))))));
       }
     }
   }

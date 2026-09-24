@@ -1096,15 +1096,17 @@ AI and UI are the mod.
   race in the same page via boot(), onExit back to the launcher, stats line.
 
 **Applies -- to do, by impact:**
-- [ ] Perf: ContO.d face order by stable `Array#sort` on `av` instead of the
-      O(npl^2) rank count (same order; ~12% of the base frame). A J2JS patch or
-      a post-generation override, kept by a test that the order is identical.
-- [ ] Perf: hoist `m.cos(k)`/`m.sin(k)` out of Plane.rot's and Medium.rot's
-      per-vertex loops (4 table calls per vertex today; Plane.rot was 6.5% of
-      Extended's profile).
-- [ ] Perf: Record's per-cycle ContO copies (74% of the base's allocation, the
-      likely cause of Extended's remaining 20-30 ms spikes): the base's
-      `record.ghosts` guard / "Replay recording" setting.
+- [x] Perf: ContO.d face order by stable `Array#sort` on `av` instead of the
+      O(npl^2) rank count, and cos/sin hoisted out of ContO/Plane/Medium.rot:
+      named patches over J2JS output (`web/tools/ext-patches.mjs`, checked by
+      `ext/patches.test.js`; draw.test.js still matches the jar call for call).
+      Tick 13.9 -> 10.8 ms and redraw 9.6 -> 7.7 ms on a 16.5k-vertex scene;
+      22-40% off race frames.
+- [x] ~~Perf: Record's per-cycle ContO copies~~ -- measured, not the cause:
+      `?spike=18` logged 5 frames over 18 ms in 20 s, none following a Record
+      cycle (cntf 4..43), heap +3.4 MB/s of short-lived draw arrays. The copy
+      constructor also consumes randoms (gr == -15 planes) and writes the
+      source and the Trackers, so skipping copies would change the race.
 - [ ] Visual: replay the tick draw's random sequence on redraws (the base's
       Medium random log), so sparks, dust and bolts keep their shape between
       ticks instead of re-rolling at 60 Hz.
