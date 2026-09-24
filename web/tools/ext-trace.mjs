@@ -1,6 +1,6 @@
 // Replay captured jar calls against the transpiled Extended port.
 //
-//   node --max-old-space-size=8000 web/tools/ext-trace.mjs <trace.jsonl> [--fixture out.json.gz]
+//   node --max-old-space-size=8000 web/tools/ext-trace.mjs <trace.jsonl> [--fixture out.json.gz] [--from call]
 //
 // Each line of a trace (DiffRun -Ddiffrun.trace=Class.method, det.Det.enter/
 // exit) is one sampled call: the object graph reachable from `this` and the
@@ -183,12 +183,15 @@ if (process.argv[1] && process.argv[1].endsWith('ext-trace.mjs')) {
   const [file, ...rest] = process.argv.slice(2);
   const fixture = rest.includes('--fixture') ? rest[rest.indexOf('--fixture') + 1] : null;
   const method = rest.includes('--method') ? rest[rest.indexOf('--method') + 1] : 'drive';
+  // --from N resumes a long replay: earlier lines are skipped without JSON.parse.
+  const from = rest.includes('--from') ? +rest[rest.indexOf('--from') + 1] : -Infinity;
   const kept = [];
   let n = 0, ok = 0;
   const input = file.endsWith('.gz') ? fs.createReadStream(file).pipe(zlib.createGunzip()) : fs.createReadStream(file);
   const lines = readline.createInterface({ input, crlfDelay: Infinity });
   for await (const line of lines) {
     if (!line.trim()) continue;
+    if (+(/"call":(\d+)/.exec(line)?.[1] ?? Infinity) < from) continue;
     const rec = JSON.parse(line);
     process.stdout.write(`call ${rec.call} ... `);
     const t0 = Date.now();
