@@ -1066,6 +1066,83 @@ replay (`web/tools/ext-trace.mjs`, DiffRun `-Ddiffrun.trace=Class.method`).
 - [ ] **The base shell's race features** for Extended: pause menu, finish
       screen, highlights, Spanish HUD sprites. Today the jar's own finish runs.
 - [ ] **Deploy:** `deploy.sh` needs `rsync`, which this Windows machine lacks.
+### Base-port parity audit (2026-09-24)
+
+The base port is not just the Java transcribed: it carries port-level fixes and
+features no Java has. Extended was transpiled from its own source and checked
+against the jar, so it did NOT inherit them, and several were being
+rediscovered one bug at a time. This list is every base-port item (from
+WORK.md, TASKS.md and the code of web/ContO/Plane/Medium/graphics/main/
+XtGraphics/Mad), sorted against Extended. Engine comparison, for scale:
+Plane shares 8/10 methods and all fields with the base; Medium 30/32 (+39
+fields); ContO 13/19 (+40 fields, 6 new effects); Mad->Madness +120 fields;
+Control 4x the code; xtGraphics twice. The render core is the base's; physics,
+AI and UI are the mod.
+
+**Covered already** (shared code, or redone for Extended):
+- graphics.js as a whole: WebGL batch in submission order, even-odd trapezoid
+  fill, packed colour, modulo-free isConvex, textres/AA defaults, per-colour
+  alpha, setFont(Font), drawString/stringWidth through tr(). java.js: float
+  RGBtoHSB/HSBtoRGB, idiv(x,0) = 0, the draw random bank.
+- Fixed tick 53 ms, MAX_CATCHUP 3, display-rate interpolation with the camera
+  blended between its tick states, HUD vector replay, overlay kept
+  (web/ext/interp.js); one scene draw per frame (the tick's own picture is t=0).
+- Fractional sin/cos (during redraws); draw-time mutations kept out of the sim
+  (save/restore instead of `interpolating` hooks, checked by interp.test.js).
+- Procyon `*= (int)literal` artifacts (sky 0.991, etc.): Extended's repaired
+  source is bytecode-verified; field/method name clashes (trackbg$m, stat$m);
+  pacing without catch-up bursts on menu screens (carselect.js fix is shared).
+- Canvas2D edge stroke on fills (offscreen images use canvas-graphics.js),
+  race in the same page via boot(), onExit back to the launcher, stats line.
+
+**Applies -- to do, by impact:**
+- [ ] Perf: ContO.d face order by stable `Array#sort` on `av` instead of the
+      O(npl^2) rank count (same order; ~12% of the base frame). A J2JS patch or
+      a post-generation override, kept by a test that the order is identical.
+- [ ] Perf: hoist `m.cos(k)`/`m.sin(k)` out of Plane.rot's and Medium.rot's
+      per-vertex loops (4 table calls per vertex today; Plane.rot was 6.5% of
+      Extended's profile).
+- [ ] Perf: Record's per-cycle ContO copies (74% of the base's allocation, the
+      likely cause of Extended's remaining 20-30 ms spikes): the base's
+      `record.ghosts` guard / "Replay recording" setting.
+- [ ] Visual: replay the tick draw's random sequence on redraws (the base's
+      Medium random log), so sparks, dust and bolts keep their shape between
+      ticks instead of re-rolling at 60 Hz.
+- [ ] Visual: loadsnap's corner-pixel reference when the corner is transparent
+      (base fix for the missing "TH" on rank badges); the probable cause of the
+      black shapes on Extended's loading/stage images.
+- [ ] Visual: `?hud=auto` contrast-adapted HUD ink on dark skies, `outline`,
+      `boxes` (images.js readable/halo).
+- [ ] Screens: Esc opens the base's DOM pause menu (race-ui.js: Resume /
+      Instant Replay / Instructions / Quit), pause drops accumulated time;
+      Enter mid-race (the jar's fase -6/-7) routed to it instead of Extended's
+      pause screen.
+- [ ] Screens: race end -> the base's finish screen, automatic highlights and
+      Instant Replay (Record.playh on cloned cars), then back to the launcher.
+- [ ] Screens: launcher car and stage pickers for Extended (base carselect.js /
+      stage select with the NFM1/NFM2 lists and 3D preview).
+- [ ] Audio: SFX through web/audio.js (the base's AudioClip stand-ins for
+      getAudioClip), unlocked on key/pointer, volumes from Settings.
+- [ ] Audio: music -- the .radq stage modules through BassoonTracker
+      (music.js), career .ogg pairs through an <audio> element; ship the files.
+- [ ] i18n: Spanish HUD sprites and layout (ui-sprites-es.js), Extended's
+      strings in the i18n dictionary.
+- [ ] Input: touch joystick and two-finger trick; check Extended's own key map
+      (A/S toggles, Shift lookback) against the base's.
+- [ ] Tooling: `?bench=`, `?spike=`, `?prof=1`, `?maxfps=`, `?debug=1` for the
+      Extended race.
+
+**Does not apply now** (decide when Extended gets multiplayer):
+- Netplay determinism fixes that deliberately depart from the Java: sound and
+  announcer randoms on the draw bank, stepFix / tickMissedCp moved out of
+  drawing, repair never branching on ContO.dist, `human(i)` / `Control.remote`
+  / `xt.im`, trig tables baked as constants. Extended stays jar-faithful here;
+  they matter once two clients must agree.
+- Base deviations flagged as possibly unintended (Medium.ys clamp at 50, dsprk
+  truncation): not to be copied.
+- Base-only screens (car maker, stage maker, lobby) and ?mystage / ?mycar /
+  ?cars=same / ?players.
+
 - [ ] **Extended's own menus, last** (as in the base port, the launcher stands
       in for them). They already run from the transpiled `xtGraphics`; images
       decode, but the menu backdrop draws black.
