@@ -24,6 +24,13 @@ X="--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED --add-exports
     $(ls decompilation/extended/java-src/*.java | grep -v Control.java)
 ```
 
+After every regeneration, apply the named patches that carry the base port's
+optimisations over (`ext/patches.test.js` fails until you do):
+
+```sh
+node web/tools/ext-patches.mjs
+```
+
 Hand-written: `radq.js` (the archives), `jawt.js` (the slice of the Java
 library the generated code calls, with Java's semantics where they matter).
 
