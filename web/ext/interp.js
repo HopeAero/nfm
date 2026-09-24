@@ -191,9 +191,27 @@ export function makeInterp(w) {
   for (const name of ['nitroandspecials', typeof xt.stat$m === 'function' ? 'stat$m' : 'stat']) {
     const f = xt[name];
     xt[name] = function (...a) {
-      if (hudStart < 0) { hudStart = rd.count; sceneVerts = rd.inputVerts; }
+      if (hudStart < 0) { unmute(); hudStart = rd.count; sceneVerts = rd.inputVerts; }
       return f.apply(this, a);
     };
+  }
+
+  // A tick whose picture will not be shown (a redraw replaces it, or a later
+  // catch-up tick does) still runs the jar's scene drawing -- its side effects
+  // are simulation state -- but emits no geometry until the HUD starts: the
+  // surface counts the polygons and drops them, as graphics.js's ?geom=0 does.
+  const EMIT = ['fillPolygon', 'drawPolygon', 'drawLine', 'fillRect', 'drawRect', 'fillOval', 'fillRoundRect', 'drawRoundRect'];
+  const countOnly = (xs, ys, n) => { rd.inputVerts += (xs && xs.npoints !== undefined ? xs.npoints : n) | 0; };
+  const noop = () => {};
+  let muted = false;
+  function mute() {
+    muted = true;
+    for (const m of EMIT) rd[m] = m === 'fillPolygon' || m === 'drawPolygon' ? countOnly : noop;
+  }
+  function unmute() {
+    if (!muted) return;
+    muted = false;
+    for (const m of EMIT) delete rd[m];
   }
 
   const capture = () => {
@@ -236,10 +254,11 @@ export function makeInterp(w) {
     prof,
     /** Polygon vertices the last tick's scene submitted (before its HUD). */
     get sceneVerts() { return sceneVerts; },
-    /** Before a tick: mark where its HUD will start. */
-    beforeTick() { prev = curr; hudStart = -1; },
+    /** Before a tick: mark where its HUD will start; `hidden`: its scene will not be shown. */
+    beforeTick(hidden = false) { prev = curr; hudStart = -1; if (hidden) mute(); },
     /** After a tick: its end state, and its HUD geometry to replay. */
     afterTick() {
+      unmute();
       curr = capture();
       if (!prev) prev = curr;
       hud = rd.snapshotFrom(hudStart >= 0 ? hudStart : rd.count);

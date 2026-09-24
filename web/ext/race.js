@@ -165,11 +165,13 @@ export async function bootExtended(params, log, onExit) {
   const INTERPOLATE = params.get('interp') !== '0';
   const interp = makeInterp({ rd, gs, xt, medium, get placed() { return placed; } });
   const MAX_CATCHUP = 3;
+  // How near a tick's own picture must be to the blend position to be shown as is (?tickeps=)
+  const TICK_EPS = parseFloat(params.get('tickeps') || '0.1');
   const SHOW_STATS = params.get('stats') === '1';
   // ?spike=MS: log every frame whose JS work exceeds MS, with what it did (the base race's ?spike=)
   const SPIKE_MS = parseFloat(params.get('spike') || '0');
   window.spikes = [];
-  let acc = 0, last = performance.now(), frames = 0, ticks = 0, lastFpsAt = last, tickMs = 0, redrawMs = 0, tickAt = last;
+  let acc = 0, last = performance.now(), frames = 0, ticks = 0, lastFpsAt = last, tickMs = 0, redrawMs = 0, ticksDone = 0;
   // ?stats=1: where a frame's time goes, split by frames with a tick and without
   const st = { tickFrames: 0, tickWork: 0, plainFrames: 0, plainWork: 0, worst: 0, over: 0 };
   const loop = (now) => {
@@ -181,25 +183,34 @@ export async function bootExtended(params, log, onExit) {
     while (acc >= TICK_MS) {
       acc -= TICK_MS;
       rd.begin();                  // a catch-up tick's picture is replaced by the next one's
-      interp.beforeTick();
+      // Only the last tick of the frame can be shown, and only if the blend position is
+      // near enough t = 0 (see below); any other runs its scene drawing without emitting it.
+      const shownAsIs = acc < TICK_MS && (!INTERPOLATE || xt.fase !== 0 || acc / TICK_MS < TICK_EPS);
+      interp.beforeTick(!shownAsIs);
       const t0 = performance.now();
       frame.next();
       tickMs += performance.now() - t0;
       interp.afterTick();
       ticks++;
+      ticksDone++;
       stepped = ticked = true;
     }
-    // A tick's own picture is the jar's frame, drawn from the state its simulation
-    // started from: exactly t = 0 of the blend towards the state it ended in. So a
-    // frame with a tick shows it as is, and later frames redraw at the time since
-    // that tick -- one scene draw per frame, as the base race manages, instead of
-    // the jar's draw plus a redraw on top of it.
-    if (ticked) tickAt = now;
+    // The blend position is the accumulator's, as in the base race: t = acc / TICK_MS,
+    // so every frame advances by its own duration. A tick's own picture is the jar's
+    // frame drawn from the state the tick started from -- t = 0 of the new blend --
+    // so a frame with a tick shows it only when t is that close (under TICK_EPS);
+    // otherwise it redraws at t. Showing it regardless (one draw per frame, always)
+    // made frames step 0.31/0.31/0.37/0.06 of a tick: a stall then a jump, felt as
+    // the screen shaking in turns.
+    let shown = null;               // the blend position this frame shows, in ticks
+    const t = acc / TICK_MS;
+    if (ticked && (!INTERPOLATE || t < TICK_EPS || xt.fase !== 0)) shown = ticksDone - 1;   // the jar's picture
     else if (INTERPOLATE && xt.fase === 0) {    // racing only: the jar's other screens draw once per frame
       const t0 = performance.now();
-      if (interp.redraw(Math.min(0.999, (now - tickAt) / TICK_MS))) stepped = true;
+      if (interp.redraw(t)) { stepped = true; shown = ticksDone - 1 + t; }
       redrawMs += performance.now() - t0;
     }
+    if (shown !== null && window.tlog) { window.tlog.push(shown); if (window.tlog.length > 2000) window.tlog.shift(); }
     if (!stepped) return;
     rd.end();
     const work = performance.now() - w0;
