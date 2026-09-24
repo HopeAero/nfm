@@ -838,62 +838,58 @@ export class ContO {
   }
 
   pdust(i, g, j) {
-    // base port: the dust's drift and stage advance at tick rate; an interpolated
-    // frame redraws the same puff (its shape rolls from the replayed randoms)
+    // The base port's look (web/ContO.js pdust: a translucent octagon tinted by
+    // the road under it, whitened, radii kept per puff) on Extended's own puff
+    // lifecycle -- dust()'s four slots, stg 0..4, the dov pre/post-face
+    // handshake, the drift and rise -- which Record also replays. The jar's
+    // own pdust (an older one) drew an opaque star of ground/sky/fog that read
+    // as white blobs; replaced at the user's request.
+    // Randoms run on a tick only: an interpolated frame redraws the same puff.
     const tick = !this.m.interpolating;
     if ((Math.imul(j, this.dov[i])) > 0) {
-      let k = 0;
-      if (this.fulls[i]) {
-        k = Math.imul(this.stg[i], this.stg[i]);
-      } else {
-        k = i32((Math.imul((Math.imul(this.stg[i], this.stg[i])), this.stg[i])) + 1);
+      const m = this.m;
+      const white = intArray(3);
+      for (let c = 0; c < 3; c++) {
+        white[c] = trunc(fr(255.0 + fr(255.0 * fr(m.snap[c] / 100.0))));
+        if (white[c] > 255) white[c] = 255;
+        if (white[c] < 0) white[c] = 0;
       }
-      let coladj = Int32Array.from([this.m.cgrnd[0], this.m.cgrnd[1], this.m.cgrnd[2]]);
-      let l = idiv(((i32((i32((Math.imul(coladj[0], k)) + (Math.imul(this.m.cfade[0], 2)))) + this.m.csky[0]))), (i32(3 + k)));
-      let i2 = idiv(((i32((i32((Math.imul(coladj[1], k)) + (Math.imul(this.m.cfade[0], 2)))) + this.m.csky[1]))), (i32(3 + k)));
-      let j2 = idiv(((i32((i32((Math.imul(coladj[2], k)) + (Math.imul(this.m.cfade[0], 2)))) + this.m.csky[2]))), (i32(3 + k)));
+      let r = idiv(m.crgrnd[0] + white[0], 2);
+      let gr = idiv(m.crgrnd[1] + white[1], 2);
+      let b = idiv(m.crgrnd[2] + white[2], 2);
+      let sbln = 0.6;
       let nodust = true;
       for (let k2 = 0; k2 < this.t.nt; k2 = i32(k2 + 1)) {
-        if (!this.m.effect[9] || (this.t.y[k2] === this.groundlevel)) {
+        if (!m.effect[9] || (this.t.y[k2] === this.groundlevel)) {
           if (this.groundlevel >= 0) {
             nodust = false;
           }
           if (((((Math.abs(this.t.zy[k2]) | 0) !== 90) && ((Math.abs(this.t.xy[k2]) | 0) !== 90)) && ((Math.abs(i32(this.sx[i] - this.t.x[k2])) | 0) < this.t.radx[k2])) && ((Math.abs(i32(this.sz[i] - this.t.z[k2])) | 0) < this.t.radz[k2])) {
             nodust = false;
-            if (this.t.skd[k2] === 0) {
-              k = i32((Math.imul((Math.imul(this.stg[i], this.stg[i])), this.stg[i])) + 2);
-            }
-            let red = this.t.c[k2][0];
-            let green = this.t.c[k2][1];
-            let blue = this.t.c[k2][2];
-            if ((((((this.m.switchfase === 0) || (this.m.switchfase === 10)) || (this.m.switchfase === 20))) && this.m.effect[2]) && !this.m.trk) {
-              red = trunc((fr(fr(this.t.oc[k2][0]) + (fr(fr(this.t.oc[k2][0]) * ((fr(fr(this.m.snap[0]) / 100.0))))))));
-              green = trunc((fr(fr(this.t.oc[k2][1]) + (fr(fr(this.t.oc[k2][1]) * ((fr(fr(this.m.snap[1]) / 100.0))))))));
-              blue = trunc((fr(fr(this.t.oc[k2][2]) + (fr(fr(this.t.oc[k2][2]) * ((fr(fr(this.m.snap[2]) / 100.0))))))));
-            }
-            l = trunc(((((((red * 0.87) * k) + (Math.imul(this.m.cfade[0], 2))) + this.m.csky[0])) / ((i32(3 + k)))));
-            i2 = trunc(((((((green * 0.87) * k) + (Math.imul(this.m.cfade[0], 2))) + this.m.csky[1])) / ((i32(3 + k)))));
-            j2 = trunc(((((((blue * 0.87) * k) + (Math.imul(this.m.cfade[0], 2))) + this.m.csky[2])) / ((i32(3 + k)))));
+            if (this.t.skd[k2] === 0) sbln = 0.2;
+            if (this.t.skd[k2] === 1) sbln = 0.4;
+            if (this.t.skd[k2] === 2) sbln = 0.45;
+            r = idiv(this.t.c[k2][0] + white[0], 2);
+            gr = idiv(this.t.c[k2][1] + white[1], 2);
+            b = idiv(this.t.c[k2][2] + white[2], 2);
           }
         }
       }
       if (this.sy[i] > 250) {
         this.sy[i] = 250;
       }
-      let _tmp = this.sy[i];
-      let l2 = i32(this.m.cx + trunc((fr((fr(fr(((i32((i32(this.sx[i] - this.m.x)) - this.m.cx)))) * this.m.cos(this.m.xz))) - (fr(fr(((i32((i32(this.sz[i] - this.m.z)) - this.m.cz)))) * this.m.sin(this.m.xz)))))));
-      let i3 = i32(this.m.cz + trunc((fr((fr(fr(((i32((i32(this.sx[i] - this.m.x)) - this.m.cx)))) * this.m.sin(this.m.xz))) + (fr(fr(((i32((i32(this.sz[i] - this.m.z)) - this.m.cz)))) * this.m.cos(this.m.xz)))))));
-      let j3 = i32(this.m.cy + trunc((fr((fr(fr(((i32((i32(this.sy[i] - this.m.y)) - this.m.cy)))) * this.m.cos(this.m.zy))) - (fr(fr(((i32(i3 - this.m.cz)))) * this.m.sin(this.m.zy)))))));
-      i3 = i32(this.m.cz + trunc((fr((fr(fr(((i32((i32(this.sy[i] - this.m.y)) - this.m.cy)))) * this.m.sin(this.m.zy))) + (fr(fr(((i32(i3 - this.m.cz)))) * this.m.cos(this.m.zy)))))));
-      let k3 = trunc(Math.sqrt(i32((i32((Math.imul(((i32(this.m.cy - j3))), (i32(this.m.cy - j3)))) + (Math.imul(((i32(this.m.cx - l2))), (i32(this.m.cx - l2)))))) + (Math.imul(i3, i3)))));
-      let l3 = 0;
-      do {
-        if (k3 > this.m.fade[l3]) {
-          l = idiv(((i32((Math.imul(l, this.m.fogd)) + this.m.cfade[0]))), (i32(this.m.fogd + 1)));
-          i2 = idiv(((i32((Math.imul(i2, this.m.fogd)) + this.m.cfade[1]))), (i32(this.m.fogd + 1)));
-          j2 = idiv(((i32((Math.imul(j2, this.m.fogd)) + this.m.cfade[2]))), (i32(this.m.fogd + 1)));
+      let l2 = i32(m.cx + trunc((fr((fr(fr(((i32((i32(this.sx[i] - m.x)) - m.cx)))) * m.cos(m.xz))) - (fr(fr(((i32((i32(this.sz[i] - m.z)) - m.cz)))) * m.sin(m.xz)))))));
+      let i3 = i32(m.cz + trunc((fr((fr(fr(((i32((i32(this.sx[i] - m.x)) - m.cx)))) * m.sin(m.xz))) + (fr(fr(((i32((i32(this.sz[i] - m.z)) - m.cz)))) * m.cos(m.xz)))))));
+      let j3 = i32(m.cy + trunc((fr((fr(fr(((i32((i32(this.sy[i] - m.y)) - m.cy)))) * m.cos(m.zy))) - (fr(fr(((i32(i3 - m.cz)))) * m.sin(m.zy)))))));
+      i3 = i32(m.cz + trunc((fr((fr(fr(((i32((i32(this.sy[i] - m.y)) - m.cy)))) * m.sin(m.zy))) + (fr(fr(((i32(i3 - m.cz)))) * m.cos(m.zy)))))));
+      let k3 = trunc(Math.sqrt(i32((i32((Math.imul(((i32(m.cy - j3))), (i32(m.cy - j3)))) + (Math.imul(((i32(m.cx - l2))), (i32(m.cx - l2)))))) + (Math.imul(i3, i3)))));
+      for (let l3 = 0; l3 < 16; l3++) {
+        if (k3 > m.fade[l3]) {
+          r = idiv(r * m.fogd + m.cfade[0], m.fogd + 1);
+          gr = idiv(gr * m.fogd + m.cfade[1], m.fogd + 1);
+          b = idiv(b * m.fogd + m.cfade[2], m.fogd + 1);
         }
-      } while (++l3 < 8);
+      }
       if (tick) {
         if ((i32((Math.abs(this.scx[i]) | 0) + (Math.abs(this.scz[i]) | 0))) > 150) {
           let sy = this.sy;
@@ -907,28 +903,45 @@ export class ContO {
         let sz = this.sz;
         sz[i] = trunc(fr(fr(sz[i]) + ((fr(fr(this.scz[i]) / ((fr(fr(((i32(this.stg[i] + 1)))) * this.smag[i]))))))));
       }
-      let ai = intArray(8);
-      let ai2 = intArray(8);
-      let i4 = i32(this.stg[i] - 3);
-      ai[0] = this.xs(trunc((fr(fr(l2) - (fr(((fr((fr(18.0 + (fr(this.m.random() * 18.0)))) + fr((Math.imul(i4, 6)))))) * this.smag[i]))))), i3);
-      ai2[0] = this.ys(trunc((j3 - ((((7.5 + (this.m.random() * 7.5)) + (i4 * 2.5))) * this.smag[i]))), i3);
-      if ((ai2[0] < 45) && (this.m.flex !== 0)) {
-        this.m.flex = 0;
+      // the base's per-vertex radii: rolled when the puff is born (osmag is
+      // the base dust()'s size x speed factor), grown every tick
+      this.vmag ??= objArray(6).map(() => floatArray(8));
+      const v = this.vmag[i];
+      if (this.stg[i] === 1 && tick) {
+        let n9 = fr((Math.sqrt(Math.imul(this.scx[i], this.scx[i]) + Math.imul(this.scz[i], this.scz[i])) - 40.0) / 160.0);
+        if (n9 > 1.0) n9 = 1.0;
+        const osmag = fr(this.smag[i] * n9);
+        for (let n4 = 0; n4 < 8; ++n4) v[n4] = fr(fr(osmag * m.random()) * 50.0);
+        for (let n5 = 0; n5 < 8; ++n5) {
+          const n6 = n5 === 0 ? 7 : n5 - 1;
+          const n7 = n5 === 7 ? 0 : n5 + 1;
+          v[n5] = fr(fr(fr(fr(v[n6] + v[n7]) / 2.0) + v[n5]) / 2.0);
+        }
+        v[6] = v[7];
       }
-      ai[1] = this.xs(trunc((fr(fr(l2) - (fr(((fr((fr(18.0 + (fr(this.m.random() * 18.0)))) + fr((Math.imul(i4, 6)))))) * this.smag[i]))))), i3);
-      ai2[1] = this.ys(trunc((j3 + ((((7.5 + (this.m.random() * 7.5)) + (i4 * 2.5))) * this.smag[i]))), i3);
-      ai[2] = this.xs(trunc((l2 - ((((7.5 + (this.m.random() * 7.5)) + (i4 * 2.5))) * this.smag[i]))), i3);
-      ai2[2] = this.ys(trunc((fr(fr(j3) + (fr(((fr((fr(18.0 + (fr(this.m.random() * 18.0)))) + fr((Math.imul(i4, 6)))))) * this.smag[i]))))), i3);
-      ai[3] = this.xs(trunc((l2 + ((((7.5 + (this.m.random() * 7.5)) + (i4 * 2.5))) * this.smag[i]))), i3);
-      ai2[3] = this.ys(trunc((fr(fr(j3) + (fr(((fr((fr(18.0 + (fr(this.m.random() * 18.0)))) + fr((Math.imul(i4, 6)))))) * this.smag[i]))))), i3);
-      ai[4] = this.xs(trunc((fr(fr(l2) + (fr(((fr((fr(18.0 + (fr(this.m.random() * 18.0)))) + fr((Math.imul(i4, 6)))))) * this.smag[i]))))), i3);
-      ai2[4] = this.ys(trunc((j3 + ((((7.5 + (this.m.random() * 7.5)) + (i4 * 2.5))) * this.smag[i]))), i3);
-      ai[5] = this.xs(trunc((fr(fr(l2) + (fr(((fr((fr(18.0 + (fr(this.m.random() * 18.0)))) + fr((Math.imul(i4, 6)))))) * this.smag[i]))))), i3);
-      ai2[5] = this.ys(trunc((j3 - ((((7.5 + (this.m.random() * 7.5)) + (i4 * 2.5))) * this.smag[i]))), i3);
-      ai[6] = this.xs(trunc((l2 + ((((7.5 + (this.m.random() * 7.5)) + (i4 * 2.5))) * this.smag[i]))), i3);
-      ai2[6] = this.ys(trunc((fr(fr(j3) - (fr(((fr((fr(18.0 + (fr(this.m.random() * 18.0)))) + fr((Math.imul(i4, 6)))))) * this.smag[i]))))), i3);
-      ai[7] = this.xs(trunc((l2 - ((((7.5 + (this.m.random() * 7.5)) + (i4 * 2.5))) * this.smag[i]))), i3);
-      ai2[7] = this.ys(trunc((fr(fr(j3) - (fr(((fr((fr(18.0 + (fr(this.m.random() * 18.0)))) + fr((Math.imul(i4, 6)))))) * this.smag[i]))))), i3);
+      const A = 0.9238, B = 0.3826;
+      const ai = intArray(8);
+      const ai2 = intArray(8);
+      ai[0] = this.xs(trunc(l2 + fr(fr(v[0] * A) * 1.5)), i3);
+      ai2[0] = this.ys(trunc(j3 + fr(fr(v[0] * B) * 1.5)), i3);
+      ai[1] = this.xs(trunc(l2 + fr(fr(v[1] * A) * 1.5)), i3);
+      ai2[1] = this.ys(trunc(j3 - fr(fr(v[1] * B) * 1.5)), i3);
+      ai[2] = this.xs(trunc(l2 + fr(v[2] * B)), i3);
+      ai2[2] = this.ys(trunc(j3 - fr(v[2] * A)), i3);
+      ai[3] = this.xs(trunc(l2 - fr(v[3] * B)), i3);
+      ai2[3] = this.ys(trunc(j3 - fr(v[3] * A)), i3);
+      ai[4] = this.xs(trunc(l2 - fr(fr(v[4] * A) * 1.5)), i3);
+      ai2[4] = this.ys(trunc(j3 - fr(fr(v[4] * B) * 1.5)), i3);
+      ai[5] = this.xs(trunc(l2 - fr(fr(v[5] * A) * 1.5)), i3);
+      ai2[5] = this.ys(trunc(j3 + fr(fr(v[5] * B) * 1.5)), i3);
+      ai[6] = this.xs(trunc(l2 - fr(fr(v[6] * B) * 1.7)), i3);
+      ai2[6] = this.ys(trunc(j3 + fr(v[6] * A)), i3);
+      ai[7] = this.xs(trunc(l2 + fr(fr(v[7] * B) * 1.7)), i3);
+      ai2[7] = this.ys(trunc(j3 + fr(v[7] * A)), i3);
+      if (tick) {
+        for (let n12 = 0; n12 < 7; ++n12) v[n12] = fr(v[n12] + fr(5.0 + fr(m.random() * 15.0)));
+        v[7] = v[6];
+      }
       let flag = true;
       if (nodust) {
         flag = false;
@@ -942,29 +955,33 @@ export class ContO {
         if ((ai2[j5] < 0) || (i3 < 10)) {
           j4 = i32(j4 + 1);
         }
-        if ((ai2[j5] > this.m.h) || (i3 < 10)) {
+        if ((ai2[j5] > m.h) || (i3 < 10)) {
           k4 = i32(k4 + 1);
         }
         if ((ai[j5] < 0) || (i3 < 10)) {
           l4 = i32(l4 + 1);
         }
-        if ((ai[j5] > this.m.w) || (i3 < 10)) {
+        if ((ai[j5] > m.w) || (i3 < 10)) {
           i5 = i32(i5 + 1);
         }
-        if ((ai2[j5] < 45) && (this.m.flex !== 0)) {
-          this.m.flex = 0;
+        if ((ai2[j5] < 45) && (m.flex !== 0)) {
+          m.flex = 0;
         }
       } while (++j5 < 8);
       if ((((l4 === 4) || (j4 === 4)) || (k4 === 4)) || (i5 === 4)) {
         flag = false;
       }
-      let fadedshad = 255;
-      if (this.m.effect[4]) {
-        fadedshad = 60;
-      }
       if (flag) {
-        g.setColorOf(new Color(l, i2, j2, fadedshad));
+        // ponytail: /5, not the base's /8 -- Extended's puff lives 4 stages, not 7
+        // (a longer life would change dust()'s spawn cadence and Record's replays)
+        let alpha = fr(sbln - fr(this.stg[i] * fr(sbln / 5.0)));
+        if (m.effect[4]) {
+          alpha = fr(alpha * (60 / 255));   // the jar's fadedshad
+        }
+        g.setColor(r, gr, b);
+        g.setComposite(alpha);
         g.fillPolygon(ai, ai2, 8);
+        g.setComposite(1.0);
       }
       if (!tick) {
         return;

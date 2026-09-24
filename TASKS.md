@@ -1117,6 +1117,10 @@ AI and UI are the mod.
 - [ ] Visual: replay the tick draw's random sequence on redraws (the base's
       Medium random log), so sparks, dust and bolts keep their shape between
       ticks instead of re-rolling at 60 Hz.
+- [x] Visual: wheel dust drawn the base way (translucent octagon, road-tinted and
+      whitened, persistent radii) on Extended's own puff lifecycle, which Record
+      replays. The jar's pdust is an older one (opaque ground/sky star that read
+      as white blobs); changed at the user's request, not a jar mismatch.
 - [ ] Visual: loadsnap's corner-pixel reference when the corner is transparent
       (base fix for the missing "TH" on rank badges); the probable cause of the
       black shapes on Extended's loading/stage images.
