@@ -7,6 +7,7 @@
 // Color.brighter/darker's integer arithmetic.
 
 import { JavaRandom, RGBtoHSB, HSBtoRGB } from '../java.js';
+import { isPlainZip, parseRadq, unswap } from './radq.js';
 
 export const Random = JavaRandom;
 
@@ -52,6 +53,174 @@ export class ByteArrayInputStream {
   close() {}
 }
 
+// ---- files -------------------------------------------------------------------
+// Java reads its archives synchronously (URL.openStream, ZipInputStream);
+// the browser cannot. preload() fetches and inflates them first, then the
+// generated code reads them from memory with Java's call shapes.
+const FILES = new Map();   // codebase-relative path -> raw bytes
+const ZIPS = new Map();    // fingerprint of a plain ZIP's bytes -> [[name, bytes]]
+const IMAGES = new Map();  // fingerprint of an encoded image -> Image (decoded by preload)
+
+/** FNV-1a over the bytes as unsigned: a ZIP as the game holds it (signed, unswapped). */
+function fingerprint(b) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < b.length; i++) h = Math.imul(h ^ (b[i] & 0xff), 0x01000193);
+  return `${b.length}:${h >>> 0}`;
+}
+
+/** Fetch each path (under ext/, e.g. 'data/Files/tracks.radq') for the code below. */
+export async function preload(paths, read) {
+  for (const p of paths) {
+    if (FILES.has(p)) continue;
+    const bytes = await read(p);
+    FILES.set(p, bytes);
+    if (p.endsWith('.radq')) {
+      // keyed by the bytes ZipInputStream will be handed: plain, whichever form is on disk
+      const entries = [...await parseRadq(bytes)];
+      ZIPS.set(fingerprint(isPlainZip(bytes) ? bytes : unswap(bytes)), entries);
+      // Toolkit.createImage(bytes) is synchronous in Java; decode every image now
+      if (typeof createImageBitmap === 'function')
+        for (const [name, b] of entries) if (/\.(gif|png|jpe?g)$/i.test(name)) IMAGES.set(fingerprint(b), await decodeImage(b));
+    }
+  }
+}
+
+export class URL {
+  constructor(base, path) { this.path = path ?? base; }
+  openConnection() { const b = this.bytes(); return { getContentLength: () => b.length }; }
+  openStream() { return new ByteArrayInputStream(this.bytes()); }
+  bytes() {
+    const b = FILES.get(this.path);
+    if (!b) throw new Error(`java.io.FileNotFoundException: ${this.path} (not preloaded)`);
+    return b;
+  }
+}
+
+// ---- images --------------------------------------------------------------------
+// An Image is its ARGB pixels; PixelGrabber/MemoryImageSource copy them the way
+// java.awt.image does (offset + scansize), which is all the game's recolouring
+// (xtGraphics.loadsnap and friends) needs.
+export class Image {
+  constructor(width, height, pixels = new Int32Array(width * height), canvas = null) {
+    this.width = width; this.height = height; this.pixels = pixels; this.canvas = canvas;
+  }
+  getWidth() { return this.width; }
+  getHeight() { return this.height; }
+  /** Something CanvasRenderingContext2D.drawImage takes; built from the pixels once. */
+  source() {
+    if (!this.canvas) {
+      this.canvas = new OffscreenCanvas(Math.max(1, this.width), Math.max(1, this.height));
+      const data = new ImageData(this.width || 1, this.height || 1);
+      const p = this.pixels, d = data.data;
+      for (let i = 0; i < p.length; i++) { const v = p[i]; d[4 * i] = (v >> 16) & 255; d[4 * i + 1] = (v >> 8) & 255; d[4 * i + 2] = v & 255; d[4 * i + 3] = (v >>> 24) & 255; }
+      this.canvas.getContext('2d').putImageData(data, 0, 0);
+    }
+    return this.canvas;
+  }
+}
+
+async function decodeImage(bytes) {
+  const bmp = await createImageBitmap(new Blob([bytes]));
+  const canvas = new OffscreenCanvas(bmp.width, bmp.height);
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  ctx.drawImage(bmp, 0, 0);
+  const d = ctx.getImageData(0, 0, bmp.width, bmp.height).data;
+  const px = new Int32Array(bmp.width * bmp.height);
+  for (let i = 0; i < px.length; i++) px[i] = (d[4 * i + 3] << 24) | (d[4 * i] << 16) | (d[4 * i + 1] << 8) | d[4 * i + 2];
+  return new Image(bmp.width, bmp.height, px, canvas);
+}
+
+export const Toolkit = {
+  getDefaultToolkit: () => Toolkit,
+  /** An image preload() decoded; outside a browser (node tests) an empty one. */
+  createImage: (bytes) => IMAGES.get(fingerprint(bytes)) ?? new Image(0, 0),
+};
+
+/** Images are decoded before the game starts, so there is nothing to wait for. */
+export class MediaTracker {
+  addImage() {}
+  waitForID() {}
+}
+
+/**
+ * {name, style, size}: the shape graphics.js / canvas-graphics.js setFont takes.
+ * createFont gets the .ttf's resource name (J2JS turns getResourceAsStream into
+ * it); the page registers each under that family with FontFace.
+ */
+export class Font {
+  constructor(name, style, size) { this.name = name; this.style = style; this.size = size; }
+  static createFont(type, resource) { return new Font(resource.replace(/\.ttf$/i, ''), 0, 1); }
+  deriveFont(style, size) { return new Font(this.name, style, size); }
+  getSize() { return this.size; }
+  getName() { return this.name; }
+}
+
+export class PixelGrabber {
+  constructor(img, x, y, w, h, pix, off, scan) { Object.assign(this, { img, x, y, w, h, pix, off, scan }); }
+  grabPixels() {
+    const { img, x, y, w, h, pix, off, scan } = this;
+    if (!(img instanceof Image)) return true;   // a replay's placeholder: not game state
+    for (let r = 0; r < h; r++) for (let c = 0; c < w; c++) pix[off + r * scan + c] = img.pixels[(y + r) * img.width + x + c];
+    return true;
+  }
+}
+
+export class MemoryImageSource {
+  constructor(w, h, pix, off, scan) { Object.assign(this, { w, h, pix, off, scan }); }
+}
+
+/** java.awt.Component's createImage(ImageProducer): a snapshot of the source's pixels. */
+export class Panel {
+  createImage(src) {
+    if (!(src instanceof MemoryImageSource)) throw new Error('jawt: createImage(width, height) is not ported');
+    const { w, h, pix, off, scan } = src;
+    const out = new Int32Array(w * h);
+    for (let r = 0; r < h; r++) for (let c = 0; c < w; c++) out[r * w + c] = pix[off + r * scan + c];
+    return new Image(w, h, out);
+  }
+}
+
+/** What GameSparker inherits from java.applet.Applet; files resolve under ext/. */
+export class Applet extends Panel {
+  getCodeBase() { return ''; }
+  // ponytail: silent sound; BassoonTracker/WebAudio clips come after a race draws
+  getAudioClip() { return { play() {}, loop() {}, stop() {} }; }
+}
+
+export class ZipEntry {
+  constructor(name, bytes) { this.name = name; this.data = bytes; }
+  getName() { return this.name; }
+  getSize() { return this.data.length; }
+}
+
+/** Over an in-memory ZIP that preload() inflated; the current entry reads like a stream. */
+export class ZipInputStream {
+  constructor(input) {
+    const entries = ZIPS.get(fingerprint(input.bytes));
+    if (!entries) throw new Error('jawt: ZipInputStream over an archive preload() has not seen');
+    this.entries = entries; this.next = 0; this.bytes = new Uint8Array(0); this.pos = 0;
+  }
+  getNextEntry() {
+    if (this.next >= this.entries.length) return null;
+    const [name, bytes] = this.entries[this.next++];
+    this.bytes = bytes; this.pos = 0;
+    return new ZipEntry(name, bytes);
+  }
+  read(buf, off, len) {
+    const n = Math.min(len, this.bytes.length - this.pos);
+    if (n <= 0) return -1;
+    buf.set(this.bytes.subarray(this.pos, this.pos + n), off);
+    this.pos += n;
+    return n;
+  }
+  close() {}
+}
+
+export class InputStreamReader {
+  constructor(input) { this.in = input; }
+  close() {}
+}
+
 /** DataInputStream.readLine: bytes as Latin-1, lines end at \n, \r or \r\n. */
 export class DataInputStream {
   constructor(input) { this.in = input; }
@@ -69,8 +238,21 @@ export class DataInputStream {
     this.in.pos = p;
     return s;
   }
+  readFully(buf) {
+    const { bytes } = this.in;
+    if (bytes.length - this.in.pos < buf.length) throw new Error('java.io.EOFException');
+    buf.set(bytes.subarray(this.in.pos, this.in.pos + buf.length));   // Int8Array.set wraps like (byte)
+    this.in.pos += buf.length;
+  }
   close() {}
 }
+
+/** Over an InputStreamReader: lines as DataInputStream splits them (the files are ASCII). */
+export class BufferedReader {
+  constructor(reader) { this.in = reader.in; }
+  close() {}
+}
+BufferedReader.prototype.readLine = DataInputStream.prototype.readLine;
 
 /** String.charAt as a char code, throwing out of range like Java. */
 export function charAt(s, i) {
@@ -129,6 +311,28 @@ export function jstr(x, t = 'D') {
   return s.includes('.') || s.includes('e') ? s : s + '.0';
 }
 
+// ---- threads -------------------------------------------------------------------
+// J2JS emits a run() that calls Thread.sleep as a generator yielding each sleep;
+// start() steps it on the event loop, one sleep per setTimeout. That is a
+// frame of GameSparker.run, whose loop ends in its frame wait.
+export class Thread {
+  constructor(runnable) { this.runnable = runnable; this.alive = false; }
+  start() {
+    const it = this.runnable.run();
+    this.alive = true;
+    if (!it || typeof it.next !== 'function') { this.alive = false; return; }   // a run() that never sleeps ran already
+    const step = () => {
+      if (!this.alive) return;
+      const r = it.next();
+      if (r.done) { this.alive = false; return; }
+      setTimeout(step, Math.max(0, Number(r.value) || 0));
+    };
+    setTimeout(step, 0);
+  }
+  stop() { this.alive = false; }
+  static yield() {}
+}
+
 // ---- placeholders ------------------------------------------------------------
 // Names the generated xtGraphics imports but the ported code paths do not use
 // yet. Constructing or calling one throws, so a path that starts to need it
@@ -138,12 +342,8 @@ function unported(name) {
 }
 export const Cursor = unported('Cursor');
 export const File = unported('File');
-export const Font = unported('Font');
-export const MediaTracker = unported('MediaTracker');
 export const Polygon = unported('Polygon');
 export const RenderingHints = unported('RenderingHints');
-export const Thread = unported('Thread');
-export const Toolkit = unported('Toolkit');
-export const URL = unported('URL');
-export const ZipInputStream = unported('ZipInputStream');
+export const Date = unported('Date');
+export const FileOutputStream = unported('FileOutputStream');
 export const FileInputStream = unported('FileInputStream');

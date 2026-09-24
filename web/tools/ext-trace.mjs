@@ -21,13 +21,22 @@ import fs from 'node:fs';
 import zlib from 'node:zlib';
 import readline from 'node:readline';
 import { setSeed } from '../java.js';
-import { System } from '../ext/jawt.js';
+import { System, preload } from '../ext/jawt.js';
 
 const CLASSES = {};
 for (const n of ['ContO', 'Plane', 'Wheels', 'Trackers', 'Medium', 'Madness', 'Control', 'CheckPoints', 'Record', 'Contva', 'Bots', 'xtGraphics',
-  'RadicalMidi', 'RadicalMod', 'Mod', 'ModSlayer', 'ModTrackInfo', 'ModInstrument', 'SuperClip', 'SuperStream', 'UlawUtils']) {
+  'GameSparker', 'RadicalMidi', 'RadicalMod', 'Mod', 'ModSlayer', 'ModTrackInfo', 'ModInstrument', 'SuperClip', 'SuperStream', 'UlawUtils']) {
   CLASSES[n] = (await import(`../ext/${n}.js`))[n];
 }
+// loadstage reads the stage archives through jawt's URL: hand it every .radq under ext/data
+const EXT = new URL('../../ext/', import.meta.url);
+const radqs = (dir) => fs.readdirSync(new URL(dir, EXT)).filter((f) => f.endsWith('.radq')).map((f) => dir + f);
+await preload([...radqs('data/'), ...radqs('data/Files/')], async (p) => new Uint8Array(fs.readFileSync(new URL(p, EXT))));
+
+// Game-source classes that are playback, not game state: the desktop jar's
+// sound clip (its lfrpo/loaded flags follow the audio device, not the race).
+const NOT_STATE = new Set(['DesktopSoundClip']);
+
 const TYPED = { I: Int32Array, F: Float32Array, D: Float64Array, J: Float64Array, B: Int8Array, S: Int16Array, C: Uint16Array };
 
 /** What is not game state (sound clips, images, threads): absorbs any use. */
@@ -119,7 +128,7 @@ export function compare(post, roots, g, limit = 10) {
     if (seen.has(jid)) continue;
     seen.add(jid);
     const j = post[jid];
-    if (!j) continue;
+    if (!j || NOT_STATE.has(j.c)) continue;
     const check = (jv, pv, p) => {
       if (jv && typeof jv === 'object' && 'r' in jv) {
         if (pv === null || pv === undefined || typeof pv !== 'object') { out.push(`${p}: jar ref #${jv.r}, port ${pv}`); return; }

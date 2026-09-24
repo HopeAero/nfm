@@ -3,12 +3,13 @@
 // fix the transpiler or the source and regenerate.
 
 import { floatArray, fr, i32, idiv, intArray, jround, objArray, random, trunc } from '../java.js';
-import { Color, Cursor, DataInputStream, File, Font, MediaTracker, Polygon, RenderingHints, StringBuilder, System, Thread, Toolkit, URL, ZipInputStream, jstr } from './jawt.js';
+import { Color, Cursor, DataInputStream, File, Font, MediaTracker, MemoryImageSource, Panel, PixelGrabber, Polygon, RenderingHints, StringBuilder, System, Thread, Toolkit, URL, ZipInputStream, jstr } from './jawt.js';
 import { RadicalMidi } from './RadicalMidi.js';
 import { RadicalMod } from './RadicalMod.js';
 
-export class xtGraphics {
+export class xtGraphics extends Panel {
   constructor(medium, g, h, applet) {
+    super();
     this.rd = null;
     this.sg = null;
     this.m = null;
@@ -1062,12 +1063,12 @@ export class xtGraphics {
     this.rd = g;
     this.sg = h;
     try {
-      this.adventure = Font.createFont(0, xtGraphics.class.getResourceAsStream('Adventure.ttf'));
+      this.adventure = Font.createFont(0, 'Adventure.ttf');
     } catch (ex) {
       ex.printStackTrace();
     }
     try {
-      this.fifa = Font.createFont(0, xtGraphics.class.getResourceAsStream('fifawelcome1.3.ttf'));
+      this.fifa = Font.createFont(0, 'fifawelcome1.3.ttf');
     } catch (ex) {
       ex.printStackTrace();
     }
@@ -17656,7 +17657,7 @@ export class xtGraphics {
     } while (++i < 6);
   }
 
-  run() {
+  *run() {
     while (this.runtyp !== 0) {
       if ((this.runtyp >= 1) && (this.runtyp <= 31)) {
         this.hipnoload(this.runtyp, false);
@@ -17666,7 +17667,7 @@ export class xtGraphics {
       }
       this.app.repaint();
       try {
-        Thread.sleep(20);
+        (yield 20);
       } catch (ex) {
       }
     }

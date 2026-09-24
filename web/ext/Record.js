@@ -303,7 +303,7 @@ export class Record {
     let i = 0;
     do {
       if (this.prepit) {
-        this.starcar[i] = new ContO(aconto[i], 0, 0, 0, 0);
+        this.starcar[i] = new ContO(1, aconto[i], 0, 0, 0, 0);
       }
       this.fix[i] = -1;
       this.dest[i] = -1;
@@ -313,7 +313,7 @@ export class Record {
     do {
       let j = 0;
       do {
-        this.car[i][j] = new ContO(aconto[j], 0, 0, 0, 0);
+        this.car[i][j] = new ContO(1, aconto[j], 0, 0, 0, 0);
         this.squash[i][j] = 0;
       } while (++j < ncars);
     } while (++i < 6);
@@ -579,10 +579,10 @@ export class Record {
     if (this.cntf === 50) {
       let i2 = 0;
       do {
-        this.car[i2][i] = new ContO(this.car[i32(i2 + 1)][i], 0, 0, 0, 0);
+        this.car[i2][i] = new ContO(1, this.car[i32(i2 + 1)][i], 0, 0, 0, 0);
         this.squash[i2][i] = this.squash[i32(i2 + 1)][i];
       } while (++i2 < 5);
-      this.car[5][i] = new ContO(conto, 0, 0, 0, 0);
+      this.car[5][i] = new ContO(1, conto, 0, 0, 0, 0);
       this.squash[5][i] = j;
       this.cntf = 0;
     } else {
@@ -696,7 +696,7 @@ export class Record {
       this.wasted = i;
       let j = 0;
       do {
-        this.starcar[j] = new ContO(this.car[0][j], 0, 0, 0, 0);
+        this.starcar[j] = new ContO(1, this.car[0][j], 0, 0, 0, 0);
         this.hsquash[j] = this.squash[0][j];
         this.hfix[j] = this.fix[j];
         this.hdest[j] = this.dest[j];

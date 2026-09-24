@@ -20,7 +20,7 @@ export class SuperClip {
     this.stream = new ByteArrayInputStream(abyte0, 0, i);
   }
 
-  run() {
+  *run() {
     let flag = false;
     try {
       let info = new DataLine.Info(SourceDataLine.class, new AudioFormat(Encoding.PCM_SIGNED, -1.0, 16, 2, 4, -1.0, true));
@@ -47,7 +47,7 @@ export class SuperClip {
       }
       try {
         let _tmp = this.cliper;
-        Thread.sleep(200);
+        (yield 200);
       } catch (ex) {
       }
     }

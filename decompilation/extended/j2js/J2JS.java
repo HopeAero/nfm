@@ -149,11 +149,14 @@ public class J2JS {
             }
             StringBuilder body = new StringBuilder();
             body.append("export class ").append(name);
-            if (cls.getExtendsClause() != null && gameClasses.contains(cls.getExtendsClause().toString()))
-                body.append(" extends ").append(cls.getExtendsClause());
+            String sup = cls.getExtendsClause() == null ? null : cls.getExtendsClause().toString();
+            boolean extendsJawt = "Applet".equals(sup) || "Panel".equals(sup);   // createImage etc.; a Thread parent stays dropped
+            if (sup != null && (gameClasses.contains(sup) || extendsJawt))
+                body.append(" extends ").append(ref(sup));
             body.append(" {\n");
             // constructor: field defaults + initialisers, then dispatch
             body.append("  constructor(").append(ctors.size() > 1 ? "k, ...a" : ctors.isEmpty() ? "" : params(ctors.get(0))).append(") {\n");
+            if (extendsJawt) body.append("    super();\n");
             for (Tree m : cls.getMembers()) {
                 if (m instanceof VariableTree v && !v.getModifiers().getFlags().contains(Modifier.STATIC)) {
                     String init = v.getInitializer() != null ? expr(v.getInitializer(), tc(type(v))) : dflt(type(v));
@@ -176,8 +179,12 @@ public class J2JS {
                     Symbol s = (Symbol) TreeInfo.symbolFor((JCTree) mt);
                     boolean st = mt.getModifiers().getFlags().contains(Modifier.STATIC);
                     retType = mt.getReturnType() == null ? 'O' : tc(type(mt.getReturnType()));
-                    body.append("\n  ").append(st ? "static " : "").append(methodNames.get(s)).append("(").append(params(mt)).append(") {\n");
+                    // A `while (true) { ... Thread.sleep(t); }` loop cannot block a browser: the
+                    // method becomes a generator that yields each sleep (GameSparker.run).
+                    generator = mt.getBody().toString().contains("Thread.sleep(");
+                    body.append("\n  ").append(st ? "static " : "").append(generator ? "*" : "").append(methodNames.get(s)).append("(").append(params(mt)).append(") {\n");
                     body.append(block(mt.getBody(), 2, false)).append("  }\n");
+                    generator = false;
                 }
             }
             body.append("}\n");
@@ -211,7 +218,7 @@ public class J2JS {
 
         String params(MethodTree m) {
             StringBuilder s = new StringBuilder();
-            for (VariableTree p : m.getParameters()) { if (s.length() > 0) s.append(", "); s.append(p.getName()); }
+            for (VariableTree p : m.getParameters()) { if (s.length() > 0) s.append(", "); s.append(local(p.getName())); }
             return s.toString();
         }
 
@@ -241,7 +248,7 @@ public class J2JS {
             if (st instanceof BlockTree b) return I + "{\n" + block(b, d + 1, false) + I + "}\n";
             if (st instanceof VariableTree v) {
                 String init = v.getInitializer() != null ? expr(v.getInitializer(), tc(type(v))) : dflt(type(v));
-                return I + "let " + v.getName() + " = " + init + ";\n";
+                return I + "let " + local(v.getName()) + " = " + init + ";\n";
             }
             if (st instanceof ExpressionStatementTree es) return I + exprStmt(es.getExpression()) + ";\n";
             if (st instanceof IfTree t) {
@@ -255,13 +262,13 @@ public class J2JS {
             }
             if (st instanceof ForLoopTree f) {
                 String init = String.join(", ", f.getInitializer().stream().map(x -> {
-                    if (x instanceof VariableTree v) return "let " + v.getName() + " = " + (v.getInitializer() != null ? expr(v.getInitializer(), tc(type(v))) : dflt(type(v)));
+                    if (x instanceof VariableTree v) return "let " + local(v.getName()) + " = " + (v.getInitializer() != null ? expr(v.getInitializer(), tc(type(v))) : dflt(type(v)));
                     return exprStmt(((ExpressionStatementTree) x).getExpression());
                 }).toList()).replace(", let ", ", ");
                 String upd = String.join(", ", f.getUpdate().stream().map(x -> exprStmt(x.getExpression())).toList());
                 return I + "for (" + init + "; " + (f.getCondition() == null ? "" : cond(f.getCondition())) + "; " + upd + ") " + sub(f.getStatement(), d);
             }
-            if (st instanceof EnhancedForLoopTree f) return I + "for (const " + f.getVariable().getName() + " of " + expr(f.getExpression(), 'O') + ") " + sub(f.getStatement(), d);
+            if (st instanceof EnhancedForLoopTree f) return I + "for (const " + local(f.getVariable().getName()) + " of " + expr(f.getExpression(), 'O') + ") " + sub(f.getStatement(), d);
             if (st instanceof WhileLoopTree w) return I + "while (" + cond(w.getCondition()) + ") " + sub(w.getStatement(), d);
             if (st instanceof DoWhileLoopTree w) {
                 String b = sub(w.getStatement(), d);
@@ -287,7 +294,7 @@ public class J2JS {
                 StringBuilder s = new StringBuilder(I + "try {\n" + block(t.getBlock(), d + 1, false) + I + "}");
                 if (!t.getCatches().isEmpty()) {
                     CatchTree c = t.getCatches().get(0);
-                    s.append(" catch (").append(c.getParameter().getName()).append(") {\n").append(block(c.getBlock(), d + 1, false)).append(I).append("}");
+                    s.append(" catch (").append(local(c.getParameter().getName())).append(") {\n").append(block(c.getBlock(), d + 1, false)).append(I).append("}");
                 }
                 if (t.getFinallyBlock() != null) s.append(" finally {\n").append(block(t.getFinallyBlock(), d + 1, false)).append(I).append("}");
                 return s + "\n";
@@ -299,6 +306,7 @@ public class J2JS {
         }
 
         char retType = 'O';
+        boolean generator = false;   // emitting a method that calls Thread.sleep itself
 
         String sub(StatementTree s, int d) {
             if (s instanceof BlockTree b) return "{\n" + block(b, d + 1, false) + ind(d) + "}\n";
@@ -417,8 +425,12 @@ public class J2JS {
                 return "this." + n;
             }
             if (s instanceof Symbol.ClassSymbol c) return ref(c.getSimpleName().toString());
-            return n;
+            return local(n);
         }
+
+        // A Java local may be named with a JS reserved word (GameSparker's `in`).
+        static final java.util.Set<String> JS_RESERVED = java.util.Set.of("in", "function", "delete", "typeof", "var", "let", "yield", "await", "with", "export", "arguments", "eval");
+        static String local(CharSequence n) { String s = n.toString(); return JS_RESERVED.contains(s) ? s + "_" : s; }
 
         String ref(String cls) {
             if (gameClasses.contains(cls)) imports.add(cls);
@@ -430,7 +442,8 @@ public class J2JS {
                 "DataInputStream", "ByteArrayInputStream", "BufferedReader", "InputStreamReader", "StringReader",
                 "Integer", "Float", "Double", "Long", "Boolean", "Character", "StringBuilder", "System", "Thread",
                 "Random", "Date", "File", "FileInputStream", "FileOutputStream", "ZipInputStream", "ZipEntry", "URL", "Toolkit", "Image",
-                "Graphics", "Graphics2D", "RenderingHints", "Event", "Applet", "Panel", "Dimension", "MediaTracker");
+                "Graphics", "Graphics2D", "RenderingHints", "Event", "Applet", "Panel", "Dimension", "MediaTracker",
+                "PixelGrabber", "MemoryImageSource");
 
         String member(MemberSelectTree ms) {
             Symbol s = (Symbol) TreeInfo.symbol((JCTree) ms);
@@ -457,6 +470,10 @@ public class J2JS {
             String mname = ms == null ? mi.getMethodSelect().toString() : ms.getSimpleName().toString();
             String qual = null;
             if (mi.getMethodSelect() instanceof MemberSelectTree sel) qual = raw(sel.getExpression());
+            // X.class.getResourceAsStream(name): the name; jawt's Font.createFont takes it (the jar's .ttf)
+            if (owner.equals("java.lang.Class") && mname.equals("getResourceAsStream")) return args(mi, ms);
+            // the game loop's frame wait: run() is a generator, its driver sleeps
+            if (owner.equals("java.lang.Thread") && mname.equals("sleep") && generator) return "(yield " + args(mi, ms) + ")";
             // java.lang.Math
             if (owner.equals("java.lang.Math")) {
                 char rt = tc(mi);
@@ -538,7 +555,8 @@ public class J2JS {
         }
 
         String newClass(NewClassTree nc) {
-            Symbol.MethodSymbol ctor = (Symbol.MethodSymbol) TreeInfo.symbol((JCTree) nc);
+            // TreeInfo.symbol is null for a JCNewClass; the resolved constructor is a field of it
+            Symbol.MethodSymbol ctor = (Symbol.MethodSymbol) ((JCTree.JCNewClass) nc).constructor;
             String cn = nc.getIdentifier().toString();
             if (nc.getClassBody() != null) return marker("anonymous class", nc);
             Symbol.ClassSymbol oc = ctor == null ? null : (Symbol.ClassSymbol) ctor.owner;
