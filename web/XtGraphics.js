@@ -748,7 +748,9 @@ export class XtGraphics {
     this.rd.drawImage(this.br, 65, 25);
     this.rd.drawImage(this.select, 338, 35);
     if (this.testdrive !== 3 && this.testdrive !== 4) {
-      if (checkPoints.stage > 0 && this.cd.staction === 0) {
+      // `<= 27`: the port's free-play Multiplayer stages (28-32, carselect.js)
+      // are walked and drawn by the stage select page, as custom stages are
+      if (checkPoints.stage > 0 && checkPoints.stage <= 27 && this.cd.staction === 0) {
         if (checkPoints.stage !== 1 && (checkPoints.stage !== 11 || this.gmode !== 2)) {
           this.rd.drawImage(this.back[this.pback], 115, 135);
         }
@@ -808,7 +810,7 @@ export class XtGraphics {
           control.handb = false;
           control.enter = false;
         }
-        if (checkPoints.stage > 0) {
+        if (checkPoints.stage > 0 && checkPoints.stage <= 27) {
           if (control.right) {
             if (this.gmode === 0 || (this.gmode === 1 && checkPoints.stage !== this.unlocked[0])
                 || (this.gmode === 2 && checkPoints.stage !== this.unlocked[1] + 10) || checkPoints.stage === 27) {

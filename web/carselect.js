@@ -158,15 +158,19 @@ export async function runCarSelect(canvas, slot, career = null) {
 // NFM 2, My Stages, the Top20 lists and Stage Maker (the stages made in the
 // Stage Maker); the online ones need the account server and are left out.
 // Stage Maker is "Custom" here, and "All" is the port's: every stage in turn.
-const GAMES = ['NFM 1', 'NFM 2', 'Custom', 'All'];
+// "Multiplayer" is stages 28-32, which the Java offered only in the online
+// lobby's game list (Lobby.java:369, "NFM Multiplayer"); here they are free play.
+const GAMES = ['NFM 1', 'NFM 2', 'Multiplayer', 'Custom', 'All'];
+const T = { NFM1: 0, NFM2: 1, MULTI: 2, CUSTOM: 3, ALL: 4 };
 const NFM1 = Array.from({ length: 10 }, (_, i) => i + 1);
 const NFM2 = Array.from({ length: 17 }, (_, i) => i + 11);
-const groupOf = (st) => (typeof st === 'string' ? 2 : st > 10 ? 1 : 0);
+const MULTI = Array.from({ length: 5 }, (_, i) => i + 28);
+const groupOf = (st) => (typeof st === 'string' ? T.CUSTOM : st > 27 ? T.MULTI : st > 10 ? T.NFM2 : T.NFM1);
 
 function stageLabel(st, all) {
   if (typeof st === 'string') return all ? `${tr('Custom')} · ${st}` : st;
-  const n = st > 10 ? st - 10 : st;
-  return all ? `${st > 10 ? 'NFM 2' : 'NFM 1'} · ${tr(`Stage ${n}`)}` : ` ${tr(`Stage ${n}`)} `;
+  const n = st > 27 ? st - 27 : st > 10 ? st - 10 : st;
+  return all ? `${st > 27 ? tr('Multiplayer') : st > 10 ? 'NFM 2' : 'NFM 1'} · ${tr(`Stage ${n}`)}` : ` ${tr(`Stage ${n}`)} `;
 }
 
 /** The two selects, placed as the applet placed its Choices. */
@@ -203,9 +207,11 @@ export async function runStageSelect(canvas, stage, career = null) {
   medium.crs = false;
   setCareer(xt, career);
   // xtGraphics.inishstageselect (xtGraphics.java:1894): past the 27 stages of
-  // NFM 1 and 2 it picks one at random...
+  // NFM 1 and 2 it picks one at random -- except, in free play, the port's
+  // Multiplayer stages 28-32...
+  const multi = xt.gmode === 0 && MULTI.includes(stage);
   let cur = typeof stage === 'string' && customs.includes(stage) ? stage
-    : stage > 27 || stage < 1 || typeof stage !== 'number' ? trunc(random() * 27.0) + 1 : stage;
+    : (stage > 27 && !multi) || stage < 1 || typeof stage !== 'number' ? trunc(random() * 27.0) + 1 : stage;
   // ...and a career starts on the stage it has reached. Once finished
   // (unlocked 11 / 17) it keeps the stage, or rolls one if the last race was
   // won. `unlocked[0] != 17` in the NFM 2 branch is the Java's own typo for
@@ -224,18 +230,21 @@ export async function runStageSelect(canvas, stage, career = null) {
     else if (career?.winner || cur < 11) cur = trunc(random() * 17.0) + 11;
   }
   let tab = groupOf(cur);
-  const members = (t) => (t === 0 ? NFM1 : t === 1 ? NFM2 : t === 2 ? customs : [...NFM1, ...NFM2, ...customs]);
+  const members = (t) => (t === T.NFM1 ? NFM1 : t === T.NFM2 ? NFM2 : t === T.MULTI ? MULTI
+    : t === T.CUSTOM ? customs : [...NFM1, ...NFM2, ...MULTI, ...customs]);
+  // the games in the list: careers have no Multiplayer tab (free play only)
+  const games = GAMES.map((g, i) => [g, i]).filter(([, i]) => i !== T.MULTI || gmode === 0);
 
   const ui = makeChoices(canvas.parentElement);
   const paintChoices = () => {
-    ui.game.innerHTML = GAMES.map((g, i) => `<option value="${i}">${tr(g)}</option>`).join('');
+    ui.game.innerHTML = games.map(([g, i]) => `<option value="${i}">${tr(g)}</option>`).join('');
     ui.game.value = String(tab);
     const items = members(tab);
     ui.list.innerHTML = '';
     items.forEach((st, i) => {
       const o = document.createElement('option');
       o.value = String(i);
-      o.textContent = stageLabel(st, tab === 3);
+      o.textContent = stageLabel(st, tab === T.ALL);
       ui.list.append(o);
     });
     if (!items.length) {
@@ -246,7 +255,7 @@ export async function runStageSelect(canvas, stage, career = null) {
     const k = items.indexOf(cur);
     if (k >= 0) ui.list.value = String(k);
     // xtGraphics.java:2093: centred as a pair, 6px apart.
-    const w = tab >= 2 ? 338 : 120;
+    const w = tab === T.CUSTOM || tab === T.ALL ? 338 : 120;
     const x = 400 - trunc((131 + 6 + w) / 2);
     ui.game.style.left = `${x}px`;
     ui.list.style.left = `${x + 137}px`;
@@ -255,7 +264,7 @@ export async function runStageSelect(canvas, stage, career = null) {
   const go = (st) => {
     if (st === cur) return;
     cur = st;
-    if (tab !== 3) tab = groupOf(cur);
+    if (tab !== T.ALL) tab = groupOf(cur);
     xt.fase = 2;
     paintChoices();
   };
@@ -263,7 +272,7 @@ export async function runStageSelect(canvas, stage, career = null) {
     tab = +ui.game.value;
     const items = members(tab);
     ui.game.blur();                    // the applet's requestFocus(): keys drive the screen again
-    if (tab !== 3 && items.length && !items.includes(cur)) go(items[0]);
+    if (tab !== T.ALL && items.length && !items.includes(cur)) go(items[0]);
     else paintChoices();
   };
   ui.list.onchange = () => {
@@ -298,17 +307,19 @@ export async function runStageSelect(canvas, stage, career = null) {
         return undefined;
       }
       // The arrows. The Java walks stages 1..27 itself (stageselect, below);
-      // a custom stage (stage -2) has no arrows there, so step through the
-      // current list here -- and in All, from stage 27 on into the customs.
+      // a custom stage (stage -2) and a Multiplayer one (28-32) have no arrows
+      // there, so step through the current list here -- and in All, from
+      // stage 27 on into them.
       const list = members(tab);
       const k = list.indexOf(cur);
       const custom = typeof cur === 'string';
-      const walkHere = gmode === 0 && (custom || (cur === 27 && tab === 3 && customs.length));
+      const walked = custom || cur > 27;
+      const walkHere = gmode === 0 && (walked || (cur === 27 && tab === T.ALL && k < list.length - 1));
       if (walkHere && xt.cd.staction === 0) {
         if (control.right) { control.right = false; if (k < list.length - 1) go(list[k + 1]); }
         if (control.left) {
           control.left = false;
-          if (custom && k > 0) go(list[k - 1]);
+          if (walked && k > 0) go(list[k - 1]);
         }
         if (xt.fase === 2) return undefined;
       }
@@ -353,15 +364,15 @@ export async function runStageSelect(canvas, stage, career = null) {
         go(st);
       }
       if (xt.cd.staction === 0) {
-        // The arrows the Java does not draw: a custom stage's, and 27's way on.
-        if (custom && (k > 0)) rd.drawImage(xt.back[0], 115, 135);
+        // The arrows the Java does not draw: a custom or Multiplayer stage's, and 27's way on.
+        if (walked && (k > 0)) rd.drawImage(xt.back[0], 115, 135);
         if (walkHere && k < list.length - 1) rd.drawImage(xt.next[0], 625, 135);
         if (checkPoints.stage === -3 && custom) {
           rd.setFont('Arial', 1, 11);
           xt.ftm = rd.getFontMetrics();
           xt.drawcs(155, 'Please Test Drive this stage in the Stage Maker to make sure it can be loaded!', 255, 138, 0, 3);
         }
-        if (tab === 2 && !customs.length) {
+        if (tab === T.CUSTOM && !customs.length) {
           rd.setFont('Arial', 1, 12);
           xt.ftm = rd.getFontMetrics();
           xt.drawcs(155, 'No custom stages yet: make one in the Stage Maker.', 255, 138, 0, 3);
