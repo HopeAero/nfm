@@ -34,6 +34,18 @@ export class ContO {
     this.shadow = false;
     this.noline = false;
     this.grounded = 0;
+    // the base port's sparks (sprk/dsprk): sprk() counts sprk_ up from 0 on a
+    // scrape, so it must start at 0 -- undefined + 1 is NaN, which reads as
+    // "no spark" forever (only a wall or hit spark, which assigns 1, cleared it)
+    this.sprk_ = 0;
+    this.sprkat = 0;
+    this.srx = 0;
+    this.sry = 0;
+    this.srz = 0;
+    this.rcx = 0.0;
+    this.rcy = 0.0;
+    this.rcz = 0.0;
+    this.bdust = null;
     this.srgb = null;
     this.grat = 0;
     this.osmag = null;
