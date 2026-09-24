@@ -148,7 +148,11 @@ export async function bootExtended(params, log, onExit) {
   // counts down run()'s music wait. Nothing here is presented: rd.end() is not
   // called until the race. The next() that reaches fase 0 runs one jar race
   // frame, which is where drive() hands over Bots.
+  // The overlay is a live Canvas2D, so the jar's own loading screens ("Loading
+  // Stage Sound Track", the car silhouette) would show: the stage stays hidden
+  // and the shell's log line is the loading screen, as in the base race.
   log(`loading ${mode} stage ${params.get('stage') || "(the jar's pick)"}...`);
+  stage.style.visibility = 'hidden';
   for (let n = 0; !(xt && xt.fase === 0 && w.bots); n++) {
     if (n > 5000) throw new Error(`Extended never reached the race (fase ${xt?.fase})`);
     if (xt && (xt.fase === 1 || xt.fase === 6)) gs.u[0].enter = true;
@@ -156,6 +160,7 @@ export async function bootExtended(params, log, onExit) {
     frame.next();
     if (n % 20 === 19) await new Promise((r) => setTimeout(r, 0));   // let the page breathe
   }
+  stage.style.visibility = '';
   const { medium } = w;
   const race = new RaceTick(gs, w);
   log(`stage ${checkpoints.stage}: ${checkpoints.name}`);
