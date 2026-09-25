@@ -40,3 +40,11 @@ test("Extended's clip paths name the base port's clips", () => {
   assert.strictEqual(clipName('data/Files/sounds/JavaNew/42.wav'), '42');
   assert.strictEqual(clipName('data/Files/sounds/caught.wav'), 'caught');
 });
+
+test("jawt's Color(int rgb) unpacks the pixel, as java.awt.Color does", async () => {
+  const { Color } = await import('./jawt.js');
+  const c = new Color(0xff336699 | 0);
+  assert.deepStrictEqual([c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha()], [0x33, 0x66, 0x99, 255]);
+  assert.strictEqual(new Color(0x80336699 | 0, true).getAlpha(), 0x80);
+  assert.deepStrictEqual([new Color(1, 2, 3).getRed(), new Color(1, 2, 3).getBlue()], [1, 3]);
+});

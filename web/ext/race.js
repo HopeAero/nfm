@@ -31,7 +31,11 @@ import { loadCareer, saveCareer } from './career-save.js';
 import { devMode } from '../devmode.js';
 import { installSound } from './sound.js';
 import { installMusic } from './radmusic.js';
-import { installSpanishSprites } from './sprites-es.js';
+import { installSprites } from './sprites-es.js';
+import { installFleximage } from './finish.js';
+import { createRaceMenu } from '../race-ui.js';
+import { spanishPauseBackground } from '../ui-sprites-es.js';
+import { lang } from '../i18n.js';
 import { random, setDrawPhase } from '../java.js';
 
 const W = 870, H = 480;   // Extended's game space (the base game's is 800x450)
@@ -72,7 +76,9 @@ export async function bootExtended(params, log, onExit) {
   const AA = params.get('aa') !== null ? params.get('aa') === '1' : res <= 1;
   // ?res= means what it means on the base race: 800*res pixels across (1600 at
   // the default 2). Extended's wider game space keeps its own aspect under it.
-  const px = (r) => [Math.round(800 * r), Math.round(800 * r * H / W)];
+  // the base race's own backing store, 800x450 per res (1600x900 at 2): the game space is
+  // scaled into it per axis (graphics.js), 1.8% taller than Extended's 870x480 aspect
+  const px = (r) => [Math.round(800 * r), Math.round(450 * r)];
   [glCanvas.width, glCanvas.height] = px(res);
   [textCanvas.width, textCanvas.height] = px(textRes);
   const rd = new JGraphics2D(glCanvas, textCanvas, W, H, { antialias: AA, fill: params.get('fill') || 'trap' });
@@ -99,7 +105,8 @@ export async function bootExtended(params, log, onExit) {
   // ---- sound: the base port's effects and tracker, the career's .ogg ---------
   // Installed before run(): xtGraphics.loaddata takes its AudioClips on the first frames.
   const sfxvol = +(params.get('sfxvol') ?? 100), musicvol = +(params.get('musicvol') ?? 100);
-  installSpanishSprites();          // the bitmaps with English on them (selectcar, next, back...), in Spanish
+  // the base's race-end sprites, and in Spanish its redrawn lettered bitmaps (selectcar, next, back...)
+  await installSprites();
   const sound = installSound(sfxvol);
   const tracker = installMusic(musicvol);
   OggClip.base = base;
@@ -120,13 +127,17 @@ export async function bootExtended(params, log, onExit) {
   // far, copy both layers, and clear the GL buffer so the frame's own end()
   // does not paint that part twice (translucent faces would double up).
   let offStale = false;
+  // The race's last frame, kept when the race stops (see freeze()): the jar's race-end
+  // screens read it back through offImage (fleximage), but by then the WebGL buffer has
+  // been presented and cleared (preserveDrawingBuffer is off), so a copy of it is black.
+  let frozen = null;
   gs.repaint = () => { offStale = true; };
   gs.offImage.beforeRead = () => {
     if (!offStale) return;
     offStale = false;
     rd.end();
     const ctx = gs.offImage.canvas.getContext('2d');
-    ctx.drawImage(glCanvas, 0, 0, W, H);
+    ctx.drawImage(frozen || glCanvas, 0, 0, W, H);
     ctx.drawImage(textCanvas, 0, 0, W, H);
     rd.gl.clearColor(0, 0, 0, 1);
     rd.gl.clear(rd.gl.COLOR_BUFFER_BIT);
@@ -135,6 +146,7 @@ export async function bootExtended(params, log, onExit) {
   gs.readdata = function (x, madness, cp) {
     GameSparker.prototype.readdata.call(this, x, madness, cp);
     xt = x; checkpoints = cp;
+    installFleximage(xt);             // the base port's race-end smear (finish.js)
     // the whole career, not the jar's beta wall at stage 14 (the user, 2026-09-25)
     xt.betalimit = 100;
     if (realCareer) {
@@ -274,8 +286,75 @@ export async function bootExtended(params, log, onExit) {
   window.xt = xt; window.checkpoints = checkpoints;
   window.ext = { w, race };        // for the console
 
+  // ---- the pause: the base port's race menu (web/race-ui.js) ------------------------
+  // Esc, or Enter (stat() sets the jar's pause fase -6), opens it over the frozen frame
+  // with the base's grey blur (race-ui.css); Resume hands the jar fase 609, its own way
+  // back into the race (fcnt, wrecks), and restarts the music stat() stopped; Instant
+  // Replay is the jar's (fase -1, which ends on -6: back to this menu); Quit leaves.
+  let paused = false, pauseArt = null, replayArmed = false;
+  try {
+    const gif = (await readZip('data/images.zip')).get('paused.gif');
+    const blob = new Blob([gif], { type: 'image/gif' });
+    pauseArt = URL.createObjectURL(lang === 'es'
+      ? await spanishPauseBackground(await createImageBitmap(blob)).convertToBlob({ type: 'image/png' }) : blob);
+  } catch { /* the menu draws its own panel */ }
+  // the jar's music pause and resume (xtGraphics.stat / pausedgame)
+  const musicPaused = (on) => {
+    if (!xt.loadedt[xt.lastload]) return;
+    if (!xt.isMidi[xt.lastload]) { if (on) xt.stracks[xt.lastload].stop(); else xt.stracks[xt.lastload].resume(); return; }
+    const t = xt.mtracks[xt.lastload];
+    if (on && !xt.stopped) { t.setPaused(true); xt.resumed = false; xt.stopped = true; }
+    if (!on && !xt.resumed && !xt.mutem) { t.setPaused(false); xt.resumed = true; xt.stopped = false; }
+  };
+  const raceMenu = createRaceMenu(stage, {
+    multiplayer: false,
+    pauseArt,
+    pauseArtBackgroundOnly: lang === 'es',
+    onLeave: () => exit(),
+    onReplay: () => {
+      if (w.record.caught < 300) return 'Sorry not enough replay data to play available, please try again later.';
+      // Through one jar frame of fase -7, which zeroes run()'s replay counter (a local, k2)
+      // after pausedgame -- here a pausedgame that only starts the replay, as its option does.
+      const own = xt.pausedgame;
+      xt.pausedgame = function () {
+        xt.pausedgame = own;
+        replayArmed = false;
+        musicPaused(false);
+        this.fase = -1;
+      };
+      replayArmed = true;
+      paused = false;
+      gs.u[0].enter = gs.u[0].handb = false;   // the key that chose it would end the replay at once
+      xt.fase = -7;
+      return true;
+    },
+    onSkipReplay: () => { gs.u[0].enter = true; },   // the jar's replay ends on Enter
+    onToggle: (open) => {
+      const u = gs.u[0];
+      u.up = u.down = u.left = u.right = u.handb = u.enter = false;
+      paused = open;
+      if (open) { sound.stopAll(); musicPaused(true); } else {
+        musicPaused(false);
+        if (xt.fase === 0) xt.fase = 609;
+        last = performance.now();
+        acc = 0;
+      }
+    },
+  });
+  // the base's menu is laid out on 800x450: centre it on Extended's 870x480
+  stage.querySelector('.race-menu').style.transform = `translate(${(W - 800) / 2}px, ${(H - 450) / 2}px)`;
+  const toPause = () => {
+    xt.fase = 0;
+    gs.u[0].enter = gs.u[0].handb = false;
+    if (raceMenu.isOpen) raceMenu.returnToPause(); else raceMenu.show();
+  };
+
   // ---- input ------------------------------------------------------------------
-  // GameSparker.keyDown is Extended's own map (arrows, handbrake, V for the view, ...).
+  // The race menu takes its keys first (after the audio unlock); outside it and the race
+  // (the jar's finish screens) Esc is the jar's. GameSparker.keyDown is Extended's own map.
+  addEventListener('keydown', (e) => {
+    if ((xt.fase === 0 || raceMenu.isOpen) && raceMenu.handleKey(e)) { e.preventDefault(); e.stopImmediatePropagation(); }
+  }, true);
   if (!menus) { addEventListener('keydown', keyDown); addEventListener('keyup', keyUp); }
 
   // ---- the race loop: the base race's (web/main.js frameBody) -------------------
@@ -384,6 +463,18 @@ export async function bootExtended(params, log, onExit) {
     snapCurr.diup = medium.ddiup.slice();
   };
   // The scene, on the draw bank of the random streams (the base's GameSparker.draw).
+  // The race just stopped (finish, pause): draw its frame once more and keep a copy, in the
+  // same task, before the browser presents and clears the WebGL buffer.
+  const freeze = () => {
+    rd.begin(true);
+    drawScene();
+    rd.replay(hudVerts);
+    rd.end();
+    frozen ??= Object.assign(document.createElement('canvas'), { width: glCanvas.width, height: glCanvas.height });
+    const ctx = frozen.getContext('2d');
+    ctx.drawImage(glCanvas, 0, 0);
+    ctx.drawImage(textCanvas, 0, 0, frozen.width, frozen.height);
+  };
   const drawScene = () => {
     setDrawPhase(true);
     try { race.draw(rd); } finally { setDrawPhase(false); }
@@ -399,12 +490,17 @@ export async function bootExtended(params, log, onExit) {
     const w0 = performance.now();
     acc += now - last;
     last = now;
+    if (paused) { acc = 0; return; }   // the race menu: the frozen frame stays up
     if (acc > TICK_MS * MAX_CATCHUP) acc = TICK_MS * MAX_CATCHUP;
 
-    // the jar's own screens (pause, finish, replays): its frame, once per tick
+    // the jar's pause: the race menu instead of its pausedgame screen (the replay ends on -6,
+    // and run() goes on to -7 in the same frame)
+    const jarPause = () => !replayArmed && (xt.fase === -6 || xt.fase === -7);
+    if (jarPause()) { toPause(); return; }
+    // the jar's own screens (finish, replays): its frame, once per tick
     if (xt.fase !== 0) {
       let ran = false;
-      while (acc >= TICK_MS) { acc -= TICK_MS; rd.begin(); frame.next(); ran = true; }
+      while (acc >= TICK_MS && !jarPause()) { acc -= TICK_MS; rd.begin(); frame.next(); ran = true; }
       if (ran) rd.end();
       if (xt.fase === 0) { capture(snapPrev); capture(snapCurr); }   // back in the race: blend from here
       return;
@@ -430,6 +526,7 @@ export async function bootExtended(params, log, onExit) {
       if (xt.fase !== 0) break;      // paused, finished: the jar's screens take the next frame
     }
     if (stepped) capture(snapCurr);
+    if (stepped && xt.fase !== 0) { freeze(); return; }
 
     if (INTERPOLATE && xt.fase === 0) {
       const t1 = performance.now();

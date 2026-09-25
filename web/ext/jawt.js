@@ -13,6 +13,14 @@ export const Random = JavaRandom;
 
 export class Color {
   constructor(r, g, b, a = 255) {
+    // Color(int rgb) / Color(int argb, boolean hasalpha): fleximage and pauseimage read the
+    // frame's pixels this way; taking the int as red alone turned the race-end frame into static
+    if (g === undefined || typeof g === 'boolean') {
+      const v = r | 0;
+      this.r = (v >> 16) & 255; this.g = (v >> 8) & 255; this.b = v & 255;
+      this.a = g === true ? (v >>> 24) : 255;
+      return;
+    }
     this.r = r | 0; this.g = g | 0; this.b = b | 0; this.a = a | 0;
   }
   getRed() { return this.r; }
