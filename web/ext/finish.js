@@ -5,6 +5,8 @@
 // the frame a near-black blur; its race-end screens (finish(): unlocks,
 // rewards, CONTINUE) are drawn over whichever this is, unchanged.
 
+import { Image } from './jawt.js';
+
 const W = 870, H = 480, PASSES = 7;
 
 export function installFleximage(xt) {
@@ -47,5 +49,40 @@ export function installFleximage(xt) {
     // finish() draws xt.fleximg as its backdrop
     this.fleximg = img;
     this.rd.drawImage(img, 0, 0);
+  };
+}
+
+/**
+ * The presenter over the start countdown (xtGraphics.blendude, starcnt 36): the dude
+ * blended a quarter over the race frame behind him, a ghost on the stage. The jar reads
+ * that frame from offImage, a copy of the WebGL canvas -- presented and cleared by then,
+ * so he blended with black; `frame()` is race.js's copy of the last drawn frame instead.
+ * And Extended places him at x = 317 or 431, both over the countdown digit (x 398-470);
+ * the base game kept him clear of it (250 / 428 in its 800), so here 268 / 500.
+ */
+export function installBlendude(xt, frame) {
+  xt.blendude = function () {
+    this.dudo = Math.random() > Math.random() ? 268 : 500;
+    const bg = frame();
+    if (!bg) { for (let j = 0; j < 3; j++) this.dudeb[j] = this.dude[j]; return; }
+    const b = bg.getContext('2d', { willReadFrequently: true }).getImageData(this.dudo, 0, 122, 160).data;
+    for (let j = 0; j < 3; j++) {
+      const c = new OffscreenCanvas(122, 160);
+      const cx = c.getContext('2d', { willReadFrequently: true });
+      cx.drawImage(this.dude[j].source(), 0, -10);        // the jar grabs the dude from y = 10
+      const img = cx.getImageData(0, 0, 122, 160), d = img.data;
+      const key = [d[0], d[1], d[2], d[3]];
+      const px = new Int32Array(122 * 160);
+      for (let k = 0; k < px.length; k++) {
+        const o = k * 4;
+        if (d[o] === key[0] && d[o + 1] === key[1] && d[o + 2] === key[2] && d[o + 3] === key[3]) {
+          px[k] = (d[o + 3] << 24) | (d[o] << 16) | (d[o + 1] << 8) | d[o + 2];
+          continue;
+        }
+        const r = (d[o] + b[o] * 3) >> 2, g = (d[o + 1] + b[o + 1] * 3) >> 2, bl = (d[o + 2] + b[o + 2] * 3) >> 2;
+        px[k] = (255 << 24) | (r << 16) | (g << 8) | bl;
+      }
+      this.dudeb[j] = new Image(122, 160, px);
+    }
   };
 }

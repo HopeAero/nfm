@@ -68,3 +68,29 @@ export function loadCareer(xt, cp, m, store = globalThis.localStorage) {
   restore(xt, cp, m, s);
   return true;
 }
+
+/**
+ * What the car select's stat buttons change: every car's stat points and six
+ * ai*sp, the car points and the bonus-car specials. The port's Confirm / Undo
+ * (menus.js) compares against and puts back one of these.
+ */
+export function statsOf(xt, m) {
+  return JSON.stringify({
+    sp: Array.from(xt.statpoints), cp: xt.carpoints,
+    ai: AI.map((k) => Array.from(m[k])),
+    special: xt.specialstats.map((car) => car.map((row) => Array.from(row))),
+  });
+}
+
+export function restoreStats(xt, m, saved) {
+  const s = JSON.parse(saved);
+  s.sp.forEach((v, a) => { xt.statpoints[a] = v; });
+  xt.carpoints = s.cp;
+  AI.forEach((k, i) => s.ai[i].forEach((v, a) => { m[k][a] = v; }));
+  s.special.forEach((car, a) => car.forEach((row, x) => row.forEach((v, b) => { xt.specialstats[a][x][b] = v; })));
+}
+
+/** A new career: the jar's defaults next time it loads. */
+export function clearCareer(store = globalThis.localStorage) {
+  try { store.removeItem(KEY); } catch { /* private mode */ }
+}

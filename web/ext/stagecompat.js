@@ -23,6 +23,7 @@
 import { TRACK_NAMES } from '../GameSparker.js';
 import { readText, readZip } from '../vfs.js';
 import { ContO } from './ContO.js';
+import { Medium as BaseMedium } from '../Medium.js';
 
 /** Extended's model list, in loadbase's order (GameSparker.java `as`). */
 export const EXT_MODELS = [
@@ -68,6 +69,9 @@ export function translateStage(text, grat) {
   const polys = ground && `polys(${[tr, tg, tb].map((t, i) => Math.trunc((ground[i] * k + t) / (1 + k))).join(',')})`;
   return lines.map((line) => {
     if (polys && line.trim().startsWith(texture ? 'texture(' : 'ground(')) return texture ? polys : `${line}\n${polys}`;
+    // the base reads density(n) as fog 2n+1, 1..30 (web/GameSparker.js); Extended takes n as it is
+    const fog = /^(\s*)density\((-?\d+)\)/.exec(line);
+    if (fog) return `${fog[1]}density(${Math.min(30, Math.max(1, 2 * +fog[2] + 1))})`;
     const m = /^(\s*)(set|chk|fix)\((-?\d+)(,.*)$/.exec(line);
     if (!m) return line;
     const [, pad, cmd, id, rest] = m;
@@ -115,6 +119,39 @@ export async function prepareBaseStage(params) {
   }
   if (!text) throw new Error(`stagecompat: no stage ${name ?? params.get('nfm2stage')}`);
   return { name, text, zip: await readZip('data/models.zip') };
+}
+
+/**
+ * The ground patches (the "mounds") of an NFM 2 stage as the base draws them:
+ * web/Medium.js's own newpolys/groundpolys run on Extended's Medium, whose
+ * fields they share by name -- seeded patches 2-4x bigger, a halo pass, 4800
+ * past the walls, a 25x25 window to fade[2]. Extended's make smaller unseeded
+ * ones in a 15x15 window. Off (the prototype's again) for any other stage.
+ * ponytail: the seed takes gs.nob for the base's notb, so the pattern is the
+ * base's kind, not its exact layout; and the base's ys() clamps to cz where
+ * Extended's clamps to 10, which only moves a vertex already behind the eye.
+ */
+export function baseGround(medium, notb) {
+  medium.baseLook = !!notb;   // ContO's pile() reads it: the base's hill shading
+  if (!notb) { delete medium.newpolys; delete medium.groundpolys; return; }
+  medium.newpolys = (a, b, c, d, t) => BaseMedium.prototype.newpolys.call(medium, a, b, c, d, t, notb());
+  medium.groundpolys = BaseMedium.prototype.groundpolys;
+}
+
+/**
+ * An NFM 2 stage's pieces (aconto[from..to), after loadstage) drawn as the base
+ * port draws them: its ContO doubles every model's disline (web/ContO.js), so
+ * road, trees and ramps reach fade[8] and on, not fade[4]; its Plane culls
+ * (Plane.basecull); and its checkpoints flicker on every stage but 1 and 11
+ * (Extended's rule is "all but 1", and these run as the classic twin or 1).
+ */
+export function baseLook(aconto, from, to, medium, stage) {
+  for (let i = from; i < to; i++) {
+    const o = aconto[i];
+    o.disline = Math.min(15, o.disline * 2);   // fade[] has 16 steps
+    for (let j = 0; j < o.npl; j++) { o.p[j].disline = o.disline; o.p[j].basecull = true; }
+  }
+  medium.nochekflk = !(stage === 1 || stage === 11);
 }
 
 /** Puts the base's models for APPENDED into Extended's model array (after loadbase). */

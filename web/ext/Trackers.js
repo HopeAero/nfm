@@ -42,8 +42,9 @@ export class Trackers {
     this.dam = intArray(67000);
     this.notwall = new Array(67000).fill(false);
     this.tracksReady = false;
-    this.oc = objArray(67000).map(() => intArray(3));
-    this.c = objArray(67000).map(() => intArray(3));
+    // ext-patch tracker-rows: rows added by ContO's trackerRow as slots fill
+    this.oc = [];
+    this.c = [];
     this.radx = intArray(67000);
     this.radz = intArray(67000);
     this.rady = intArray(67000);

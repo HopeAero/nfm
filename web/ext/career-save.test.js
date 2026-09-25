@@ -2,7 +2,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { loadCareer, saveCareer, snapshot } from './career-save.js';
+import { loadCareer, restoreStats, saveCareer, snapshot, statsOf } from './career-save.js';
 import { clipName } from './sound.js';
 
 const fresh = () => {
@@ -35,6 +35,18 @@ test('a career saves and loads back field for field', () => {
   assert.strictEqual(loadCareer(fresh().xt, {}, fresh().m, { getItem: () => null }), false);
 });
 
+test('Undo puts every stat the car select spends back as it was', () => {
+  const a = fresh();
+  a.xt.statpoints[5] = 3; a.xt.carpoints = 2;
+  const saved = statsOf(a.xt, a.m);
+  a.xt.statpoints[5]--; a.m.aigripsp[5]++;                  // a + on control
+  a.xt.carpoints--; a.xt.specialstats[5][a.xt.statsalc[5][1]][1]++;   // a bonus-car point
+  assert.notStrictEqual(statsOf(a.xt, a.m), saved);
+  restoreStats(a.xt, a.m, saved);
+  assert.strictEqual(statsOf(a.xt, a.m), saved);
+  assert.deepStrictEqual([a.xt.statpoints[5], a.m.aigripsp[5], a.xt.carpoints], [3, 0, 2]);
+});
+
 test("Extended's clip paths name the base port's clips", () => {
   assert.strictEqual(clipName('data/Files/sounds/JavaNew/crash1.wav'), 'crash1');
   assert.strictEqual(clipName('data/Files/sounds/JavaNew/42.wav'), '42');
@@ -47,4 +59,11 @@ test("jawt's Color(int rgb) unpacks the pixel, as java.awt.Color does", async ()
   assert.deepStrictEqual([c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha()], [0x33, 0x66, 0x99, 255]);
   assert.strictEqual(new Color(0x80336699 | 0, true).getAlpha(), 0x80);
   assert.deepStrictEqual([new Color(1, 2, 3).getRed(), new Color(1, 2, 3).getBlue()], [1, 3]);
+});
+
+test("the presenter's download line", async () => {
+  const { progressText } = await import('./musicload.js');
+  assert.strictEqual(progressText({ loaded: 145408, total: 1739776, done: false }), '142 / 1699 KB');
+  assert.strictEqual(progressText({ loaded: 1739776, total: 1739776, done: true }), '1699 KB');
+  assert.strictEqual(progressText({ loaded: 51200, total: 0, done: false }), '50 KB');
 });

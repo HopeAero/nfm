@@ -476,31 +476,43 @@ export class OggClip {
   static volume = 1;
   static base = '../';           // where ext/ is (race.js: detectFpath)
   static all = new Set();
+  /** (path under the game root) -> Promise of the file's bytes; race.js counts them (musicload.js). */
+  static load = null;
   constructor(input) {
     this.path = input.path;
-    this.el = typeof Audio === 'function' ? new Audio(`${OggClip.base}ext/${this.path}`) : null;
-    if (this.el) {
-      this.el.preload = 'auto';
-      this.el.volume = OggClip.level();
-      // an intro played once has ENDED, not been refused: unlock() must not start it again
-      this.el.onended = () => { this.wanted = false; };
-      OggClip.all.add(this);
-    }
+    this.el = typeof Audio === 'function' ? new Audio() : null;
+    if (!this.el) return;
+    this.el.preload = 'auto';
+    this.el.volume = OggClip.level();
+    // an intro played once has ENDED, not been refused: unlock() must not start it again
+    this.el.onended = () => { this.wanted = false; };
+    OggClip.all.add(this);
+    const file = `ext/${this.path}`;
+    if (!OggClip.load) { this.el.src = OggClip.base + file; this.ready = true; return; }
+    this.ready = false;
+    OggClip.load(file).then((bytes) => {
+      if (!this.el) return;         // closed while it downloaded
+      this.url = globalThis.URL.createObjectURL(new Blob([bytes], { type: "audio/ogg" }));   // globalThis: URL here is java.net.URL
+      this.el.src = this.url;
+      this.ready = true;
+      if (this.wanted) this.el.play().catch(() => {});
+    }, (e) => console.warn('music: no track', file, e));
   }
   static level() { return Math.max(0, Math.min(1, 0.6 * OggClip.volume)); }
   start(loop) {
     if (!this.el) return;
     this.wanted = true;
     this.el.loop = loop;
+    if (!this.ready) return;        // still downloading: it starts when it arrives
     this.el.currentTime = 0;
     this.el.play().catch(() => { /* no gesture yet: race.js retries on the first key */ });
   }
   play() { this.start(false); }
   loop() { this.start(true); }
   pause() { this.wanted = false; this.el?.pause(); }
-  resume() { this.wanted = true; if (this.el?.paused) this.el.play().catch(() => {}); }
+  resume() { this.wanted = true; if (this.ready && this.el?.paused) this.el.play().catch(() => {}); }
   stop() { this.pause(); }
-  close() { this.el?.pause(); if (this.el) this.el.src = ''; OggClip.all.delete(this); this.el = null; }
+  close() { this.el?.pause(); if (this.el) this.el.src = ''; if (this.url) globalThis.URL.revokeObjectURL(this.url); OggClip.all.delete(this); this.el = null; }
   /** A key or click: start any clip asked to play before the page had a gesture. */
-  static unlock() { for (const c of OggClip.all) if (c.el && c.el.paused && c.wanted) c.el.play().catch(() => {}); }
+  static unlock() { for (const c of OggClip.all) if (c.ready && c.el && c.el.paused && c.wanted) c.el.play().catch(() => {}); }
 }

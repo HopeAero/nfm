@@ -10,7 +10,7 @@
 // decoded Image is swapped -- before bressed() makes the pressed button from it.
 
 import { spanishSprite } from '../ui-sprites-es.js';
-import { loadude } from '../images.js';
+import { loadsnap as baseLoadsnap, loadude } from '../images.js';
 import { lang } from '../i18n.js';
 import { readZip } from '../vfs.js';
 import { Image, ZipInputStream } from './jawt.js';
@@ -34,6 +34,67 @@ async function decode(bytes) {
   const bmp = await createImageBitmap(new Blob([bytes]));
   const c = new OffscreenCanvas(bmp.width, bmp.height);
   c.getContext('2d').drawImage(bmp, 0, 0);
+  return c;
+}
+
+/**
+ * Extended's own "Loading Stage Sound Track" card (the presenter's screen before a race):
+ * its black lettering (rows 66-81) replaced with the pixel above or below it -- the stage
+ * silhouette or clear -- and the Spanish drawn in the same Adventure face (race.js loads
+ * it before run()). loadopsnap tints the result afterwards, as it did the original.
+ */
+function spanishLoadingMusic(src) {
+  const c = new OffscreenCanvas(src.width, src.height);
+  const ctx = c.getContext('2d', { willReadFrequently: true });
+  ctx.drawImage(src, 0, 0);
+  const img = ctx.getImageData(0, 0, c.width, c.height), p = img.data, w = c.width;
+  const ink = (o) => p[o + 3] > 0 && p[o] < 80 && p[o + 1] < 80 && p[o + 2] < 80;
+  for (let y = 64; y <= 83; y++) {
+    for (let x = 0; x < w; x++) {
+      const o = (y * w + x) * 4;
+      if (!ink(o)) continue;
+      const from = ((y < 73 ? 64 : 83) * w + x) * 4;
+      for (let k = 0; k < 4; k++) p[o + k] = p[from + k];
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+  let size = 17;
+  do { ctx.font = `italic ${size}px Adventure`; } while (ctx.measureText('CARGANDO MÚSICA DE LA PISTA').width > w - 8 && --size > 8);
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#000';
+  ctx.fillText('CARGANDO MÚSICA DE LA PISTA', w / 2, 74);
+  return c;
+}
+
+/**
+ * The presenter's START button (start1.gif, start2.gif: its two blinking states, 82x26):
+ * the lettering inside the grey pill (132) refilled with it, and INICIAR drawn in the
+ * Adventure face in each state's own ink -- white on start1, light grey outlined dark on
+ * start2. The jar makes the pressed copy from start2 and tints both (loadopsnap) after.
+ */
+function spanishStart(src, second) {
+  const c = new OffscreenCanvas(src.width, src.height);
+  const ctx = c.getContext('2d', { willReadFrequently: true });
+  ctx.drawImage(src, 0, 0);
+  const img = ctx.getImageData(0, 0, c.width, c.height), p = img.data, w = c.width;
+  for (let y = 5; y <= 20; y++) {
+    for (let x = 9; x <= 73; x++) {
+      const o = (y * w + x) * 4;
+      p[o] = p[o + 1] = p[o + 2] = 132; p[o + 3] = 255;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+  let size = 18;
+  do { ctx.font = `italic ${size}px Adventure`; } while (ctx.measureText('INICIAR').width > 62 && --size > 8);
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.lineJoin = 'round';
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = second ? 'rgb(90,90,90)' : 'rgb(110,110,110)';
+  ctx.strokeText('INICIAR', w / 2, 13.5);
+  ctx.fillStyle = second ? 'rgb(231,231,231)' : '#fff';
+  ctx.fillText('INICIAR', w / 2, 13.5);
   return c;
 }
 
@@ -61,7 +122,27 @@ export async function installSprites() {
     const name = BASE[entry] || entry;
     const own = base.get(BASE[entry]);
     const src = own || img.source();
-    const out = lang === 'es' ? spanishSprite(name, src) : src;
+    const out = lang !== 'es' ? src
+      : entry === 'loadingmusic.gif' ? spanishLoadingMusic(src)
+      : entry === 'start1.gif' || entry === 'start2.gif' ? spanishStart(src, entry === 'start2.gif')
+      : spanishSprite(name, src);
     return out === src && !own ? img : fromCanvas(out);
+  };
+}
+
+/**
+ * Extended's race messages (you won / lost / wasted..., the highlight title) through the
+ * base port's loadsnap: grey is black lettering with coverage and the 192 background is
+ * clear. Extended's own loadsnap paints that background the sky's colour -- a box behind
+ * every message wherever the sky is not flat. The bars (dmg, pwr, special) keep
+ * Extended's: the base's reads a pixel with g === b as grey, so special.gif's pure red
+ * would go clear.
+ */
+const LETTERED = ['oyourwasted', 'oyoulost', 'oyouwon', 'oyouwastedem', 'ogameh'];
+export function installBaseLoadsnap(xt) {
+  const own = xt.loadsnap;
+  xt.loadsnap = function (image) {
+    if (!LETTERED.some((k) => this[k] === image)) return own.call(this, image);
+    return fromCanvas(baseLoadsnap(image.source(), this.m.snap));
   };
 }

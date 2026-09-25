@@ -10,6 +10,13 @@
 import { floatArray, fr, i32, idiv, inDrawPhase, intArray, objArray, random, trunc } from '../java.js';
 import { Arrays, Color, Random, StringBuilder, System } from './jawt.js';
 
+// Extended's groundpolys scratch (see there)
+const GP = {
+  ai: [0, 1, 2, 3].map(() => new Int32Array(8)), ai2: [0, 1, 2, 3].map(() => new Int32Array(8)), ai3: [0, 1, 2, 3].map(() => new Int32Array(8)),
+  ai4: [0, 1, 2, 3].map(() => new Int32Array(8)), ai5: [0, 1, 2, 3].map(() => new Int32Array(8)),
+  levels: Int32Array.from([0, -10000, -20000, -30000]),
+};
+
 export class Medium {
   constructor() {
     this.focus_point = 0;
@@ -109,6 +116,7 @@ export class Medium {
     this.elecr = 0;
     this.cpflik = false;
     this.nochekflk = false;
+    this.baseLook = false;   // port: an NFM 2 stage drawn as the base draws it (stagecompat.js baseGround)
     this.cntrn = 0;
     this.diup = null;
     this.rand = null;
@@ -261,8 +269,11 @@ export class Medium {
     this.vert = false;
     this.trns = 1;
     this.dispolys = 0;
-    this.ogpx = objArray(200000).map(() => intArray(8));
-    this.ogpz = objArray(200000).map(() => intArray(8));
+    // port: the ground patches' shapes, grown by newpolys to the stage's cell count.
+    // The jar made 2 x 200000 up front: 400k live typed arrays for the whole race,
+    // which every major GC walks (50-60 ms pauses mid-race).
+    this.ogpx = [];
+    this.ogpz = [];
     this.cgpx = intArray(200000);
     this.cgpz = intArray(200000);
     this.sgpx = 0;
@@ -393,14 +404,15 @@ export class Medium {
         let i3 = i32(this.cz + trunc((fr((fr(fr(((i32((i32(this.cgpx[k2] - this.x)) - this.cx)))) * this.sin(this.xz))) + (fr(fr(((i32((i32(this.cgpz[k2] - this.z)) - this.cz)))) * this.cos(this.xz)))))));
         let j3 = i32(this.cz + trunc((fr((fr(fr(((i32((i32(this.ground - this.y)) - this.cy)))) * this.sin(this.zy))) + (fr(fr(((i32(i3 - this.cz)))) * this.cos(this.zy)))))));
         if ((((((this.xs(i32(l2 + 700), j3) > 0) && (this.xs(i32(l2 - 700), j3) < this.w)) && (j3 > -700)) && (j3 < (idiv(((i32(this.fade[0] + this.fade[1]))), 2))))) || this.effect[4]) {
-          let ai = objArray(4).map(() => intArray(8));
-          let ai2 = objArray(4).map(() => intArray(8));
-          let ai3 = objArray(4).map(() => intArray(8));
+          // port: the patch's arrays are reused, not made per cell per frame -- every slot
+          // read (a < polylimit) is written first
+          let ai = GP.ai, ai2 = GP.ai2, ai3 = GP.ai3;
           let groundloc = this.ground;
           if (this.effect[4]) {
             groundloc = i32(this.ground + 2500);
           }
-          let groundlevels = Int32Array.from([groundloc, -10000, -20000, -30000]);
+          let groundlevels = GP.levels;
+          groundlevels[0] = groundloc;
           let polylimit = 1;
           let b2 = this.effect[9];
           for (let a = 0; a < polylimit; a = i32(a + 1)) {
@@ -413,8 +425,7 @@ export class Medium {
             this.rot(ai[a], ai2[a], this.cx, this.cz, this.xz, 8);
             this.rot(ai3[a], ai2[a], this.cy, this.cz, this.zy, 8);
           }
-          let ai4 = objArray(4).map(() => intArray(8));
-          let ai5 = objArray(4).map(() => intArray(8));
+          let ai4 = GP.ai4, ai5 = GP.ai5;
           let l3 = 0;
           let i4 = 0;
           let j4 = 0;
@@ -2364,6 +2375,7 @@ export class Medium {
       }
     }
     let polysize = 1.0;
+    for (let n = Math.imul(this.nrw, this.ncl); this.ogpx.length < n;) { this.ogpx.push(intArray(8)); this.ogpz.push(intArray(8)); }
     for (let l2 = 0; l2 < (Math.imul(this.nrw, this.ncl)); l2 = i32(l2 + 1)) {
       this.ogpx[l2][0] = 0;
       this.ogpz[l2][0] = trunc((100.0 + ((random() * 600.0) * polysize)));

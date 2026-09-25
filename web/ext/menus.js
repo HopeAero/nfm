@@ -16,14 +16,17 @@
 // cars, AI by classicTwin's stage number).
 //
 // Career: the jar's car select as it is (locks, levels, stat points, bonus
-// cars, reset/sell, change stats: all the jar's own, mouse included), and the
-// stage select's career extras as DOM buttons that do what its ctachm does --
-// bonus stage, hard mode / scale levels / no levels, xp gain, scouting (the
-// jar's own screen), change car, back to the menu.
+// cars, reset/sell, change stats: all the jar's own, mouse included) plus the
+// port's Confirm / Undo, -, held + and New career; and the jar's own stage
+// select over the rendered stage -- the base port's look, with Extended's
+// buttons (bonus stage, xp gain, hard / scale / no levels, scouting, change
+// car, menu) and its locked-stage screen -- plus a way back out of a bonus
+// stage.
 
 import { CAREER_STAGES, EXT_CARS, EXT_STAGES, classicTwin } from './catalog.js';
 import { devMode } from '../devmode.js';
 import { tr } from '../i18n.js';
+import { restoreStats, statsOf } from './career-save.js';
 
 const STORE_KEY = 'nfm.ext.free';
 // the career's stages only in developer mode (catalog.js)
@@ -89,8 +92,9 @@ export const bonusAt = (stage) => [5, 11, 15, 18].indexOf(stage);
  * @param o.nfm2Names       the base game's 32 stage names (free play)
  * @param o.setBaseStage    (n | null) -> the NFM 2 stage loadstage substitutes (free play)
  * @param o.exit            back to the launcher
+ * @param o.careerStore     a real career's { save, saves, reset } (race.js), or null
  */
-export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, nfm2Names = [], setBaseStage = () => {}, exit }) {
+export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, nfm2Names = [], setBaseStage = () => {}, exit, careerStore = null }) {
   const career = mode === 'career';
   const GROUPS = groups();
   const pick = loadPick(GROUPS);
@@ -118,9 +122,15 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
       this.careermode = this.classicmode = false;
       clampCarArrows(control_, this.sc[0]);
     }
+    if (careerStore) {
+      stat.mad = rest[1];
+      // what Undo returns to: the stats as last saved (by Confirm, or by the jar's own saves)
+      if (stat.base === null || careerStore.saves() !== stat.saves) { stat.base = statsOf(this, stat.mad); stat.saves = careerStore.saves(); }
+    }
     own.carselect.call(this, control_, ...rest);
+    if (careerStore) stat.pending = statsOf(this, stat.mad) !== stat.base;
     if (this.fase !== 6476) return;      // Enter: the car is chosen, on to the stage
-    if (career) { this.lastcar = this.sc[0]; return; }
+    if (career) { this.lastcar = this.sc[0]; if (stat.pending) stat.confirm(); return; }
     pick.car = this.sc[0];
     savePick(pick);
     apply();
@@ -146,15 +156,22 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
     xt.fase = 5;
     try { xt.stages.stop(); xt.stages.unloadMod(); } catch { /* no stage music loaded */ }
   };
-  let notice = '', noticeUntil = 0;
   xt.stageselect = function (checkpoints, c, madness) {
+    // The career: the jar's own stage select, drawn over the rendered stage -- the base port's
+    // look (its arrows, CONTINUE, the locked-stage screen) with Extended's own buttons (bonus
+    // stage, xp gain, hard mode / scale / no levels, scouting, change car, menu). The one
+    // addition: out of a bonus stage, back to the career stage (the arrow, or the button).
+    if (career) {
+      paint();
+      if (this.bonstage && c.left) { c.left = false; extra.normal(); return; }
+      return own.stageselect.call(this, checkpoints, c, madness);
+    }
     // what the jar's stageselect does besides drawing: forget loaded music, play the menu's
     for (let i = 0; i < 200; i++) {
       this.mtracks[i] = null; this.stracks[i] = null;
       this.isMidi[i] = this.isOgg[i] = this.loadedt[i] = false;
     }
     this.stages.play();
-    if (career) return careerSelect.call(this, checkpoints, c, madness);
     paint();
     let group = pick.group, to = pick.stage;
     if (c.left) to = step(listOf(group), to, -1);
@@ -170,38 +187,7 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
       go(c, `Stage ${pick.stage}:  ${checkpoints.name}`);
     }
   };
-  function careerSelect(checkpoints, c, madness) {
-    paint(madness);
-    // in a bonus stage the jar has no arrows; here back (the arrow or the button) returns to the career stage
-    if (this.bonstage && c.left) extra.normal();
-    else if (!this.bonstage && this.showopstage !== 195 && (c.left || c.right)) {
-      const r = careerStep(checkpoints.stage, this.unlocked[1], c.right ? 1 : -1);
-      if (r.locked) {
-        notice = tr(`This stage will be unlocked when stage ${checkpoints.stage} is complete!`);
-        noticeUntil = performance.now() + 2500;
-      } else if (r.stage !== checkpoints.stage) {
-        checkpoints.stage = r.stage;
-        this.hardstage = this.scalelevels = this.nolevels = false;
-        this.fase = 6476;
-      }
-    }
-    c.left = c.right = c.up = c.down = false;
-    if (c.enter || c.handb) {
-      const b = this.bonusstage.findIndex(Boolean);
-      go(c, this.bonstage && b >= 0 ? `Bonus Stage ${b + 1}: ${checkpoints.name}` : `Stage ${checkpoints.stage}:  ${checkpoints.name}`);
-    }
-  }
-  // the career extras: what ctachm's fase 1 clicks do (xtGraphics.java:17657-17757)
   const extra = {
-    bonus() {
-      const a = bonusAt(cp.stage);
-      if (a < 0 || xt.bonstage) return;
-      xt.bonstage = true;
-      xt.scalelevels = xt.nolevels = xt.hardstage = false;
-      xt.bonusstage[a] = true;
-      if (a === 0 || a === 2) xt.unlimitedlaps = true;
-      xt.fase = 6476;
-    },
     // out of the bonus stage, back to the career stage it hangs off: what resetmaini clears of it
     normal() {
       if (!xt.bonstage) return;
@@ -212,19 +198,8 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
       xt.duration = xt.pausetime = xt.elapsed = 0;
       xt.fase = 6476;
     },
-    hard() { xt.hardstage = true; xt.scalelevels = xt.nolevels = false; xt.fase = 6476; },
-    scale() { xt.scalelevels = !xt.scalelevels; xt.hardstage = xt.nolevels = false; xt.fase = 6476; },
-    nolevels() {
-      xt.nolevels = !xt.nolevels;
-      if (xt.nolevels) xt.averagelevel = 1;
-      xt.scalelevels = xt.hardstage = false;
-      xt.fase = 6476;
-    },
-    xp() { xt.disablexp = !xt.disablexp; },
-    scout() { xt.fase = 201; },
-    // CHANGE CAR / RETURN TO MENU: fase 1110 with tocs / tomaini, as the jar's buttons
+    // CHANGE CAR: fase 1110 with tocs, as the jar's button (Esc on the stage select)
     car() { xt.fase = 1110; xt.tocs = true; xt.m.showsnow = false; xt.stages.stop(); xt.stages.unloadMod(); },
-    menu() { xt.fase = 1110; xt.tomaini = true; xt.m.showsnow = false; xt.stages.stop(); xt.stages.unloadMod(); },
   };
   const choose = (group, n) => {
     if (group === pick.group && n === pick.stage) return;
@@ -233,6 +208,110 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
     apply();
     xt.fase = 6476;                      // randomno for this stage, then fase 2 loads it
     paint();
+  };
+
+  // ---- the car select's stat changes: Confirm / Undo (a real career) -----------
+  // The jar spends a stat point the moment its + is clicked, and keeps it. Here the
+  // spending waits: Confirm saves it, Undo puts the stats back as they were saved.
+  // Racing (Enter) with changes pending confirms them; leaving (Esc) drops them.
+  const AI = ['aitssp', 'aiaccsp', 'aigripsp', 'aistusp', 'aistrsp', 'aiendsp'];
+  const stat = {
+    mad: null, base: null, saves: -1, pending: false,
+    // a point spent on stat k (the jar's order: speed, acceleration, control, stunts, strength,
+    // endurance) since the last save, that the - can give back: the car's, or a bonus car's special
+    spent(k) {
+      if (!stat.base || !stat.mad) return false;
+      const b = JSON.parse(stat.base), a = xt.sc[0];
+      if (xt.nclicked) return xt.specialstats[a][xt.statsalc[a][k]][k] > b.special[a][xt.statsalc[a][k]][k];
+      return stat.mad[AI[k]][a] > b.ai[k][a];
+    },
+    minus(k) {
+      if (!stat.spent(k)) return false;
+      const a = xt.sc[0];
+      if (xt.nclicked) { xt.specialstats[a][xt.statsalc[a][k]][k]--; xt.carpoints++; } else { stat.mad[AI[k]][a]--; xt.statpoints[a]++; }
+      for (let i = 0; i < 7; i++) { xt.colorcode[i] = 0; xt.stopflashing[i] = false; }   // what the jar's + resets
+      stat.pending = statsOf(xt, stat.mad) !== stat.base;
+      return true;
+    },
+    confirm() { careerStore.save(); stat.base = statsOf(xt, stat.mad); stat.saves = careerStore.saves(); stat.pending = false; },
+    undo() { restoreStats(xt, stat.mad, stat.base); stat.pending = false; },
+  };
+  const statUi = document.createElement('div');
+  // beside the jar's STAT POINTS line (442, 375) and under its CHANGE STATS button, in its 870x480
+  statUi.style.cssText = 'position:absolute;left:0;top:0;width:870px;height:480px;z-index:4;display:none;pointer-events:none;'
+    + 'font:bold 13px Arial,sans-serif;color:#fff;text-shadow:0 0 4px #000;';
+  const statBtn = 'cursor:pointer;border:1px solid #fff;font:bold 13px Arial,sans-serif;padding:4px 10px;color:#fff;';
+  // New career in the style of the jar's RESET CAR / CHANGE STATS (xtGraphics carselect: the
+  // pointed white box 198 x 50, Adventure bold 20), in the right column under BONUS CARS: the
+  // left column's next slot is where the jar draws its BACK arrow (30, 290) for most cars
+  // the jar's + boxes (352..378 / 762..788 x 390 + 30 per row, grey), with a - beside each
+  const minusBtn = 'position:absolute;width:27px;height:26px;pointer-events:auto;cursor:pointer;border:0;padding:0;'
+    + 'border-radius:4px;background:rgb(150,150,150);color:#000;font:bold 25px Arial,sans-serif;line-height:22px;text-shadow:none;';
+  const jarBtn = 'position:absolute;left:652px;width:198px;height:50px;pointer-events:auto;cursor:pointer;border:0;padding:0;'
+    + 'clip-path:polygon(0 50%,8px 0,190px 0,100% 50%,190px 100%,8px 100%);background:rgba(255,255,255,.78);'
+    + "color:#000;font:bold 20px Adventure,Arial,sans-serif;text-shadow:none;";
+  statUi.innerHTML = `
+    <div style="position:absolute;left:720px;top:326px;display:flex;flex-direction:column;gap:4px;pointer-events:auto">
+      <div data-s="note" style="color:#ffd24a;font-size:11px">${tr('Stat changes not saved')}</div>
+      <div style="display:flex;gap:5px">
+        <button data-s="confirm" style="${statBtn}background:rgba(0,125,0,.9)">${tr('Confirm')}</button>
+        <button data-s="undo" style="${statBtn}background:rgba(125,0,0,.9)">${tr('Undo')}</button>
+      </div>
+    </div>
+    <button data-s="reset" style="${jarBtn}">${tr('New career').toUpperCase()}</button>
+    ${[0, 1, 2, 3, 4, 5].map((k) => `<button data-s="minus${k}" aria-label="-" style="${minusBtn}left:${k < 3 ? 382 : 792}px;top:${390 + (k % 3) * 30}px">−</button>`).join('')}`;
+  const $s = (k) => statUi.querySelector(`[data-s="${k}"]`);
+  // not a click on the jar's screen; and no focus, or the game's next Enter would press the button
+  statUi.addEventListener('mousedown', (e) => { e.stopPropagation(); e.preventDefault(); });
+  for (const b of statUi.querySelectorAll('button')) b.tabIndex = -1;
+  $s('confirm').onclick = (e) => { e.currentTarget.blur(); stat.confirm(); };
+  $s('undo').onclick = (e) => { e.currentTarget.blur(); stat.undo(); };
+  $s('reset').onmouseenter = (e) => { e.currentTarget.style.background = '#fff'; };   // the jar's hover: opaque
+  $s('reset').onmouseleave = (e) => { e.currentTarget.style.background = 'rgba(255,255,255,.78)'; };
+  $s('reset').onclick = (e) => {
+    e.currentTarget.blur();
+    if (confirm(tr('Start a new career? All career progress will be lost.'))) careerStore.reset();
+  };
+  if (careerStore) host.append(statUi);
+  // Held down, a + or - keeps going: after 350 ms, one more every 90 ms (the + is the jar's own
+  // click, repeated while the pointer stays on it: statcm + statincrease, what its mouse sets).
+  let hold = 0;
+  const stopHold = () => { clearTimeout(hold); clearInterval(hold); hold = 0; };
+  const holdRepeat = (step) => {
+    stopHold();
+    hold = setTimeout(() => { hold = setInterval(() => { if (!step()) stopHold(); }, 90); }, 350);
+  };
+  for (let k = 0; k < 6; k++) {
+    $s(`minus${k}`).addEventListener('mousedown', (e) => { if (e.button === 0 && stat.minus(k)) holdRepeat(() => stat.minus(k)); });
+  }
+  const plusHeld = (e) => {
+    if (!careerStore || xt.fase !== 7 || e.button !== 0) return;
+    const k = xt.hoverstat?.findIndex(Boolean) ?? -1;
+    if (k < 0) return;                                   // the jar takes this first click itself
+    holdRepeat(() => {
+      if (xt.fase !== 7 || !xt.hoverstat[k]) return false;   // moved off the +
+      xt.statcm[k] = true;
+      control.statincrease = true;
+      return true;
+    });
+  };
+  host.addEventListener('mousedown', plusHeld);
+  addEventListener('mouseup', stopHold);
+  addEventListener('blur', stopHold);
+  const paintStat = () => {
+    const show = careerStore && xt.fase === 7;
+    statUi.style.display = show ? '' : 'none';
+    if (!show) return;
+    for (const k of ['note', 'confirm', 'undo']) $s(k).style.visibility = stat.pending ? '' : 'hidden';
+    // shown with the jar's own buttons: once the car has been presented (flipo 0, flatrstart 6),
+    // not on a locked car nor while it shuffles; a slot lower when its EXTRA STATS (y 112) is up
+    const reset = $s('reset');
+    const up = xt.flipo === 0 && xt.flatrstart === 6 && !xt.notunlocked && !xt.nclicked && xt.shufflefase < 5 && !xt.showboosts?.some(Boolean);
+    reset.style.display = up ? '' : 'none';
+    reset.style.top = xt.boncomp[3] > 0 ? '162px' : '110px';
+    // a - where a point was spent since the last save, while the jar's + boxes are up
+    const boxes = xt.flipo === 0 && xt.flatrstart === 6 && !xt.notunlocked && xt.shufflefase < 5;
+    for (let k = 0; k < 6; k++) $s(`minus${k}`).style.display = boxes && stat.spent(k) ? '' : 'none';
   };
 
   // ---- the stage select's controls (DOM, over the rendered stage) -----------
@@ -248,32 +327,18 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
   const shade = 'text-shadow:0 0 4px #000,0 0 2px #000';
   ui.innerHTML = `
     <div data-k="title" style="position:absolute;left:0;right:0;top:10px;text-align:center;font-size:22px;${shade}"></div>
-    <div data-k="sub" style="position:absolute;left:0;right:0;top:42px;text-align:center;font-size:14px;${shade}"></div>
     <div data-k="picks" style="position:absolute;left:0;right:0;top:46px;display:flex;justify-content:center;gap:6px">
       <select data-k="group" style="${sel}width:120px" aria-label="${tr('Stages')}"></select>
       <select data-k="stage" style="${sel}width:300px" aria-label="${tr('Stage')}"></select>
     </div>
-    <div data-k="notice" style="position:absolute;left:0;right:0;top:200px;text-align:center;font-size:17px;color:#ffd24a;${shade}"></div>
-    <div data-k="left" style="position:absolute;left:14px;top:90px;display:flex;flex-direction:column;gap:6px">
-      <button data-k="bonus" style="${small}">${tr('BONUS STAGE!')}</button>
-      <button data-k="normal" style="${small}">${tr('Back to the normal stage')}</button>
-      <button data-k="scout" style="${small}">${tr('Scouting')}</button>
-      <button data-k="xp" style="${small}"></button>
-    </div>
-    <div data-k="right" style="position:absolute;right:14px;top:90px;display:flex;flex-direction:column;gap:6px">
-      <button data-k="hard" style="${small}">${tr('hard mode')}</button>
-      <button data-k="scale" style="${small}">${tr('scale levels')}</button>
-      <button data-k="nolevels" style="${small}">${tr('no levels')}</button>
-    </div>
+    <button data-k="normal" style="${small}position:absolute;left:14px;top:60px">${tr('Back to the normal stage')}</button>
     <div style="position:absolute;left:0;right:0;top:420px;display:flex;justify-content:center;gap:10px">
-      <button data-k="car" style="${btn}">${tr('Change car')}</button>
       <button data-k="prev" style="${btn}">◂</button>
       <button data-k="go" style="${btn}">${tr('Race')}</button>
       <button data-k="next" style="${btn}">▸</button>
-      <button data-k="menu" style="${btn}">${tr('Menu')}</button>
     </div>
     <div data-k="hint" style="position:absolute;left:0;right:0;top:458px;text-align:center;font-size:12px;opacity:.85;${shade}">
-      ${tr(career ? '◂ ▸ stage · Enter race · Esc change car' : '◂ ▸ stage · ▴ ▾ stages · Enter race · Esc change car')}</div>`;
+      ${tr('◂ ▸ stage · ▴ ▾ stages · Enter race · Esc change car')}</div>`;
   const $ = (k) => ui.querySelector(`[data-k="${k}"]`);
   ui.addEventListener('mousedown', (e) => e.stopPropagation());   // not a click on the jar's screen
   $('group').onchange = () => { const g = $('group').value; $('group').blur(); choose(g, listOf(g)[0][0]); };
@@ -282,12 +347,12 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
   $('next').onclick = () => { control.right = true; };
   $('go').onclick = () => { control.enter = true; };
   for (const k of Object.keys(extra)) if ($(k)) $(k).onclick = (e) => { e.currentTarget.blur(); extra[k](); painted = ''; };
-  if (career) $('picks').remove();
-  else for (const k of ['left', 'right', 'car', 'menu', 'sub']) $(k).remove();
+  // the career: the jar draws the rest, the bonus stage's way back is the port's
+  if (career) ui.replaceChildren($('normal'));
+  else $('normal').remove();
   host.append(ui);
   let painted = '';
   function paint(madness) {
-    $('notice').textContent = performance.now() < noticeUntil ? notice : '';
     const key = `${pick.group}/${pick.stage}/${cp.stage}/${cp.name}/${xt.bonstage}/${xt.hardstage}/${xt.scalelevels}/${xt.nolevels}/${xt.disablexp}/${xt.averagelevel}`;
     if (key === painted) return;
     painted = key;
@@ -299,41 +364,13 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
       $('title').textContent = xt.fase === 1 ? tr(`Stage ${pick.stage}: ${cp.name}`) : '';
       return;
     }
-    const b = xt.bonusstage.findIndex(Boolean);
-    $('title').textContent = xt.bonstage && b >= 0 ? tr(`BONUS STAGE ${b + 1}`) : tr(`Stage ${cp.stage}: ${cp.name}`);
-    $('title').style.color = !xt.bonstage && cp.stage < xt.unlocked[1] && xt.hardstage ? 'rgb(240,120,120)' : '';
-    // the opponents' level, and whether this race earns bonus stat points (xtGraphics.stageselect)
-    const mine = madness?.[0]?.level?.[xt.sc[0]] ?? 1;
-    const hard = (xt.hardstage || cp.stage === xt.unlocked[1] || xt.bonstage) && mine < xt.averagelevel - 2;
-    const capped = xt.startinglevel >= xt.softlevelcap && !xt.nolevels;
-    const sub = $('sub');
-    const lvl = document.createElement('span');
-    lvl.textContent = tr(`Opponents: level ${xt.averagelevel}`);
-    lvl.style.color = mine >= xt.averagelevel ? 'rgb(0,200,0)' : 'rgb(230,60,60)';
-    sub.replaceChildren(lvl);
-    if (hard || capped) {
-      const w = document.createElement('span');
-      w.textContent = ' · ' + tr(capped ? 'No bonus stat points' : '+ bonus stat points');
-      w.style.color = capped ? 'rgb(255,60,60)' : 'rgb(0,200,0)';
-      sub.append(w);
-    }
-    $('bonus').style.display = bonusAt(cp.stage) >= 0 && !xt.bonstage ? '' : 'none';
-    $('xp').textContent = tr(xt.disablexp ? 'xp gain: DISABLED' : 'xp gain: ENABLED');
-    $('xp').style.background = xt.disablexp ? 'rgba(125,0,0,.75)' : 'rgba(0,125,0,.75)';
-    const custom = cp.stage < xt.unlocked[1] && !xt.bonstage && xt.unlocked[1] >= 3;
-    $('right').style.display = custom ? 'flex' : 'none';
-    for (const [k, on] of [['hard', xt.hardstage], ['scale', xt.scalelevels], ['nolevels', xt.nolevels]]) {
-      $(k).style.borderColor = on ? '#ffd24a' : 'rgba(255,255,255,.6)';
-      $(k).style.color = on ? '#ffd24a' : '#fff';
-    }
     $('normal').style.display = xt.bonstage ? '' : 'none';
-    $('next').style.visibility = xt.bonstage ? 'hidden' : '';
   }
 
   // ---- the loop: one jar frame per menu tick --------------------------------
   // The jar's canvas screens -- the car select, scouting -- draw on the Canvas2D
   // `menu`; the stage select on the race surface.
-  const MENU_FASES = new Set([-9, 7, 201, 202, 205, 1110]);
+  const MENU_FASES = new Set([-9, 7, 4, 201, 202, 205, 1110]);
   return new Promise((resolve, reject) => {
     let acc = 0, last = performance.now(), raf = 0;
     const onKey = (e) => {
@@ -341,7 +378,7 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
       if (xt.fase !== 7 && xt.fase !== 1) return;   // scouting: the jar takes Esc as Enter, back to the stage
       e.preventDefault();
       e.stopImmediatePropagation();
-      if (xt.fase === 7) exit();
+      if (xt.fase === 7) { if (stat.pending) stat.undo(); exit(); }   // unconfirmed stat changes are dropped
       else if (career) extra.car();
       else xt.fase = -9;                  // the jar's CHANGE CAR: back to the car select
     };
@@ -350,6 +387,11 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
       cancelAnimationFrame(raf);
       removeEventListener('keydown', onKey, true);
       ui.remove();
+      statUi.remove();
+      stopHold();
+      host.removeEventListener('mousedown', plusHeld);
+      removeEventListener('mouseup', stopHold);
+      removeEventListener('blur', stopHold);
       menuCanvas.style.display = 'none';
       Object.assign(xt, own);
       gs.rd = xt.rd = gl;
@@ -363,6 +405,7 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
       if (xt.fase === 1 && !onMenu) gl.end();
       menuCanvas.style.display = MENU_FASES.has(xt.fase) ? '' : 'none';
       ui.style.display = xt.fase === 1 ? '' : 'none';
+      paintStat();
     };
     const loop = (now) => {
       raf = requestAnimationFrame(loop);

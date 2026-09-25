@@ -14,13 +14,14 @@
 // already there; stop()/unloadMod() on the current one stop the tracker.
 
 import * as music from '../music.js';
-import { readRadq } from './radq.js';
+import { parseRadq } from './radq.js';
+import { fetchTracked } from './musicload.js';
 import { RadicalMod } from './RadicalMod.js';
 
 const mods = new Map();        // path -> Promise<Uint8Array | null>, the .mod inside
 const modBytes = (path) => {
   if (!mods.has(path)) {
-    mods.set(path, readRadq(`ext/${path}`).then((zip) => zip.values().next().value || null).catch((e) => {
+    mods.set(path, fetchTracked(`ext/${path}`).then(parseRadq).then((zip) => zip.values().next().value || null).catch((e) => {
       console.warn('music: no module', path, e);
       return null;
     }));

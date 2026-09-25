@@ -579,10 +579,12 @@ export class Record {
     if (this.cntf === 50) {
       let i2 = 0;
       do {
-        this.car[i2][i] = new ContO(1, this.car[i32(i2 + 1)][i], 0, 0, 0, 0);
+        // ext-patch record-shift: move the snapshot, do not copy it again
+        this.car[i2][i] = this.car[i32(i2 + 1)][i];
         this.squash[i2][i] = this.squash[i32(i2 + 1)][i];
       } while (++i2 < 5);
-      this.car[5][i] = new ContO(1, conto, 0, 0, 0, 0);
+      // ext-patch record-ghosts: no snapshot when the replay is not recorded (race.js)
+      if (this.ghosts !== false) this.car[5][i] = new ContO(1, conto, 0, 0, 0, 0);
       this.squash[5][i] = j;
       this.cntf = 0;
     } else {

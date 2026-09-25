@@ -174,9 +174,10 @@ function changed(pre, post) {
   return s;
 }
 
-export function run(rec, method, track = true) {
+export function run(rec, method, track = true, prep = null) {
   const g = rebuild(rec.pre, track || !!rec.writes);
   const roots = rec.roots.map((r) => decode(r, g.get));
+  prep?.(roots);                          // e.g. trace.test.js builds the tracker grid
   g.touched.clear();
   writes = rec.writes ? [] : null;
   setSeed(rec.xs >>> 0);

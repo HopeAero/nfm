@@ -24,15 +24,21 @@ import { MUSIC_FILES } from './musicfiles.js';
 import { JGraphics, JGraphics2D } from './jgraphics.js';
 import { GameSparker } from './GameSparker.js';
 import { RaceTick } from './racetick.js';
-import { Madness } from './Madness.js';
-import { appendModels, prepareBaseStage, renumberOldStage, translateStage } from './stagecompat.js';
+import { Bots } from './Bots.js';
+import { appendModels, baseGround, baseLook, prepareBaseStage, renumberOldStage, translateStage } from './stagecompat.js';
 import { runMenus } from './menus.js';
-import { loadCareer, saveCareer } from './career-save.js';
-import { devMode } from '../devmode.js';
+import { buildTrackGrid } from './trackgrid.js';
+import { Bench, countScene, frameCap, installProfile } from './benchtools.js';
+import { perfLevel, perfLine } from '../perfline.js';
+import { ContO } from './ContO.js';
+import { Plane } from './Plane.js';
+import { Madness } from './Madness.js';
+import { clearCareer, loadCareer, saveCareer } from './career-save.js';
 import { installSound } from './sound.js';
 import { installMusic } from './radmusic.js';
-import { installSprites } from './sprites-es.js';
-import { installFleximage } from './finish.js';
+import { begin as musicBegin, fetchTracked, progressText, status as musicStatus } from './musicload.js';
+import { installBaseLoadsnap, installSprites } from './sprites-es.js';
+import { installBlendude, installFleximage } from './finish.js';
 import { createRaceMenu } from '../race-ui.js';
 import { spanishPauseBackground } from '../ui-sprites-es.js';
 import { lang } from '../i18n.js';
@@ -57,9 +63,13 @@ export async function bootExtended(params, log, onExit) {
   let exit = () => { sound.stopAll(); tracker.stop(); for (const c of OggClip.all) c.pause(); leave(); };
   const mode = ['career', 'free'].includes(params.get('ext')) ? params.get('ext') : 'classic';
   const free = mode === 'free';
-  const menus = free || mode === 'career';
+  // ?selftest= with ?stage= goes straight to the race, as before the menus: a hash that repeats
+  const menus = (free || mode === 'career') && !(params.get('selftest') && params.has('stage'));
   // a real career is saved (career-save.js); developer mode races it with everything open, unsaved
-  const realCareer = mode === 'career' && !devMode();
+  // The career is the real one -- saved, unlocking stage by stage, stat points earned --
+  // in developer mode too; ?extdebug=1 is the jar captures' debug setup instead (every
+  // stage open, 999 points, nothing saved).
+  const realCareer = mode === 'career' && params.get('extdebug') !== '1';
 
   // ---- the page: Extended's 870x480 in the shell's box ----------------------
   const stage = document.getElementById('stage');
@@ -110,6 +120,7 @@ export async function bootExtended(params, log, onExit) {
   const sound = installSound(sfxvol);
   const tracker = installMusic(musicvol);
   OggClip.base = base;
+  OggClip.load = fetchTracked;      // the career's .ogg, counted with the modules (musicload.js)
   OggClip.volume = musicvol / 100;
   // the gesture that started the race was on the launcher: resume on this page's first key or click
   const unlock = () => { sound.unlock(); tracker.unlock(); OggClip.unlock(); };
@@ -131,6 +142,13 @@ export async function bootExtended(params, log, onExit) {
   // screens read it back through offImage (fleximage), but by then the WebGL buffer has
   // been presented and cleared (preserveDrawingBuffer is off), so a copy of it is black.
   let frozen = null;
+  // The last drawn race frame while the start countdown runs, for the presenter's blend
+  // (finish.js installBlendude); copied in the same task as the draw, before it is cleared.
+  let startFrame = null;
+  const keepStartFrame = () => {
+    startFrame ??= Object.assign(document.createElement('canvas'), { width: W, height: H });
+    startFrame.getContext('2d').drawImage(glCanvas, 0, 0, W, H);
+  };
   gs.repaint = () => { offStale = true; };
   gs.offImage.beforeRead = () => {
     if (!offStale) return;
@@ -142,16 +160,28 @@ export async function bootExtended(params, log, onExit) {
     rd.gl.clearColor(0, 0, 0, 1);
     rd.gl.clear(rd.gl.COLOR_BUFFER_BIT);
   };
-  let xt = null, checkpoints = null;
+  let xt = null, checkpoints = null, careerSave = () => {}, careerSaves = 0;
   gs.readdata = function (x, madness, cp) {
     GameSparker.prototype.readdata.call(this, x, madness, cp);
     xt = x; checkpoints = cp;
+    // The presenter's screen shows the race music's real download in place of the jar's
+    // hand-written size per stage (sndsize, "N KB").
+    const hipnoload = xt.hipnoload, drawcs = xt.drawcs;
+    let presenter = false;
+    xt.hipnoload = function (...a) { presenter = true; try { return hipnoload.apply(this, a); } finally { presenter = false; } };
+    xt.drawcs = function (y, s, ...r) {
+      if (presenter && /^-?\d+ KB$/.test(s)) s = progressText(musicStatus());
+      return drawcs.call(this, y, s, ...r);
+    };
     installFleximage(xt);             // the base port's race-end smear (finish.js)
+    installBlendude(xt, () => startFrame);   // the countdown presenter over the real frame (finish.js)
+    installBaseLoadsnap(xt);          // HUD bitmaps without the sky-coloured box (sprites-es.js)
     // the whole career, not the jar's beta wall at stage 14 (the user, 2026-09-25)
     xt.betalimit = 100;
     if (realCareer) {
       loadCareer(xt, cp, madness);
-      const save = () => saveCareer(xt, checkpoints, madness);
+      const save = () => { saveCareer(xt, checkpoints, madness); careerSaves++; };
+      careerSave = save;
       // the jar saves after a race (fase 10), on a stat transfer and a sold car; here also on the way out
       this.writedata = (x2) => { save(); x2.savefase = 2; };
       const out = exit;
@@ -189,9 +219,15 @@ export async function bootExtended(params, log, onExit) {
   const w = {};
   gs.loadstage = function (aconto, aconto1, medium, trackers, cp, xtg, amadness, record, contva) {
     Object.assign(w, { aconto2: aconto, aconto: aconto1, medium, trackers, checkpoints: cp, xtgraphics: xtg, amadness, record, contva });
+    record.ghosts = params.get('ghost') !== '0';   // Settings -> Replay recording (ext-patch record-ghosts)
+    baseGround(medium, baseStage && (() => this.nob));   // on for an NFM 2 stage, off otherwise
     // the jar's normal mode reads tracks.radq, most of it on an old model list (renumberOldStage)
     const normalMode = !xtg.careermode && !xtg.classicmode;
-    if (!baseStage && !normalMode) return GameSparker.prototype.loadstage.call(this, aconto, aconto1, medium, trackers, cp, xtg, amadness, record, contva);
+    if (!baseStage && !normalMode) {
+      const r = GameSparker.prototype.loadstage.call(this, aconto, aconto1, medium, trackers, cp, xtg, amadness, record, contva);
+      if (params.get('grid') !== '0') buildTrackGrid(trackers);   // ?grid=0: every scan sweeps them all (A/B)
+      return r;
+    }
     const latin1 = (b) => Array.from(b, (c) => String.fromCharCode(c)).join('');
     const toBytes = (t) => Uint8Array.from(t, (c) => c.charCodeAt(0) & 255);
     // the stage text loadstage should read in place of the jar's stage file
@@ -204,7 +240,10 @@ export async function bootExtended(params, log, onExit) {
       return e;
     };
     try {
-      return GameSparker.prototype.loadstage.call(this, aconto, aconto1, medium, trackers, cp, xtg, amadness, record, contva);
+      const r = GameSparker.prototype.loadstage.call(this, aconto, aconto1, medium, trackers, cp, xtg, amadness, record, contva);
+      if (baseStage) baseLook(aconto, xtg.nplayers, this.nob, medium, baseStage.n ?? +params.get('nfm2stage'));
+      if (params.get('grid') !== '0') buildTrackGrid(trackers);   // ?grid=0: every scan sweeps them all (A/B)
+      return r;
     } finally {
       ZipInputStream.prototype.getNextEntry = next;
       if (baseStage?.name) cp.name = baseStage.name;   // a Stage Maker stage is named by its file, as in the base
@@ -217,12 +256,18 @@ export async function bootExtended(params, log, onExit) {
       return r;
     };
   }
-  const drive = Madness.prototype.drive;
-  Madness.prototype.drive = function (u, conto, trackers, cp, contva, bots) {
-    w.bots = bots;
-    Madness.prototype.drive = drive;
-    return drive.call(this, u, conto, trackers, cp, contva, bots);
-  };
+  // run()'s Bots, taken as it is made (its constructor's first `doneload` write). The first
+  // drive() hands it over too, but only once the start countdown is over (starcnt 130 -> 0),
+  // and waiting for that fast-forwarded the whole fly-in and 3-2-1 unseen: ~130 full frames,
+  // seconds with a full grid, and a race that began already counted down.
+  Object.defineProperty(Bots.prototype, 'doneload', {
+    configurable: true,
+    set(v) {
+      w.bots = this;
+      delete Bots.prototype.doneload;
+      Object.defineProperty(this, 'doneload', { value: v, writable: true, enumerable: true, configurable: true });
+    },
+  });
   window.gs = gs;                  // for the console
 
   const frame = gs.run();          // the jar's loop; each next() is one frame
@@ -234,8 +279,9 @@ export async function bootExtended(params, log, onExit) {
   const keyUp = (e) => { const k = javaKey(e); if (k) { gs.keyUp({}, k); e.preventDefault(); } };
   const at = (e) => { const r = glCanvas.getBoundingClientRect(); return [Math.round((e.clientX - r.left) * W / r.width), Math.round((e.clientY - r.top) * H / r.height)]; };
   let menusUp = false;
-  // on the free stage select the jar's buttons are not drawn, so their hit areas must not answer
-  stage.addEventListener('mousedown', (e) => { if (!(menusUp && xt?.fase === 1)) gs.mouseDown({}, ...at(e)); });
+  // on free play's stage select the jar's buttons are not drawn, so their hit areas must not
+  // answer; the career's is the jar's own (menus.js), buttons and all
+  stage.addEventListener('mousedown', (e) => { if (!(menusUp && free && xt?.fase === 1)) gs.mouseDown({}, ...at(e)); });
   stage.addEventListener('mousemove', (e) => gs.mouseMove({}, ...at(e)));
   if (menus) {
     for (let n = 0; !xt; n++) {
@@ -255,25 +301,35 @@ export async function bootExtended(params, log, onExit) {
     await runMenus({
       mode, gs, frame, xt, cp: checkpoints, gl: rd, menu: new JGraphics(menuCanvas, W, H), menuCanvas, host: stage,
       nfm2Names: nfm2?.names, exit: () => exit(),
-      setBaseStage: (n) => { baseStage = n ? { name: null, text: nfm2.texts[n - 1], zip: nfm2.zip } : null; },
+      // the car select's Confirm / Undo and New career (menus.js): a real career only
+      careerStore: realCareer ? { save: () => careerSave(), saves: () => careerSaves, reset: () => { clearCareer(); location.reload(); } } : null,
+      setBaseStage: (n) => { baseStage = n ? { n, name: null, text: nfm2.texts[n - 1], zip: nfm2.zip } : null; },
     });
     menuCanvas.remove();
     menusUp = false;
+    // A finished career race goes where the jar goes, back to its car select (its main
+    // menu, fase 10, is where the career is entered), with the progress saved: this page
+    // again. Quitting from the pause menu still leaves for the launcher.
+    if (realCareer) xt.maini = () => { xt.laststage = checkpoints.stage; careerSave(); location.reload(); };
   }
 
-  // ---- to the start line, unseen --------------------------------------------
-  // Stage preview (fase 1) and "press start" (fase 6) wait for Enter; fase 176
-  // counts down run()'s music wait. Nothing here is presented: rd.end() is not
-  // called until the race. The next() that reaches fase 0 runs one jar race
-  // frame, which is where drive() hands over Bots.
-  // The overlay is a live Canvas2D, so the jar's own loading screens ("Loading
-  // Stage Sound Track", the car silhouette) would show: the stage stays hidden
-  // and the shell's log line is the loading screen, as in the base race.
+  // ---- to the presenter, unseen -----------------------------------------------
+  // The stage preview (fase 1) waits for Enter and is pressed through; loading the
+  // stage (fase 2) is not presented: rd.end() is not called, and the stage stays
+  // hidden (the overlay is a live Canvas2D and would show the jar's loading draws)
+  // while the shell's log line is the loading screen. The fast-forward stops at the
+  // presenter's screen (fase 176, the music load, then 6, "press start": hipnoload,
+  // with the stage's notes), which the race loop shows and which waits for the
+  // player's own Enter, as in the jar; then the fly-in and countdown (starcnt
+  // 130 -> 0) are the race's. ?selftest= goes straight through to fase 0.
+  const selftestTicks = +params.get('selftest') || 0;
+  const reached = () => xt && w.bots && (xt.fase === 0 || (!selftestTicks && (xt.fase === 176 || xt.fase === 6)));
+  musicBegin();                      // what loadmusic fetches from here is this race's music
   log(`loading ${mode} stage ${menus ? checkpoints.stage : params.get('stage') || "(the jar's pick)"}...`);
   stage.style.visibility = 'hidden';
-  for (let n = 0; !(xt && xt.fase === 0 && w.bots); n++) {
+  for (let n = 0; !reached(); n++) {
     if (n > 5000) throw new Error(`Extended never reached the race (fase ${xt?.fase})`);
-    if (xt && (xt.fase === 1 || xt.fase === 6)) gs.u[0].enter = true;
+    if (xt && (xt.fase === 1 || (selftestTicks && xt.fase === 6))) gs.u[0].enter = true;
     rd.begin();
     frame.next();
     if (n % 20 === 19) await new Promise((r) => setTimeout(r, 0));   // let the page breathe
@@ -285,13 +341,15 @@ export async function bootExtended(params, log, onExit) {
   log(`stage ${checkpoints.stage}: ${checkpoints.name}`);
   window.xt = xt; window.checkpoints = checkpoints;
   window.ext = { w, race };        // for the console
+  // ?debug=1: the base's console handle (web/main.js), for tools that read it
+  if (params.get('debug') === '1') window.__nfm = { xt, checkPoints: checkpoints, gs, medium: w.medium, record: w.record, co: w.aconto2, w, race };
 
   // ---- the pause: the base port's race menu (web/race-ui.js) ------------------------
   // Esc, or Enter (stat() sets the jar's pause fase -6), opens it over the frozen frame
   // with the base's grey blur (race-ui.css); Resume hands the jar fase 609, its own way
   // back into the race (fcnt, wrecks), and restarts the music stat() stopped; Instant
   // Replay is the jar's (fase -1, which ends on -6: back to this menu); Quit leaves.
-  let paused = false, pauseArt = null, replayArmed = false;
+  let paused = false, pauseArt = null, replayArmed = false, musicHeld = false;
   try {
     const gif = (await readZip('data/images.zip')).get('paused.gif');
     const blob = new Blob([gif], { type: 'image/gif' });
@@ -312,6 +370,7 @@ export async function bootExtended(params, log, onExit) {
     pauseArtBackgroundOnly: lang === 'es',
     onLeave: () => exit(),
     onReplay: () => {
+      if (w.record.ghosts === false) return 'Replay recording is off. Enable it in launcher Settings, then start a new race.';
       if (w.record.caught < 300) return 'Sorry not enough replay data to play available, please try again later.';
       // Through one jar frame of fase -7, which zeroes run()'s replay counter (a local, k2)
       // after pausedgame -- here a pausedgame that only starts the replay, as its option does.
@@ -371,9 +430,29 @@ export async function bootExtended(params, log, onExit) {
   const TICK_MS = parseFloat(params.get('tickms') || '53');
   const MAX_CATCHUP = 3;
   const INTERPOLATE = params.get('interp') !== '0';
-  const SHOW_STATS = params.get('stats') === '1';
+  // Settings -> Show performance (perfline.js); 'all' is the full line with the sim/draw costs
+  const PERF = perfLevel(params);
+  const SHOW_STATS = params.get('stats') === '1' || PERF === 'all';
   const SPIKE_MS = parseFloat(params.get('spike') || '0');   // ?spike=MS logs slow frames
   window.spikes = [];
+  // ?bench= ?prof=1 ?maxfps= (benchtools.js)
+  const PROFILE = params.get('prof') === '1';
+  const BENCH_S = parseFloat(params.get('bench') || '0');
+  const MAX_FPS = parseFloat(params.get('maxfps') || '0');
+  const cap = frameCap(MAX_FPS);
+  if (PROFILE || BENCH_S > 0) countScene(ContO, Plane);
+  const prof = PROFILE ? installProfile({ medium, Plane, Madness }) : null;
+  const bench = BENCH_S > 0 ? new Bench(BENCH_S, parseFloat(params.get('warmup') || '3000'), prof) : null;
+  const config = () => `buffer ${rd.gl.drawingBufferWidth}x${rd.gl.drawingBufferHeight}   interp=${INTERPOLATE ? 1 : 0}`
+    + ` players=${xt.nplayers} stage=${checkpoints.stage}${MAX_FPS ? ` maxfps=${MAX_FPS}` : ''}${PROFILE ? ' prof=1' : ''}`;
+  if (bench) {
+    addEventListener('keydown', (e) => {
+      if (e.code !== 'KeyR' || !bench.done) return;
+      bench.restart();
+      last = performance.now();    // no burst of catch-up ticks on the way back
+      acc = 0;
+    });
+  }
 
   // What is blended (main.js's FIELDS / CAM) and what the draw produces that must
   // survive a redraw's restore (dist; the draw bank of Medium's PRNG).
@@ -487,6 +566,8 @@ export async function bootExtended(params, log, onExit) {
 
   const loop = (now) => {
     requestAnimationFrame(loop);
+    if (bench?.done) return;         // frozen with the report up; R runs another window
+    if (cap?.(now)) return;
     const w0 = performance.now();
     acc += now - last;
     last = now;
@@ -500,13 +581,21 @@ export async function bootExtended(params, log, onExit) {
     // the jar's own screens (finish, replays): its frame, once per tick
     if (xt.fase !== 0) {
       let ran = false;
-      while (acc >= TICK_MS && !jarPause()) { acc -= TICK_MS; rd.begin(); frame.next(); ran = true; }
+      while (acc >= TICK_MS && !jarPause()) {
+        acc -= TICK_MS; rd.begin(); frame.next(); ran = true;
+        // The presenter's screen (fase 176) stays up until the race's music is all in:
+        // run() leaves it for "press start" (6) after a fixed count; while the download
+        // runs it is sent back, and its clock (duration, which times the career's .ogg
+        // intro) restarts when it is let through.
+        if (xt.fase === 6 && !musicStatus().done) { xt.fase = 176; musicHeld = true; }
+        else if (xt.fase === 6 && musicHeld) { musicHeld = false; xt.duration = System.nanoTime(); xt.pausetime = xt.elapsed = 0; }
+      }
       if (ran) rd.end();
       if (xt.fase === 0) { capture(snapPrev); capture(snapCurr); }   // back in the race: blend from here
       return;
     }
 
-    let stepped = false, sim = 0, drew = 0;
+    let stepped = false, sim = 0, drew = 0, tf = 0;
     while (acc >= TICK_MS) {
       capture(snapPrev);
       rd.begin();
@@ -522,6 +611,7 @@ export async function bootExtended(params, log, onExit) {
       drew += t1 - t0;
       acc -= TICK_MS;
       ticks++;
+      tf++;
       stepped = true;
       if (xt.fase !== 0) break;      // paused, finished: the jar's screens take the next frame
     }
@@ -543,6 +633,7 @@ export async function bootExtended(params, log, onExit) {
     }
     if (!stepped && !INTERPOLATE) return;
     rd.end();
+    if (xt.starcnt > 36 && xt.fase === 0) keepStartFrame();
 
     const work = performance.now() - w0;
     simMs += sim; drawMs += drew;
@@ -550,18 +641,26 @@ export async function bootExtended(params, log, onExit) {
     if (work > 16.7) over++;
     if (SPIKE_MS && work > SPIKE_MS) {
       const e = { at: Math.round(now), work: +work.toFixed(1), stepped, sim: +sim.toFixed(1), draw: +drew.toFixed(1), verts: rd.inputVerts };
+      if (prof) e.prof = prof.line(prof.frame);
       window.spikes.push(e);
       console.log('spike', JSON.stringify(e));
+    }
+    prof?.next();
+    // the race proper: the fly-in and countdown (starcnt 130 -> 0) are not in the warmup or the window
+    if (xt.starcnt === 0 && bench?.frame(now, { sim, draw: drew, ticks: tf, rendered: stepped || INTERPOLATE, rd })) {
+      log(bench.report(config()));
+      return;
     }
     if (++frames >= 5 && now - lastFpsAt >= 500) {
       const dt = now - lastFpsAt;
       const buf = `${rd.gl.drawingBufferWidth}x${rd.gl.drawingBufferHeight}`;
       let line = `${(frames * 1000 / dt).toFixed(0)} fps  ${(ticks * 1000 / dt).toFixed(1)} tick/s  ${rd.inputVerts}/${rd.vertexCount} verts`
-        + `  fan=${rd.fanPolys} concave=${rd.concavePolys}/${rd.concaveVerts}v  ${buf}  view=${gs.view}`;
+        + `  fan=${rd.fanPolys} concave=${rd.concavePolys}/${rd.concaveVerts}v  ${buf}  view=${gs.view}${bench ? bench.status(now) : ''}`;
       if (SHOW_STATS) {
         line += `\n  sim ${(simMs / Math.max(1, ticks)).toFixed(1)}ms/tick  draw ${(drawMs / Math.max(1, frames)).toFixed(1)}ms/frame`
           + `  worst ${worst.toFixed(1)}ms  over 16.7ms: ${over}/${frames}  [interp=${INTERPOLATE ? 1 : 0}]`;
       }
+      if (!bench) line = perfLine(PERF, { fps: frames * 1000 / dt, tps: ticks * 1000 / dt, tickMs: simMs / Math.max(1, ticks), frameMs: drawMs / Math.max(1, frames) }) ?? line;
       log(line);
       frames = 0; ticks = 0; lastFpsAt = now; simMs = 0; drawMs = 0; worst = 0; over = 0;
     }

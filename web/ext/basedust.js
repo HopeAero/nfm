@@ -11,6 +11,7 @@
 // puff looks through every piece.
 
 import { floatArray, fr, i32, idiv, intArray, objArray, setDrawPhase, trunc } from '../java.js';
+import { nearTrackers } from './trackgrid.js';
 
 export class BaseDust {
   constructor(c) {
@@ -98,7 +99,9 @@ export class BaseDust {
         if (array[i] < 0) array[i] = 0;
       }
       const t = c.t;
-      for (let n2 = 0; n2 < t.nt; ++n2) {   // ponytail: every piece, once per puff; Extended has no sect[][]
+      const near = nearTrackers(t, this.sx[n], this.sz[n], 0);   // trackgrid.js: same pieces, same order
+      for (let q = 0, qn = near ? near.length : t.nt; q < qn; ++q) {
+        const n2 = near ? near[q] : q;
         if (Math.abs(t.zy[n2]) !== 90 && Math.abs(t.xy[n2]) !== 90
             && Math.abs(this.sx[n] - t.x[n2]) < t.radx[n2]
             && Math.abs(this.sz[n] - t.z[n2]) < t.radz[n2]) {

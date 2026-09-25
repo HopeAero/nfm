@@ -53,6 +53,13 @@ test('a base texture() becomes the polys() Extended reads, coloured as the base 
   assert.deepStrictEqual(out('ground(204,200,190)\nsky(1,2,3)'), ['ground(204,200,190)', 'polys(200,196,186)', 'sky(1,2,3)']);
 });
 
+test('translateStage reads density as the base does: 2n+1, 1..30', () => {
+  const out = (text) => translateStage(text, () => 0);
+  assert.strictEqual(out('density(4)'), 'density(9)');
+  assert.strictEqual(out('density(-3)'), 'density(1)');
+  assert.strictEqual(out('density(20)'), 'density(30)');
+});
+
 test("tracks.radq's stages on the old model list are renumbered, the rest left alone", async () => {
   const zip = await parseRadq(new Uint8Array(fs.readFileSync(new URL('../../ext/data/Files/tracks.radq', import.meta.url))));
   const ids = (t) => [...t.matchAll(/^(set\w*|chk\w*|fix|teleset)\((\d+),/gm)].map((m) => [m[1], +m[2]]);

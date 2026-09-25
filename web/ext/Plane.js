@@ -6,6 +6,19 @@
 
 import { floatArray, fr, i32, idiv, intArray, random, trunc } from '../java.js';
 import { Color } from './jawt.js';
+import { nearTrackers } from './trackgrid.js';
+
+// port: the per-call arrays of d(), sortpieces() and s() come from a pool, one
+// array per call site and length, zeroed as a new one is -- fillPolygon and
+// drawPolygon consume them at once and nothing keeps them. Allocating them was
+// ~16% of Plane.d's time with 19 cars on screen. Calls do not nest per site.
+const POOL = [];
+const scratch = (slot, n) => {
+  const bySize = POOL[slot] || (POOL[slot] = []);
+  const a = bySize[n] || (bySize[n] = new Int32Array(n));
+  a.fill(0);
+  return a;
+};
 
 export class Plane {
   constructor(medium, trackers, ai, ai1, ai2, i, ai3, shad, j, k, l, i1, j1, k1, l1, flag1, i2, bool2) {
@@ -53,9 +66,6 @@ export class Plane {
     this.pb = 0;
     this.flx = 0;
     this.solo = false;
-    this.c = intArray(3);
-    this.oc = intArray(3);
-    this.hsb = floatArray(3);
     this.glass = 0;
     this.gr = 0;
     this.fs = 0;
@@ -76,9 +86,6 @@ export class Plane {
     this.cxz = 0;
     this.cxy = 0;
     this.czy = 0;
-    this.cox = intArray(3);
-    this.coz = intArray(3);
-    this.coy = intArray(3);
     this.dx = 0;
     this.dy = 0;
     this.dz = 0;
@@ -93,10 +100,20 @@ export class Plane {
     this.m = medium;
     this.t = trackers;
     this.n = i;
-    this.ox = intArray(this.n);
-    this.oz = intArray(this.n);
-    this.oy = intArray(this.n);
+    // port: the face's nine arrays are views of one buffer -- one ArrayBuffer and backing
+    // store per face, not nine each (57k faces with 19 cars: ~1M fewer heap nodes to mark)
+    const buf = new ArrayBuffer((3 * this.n + 18) * 4), o = this.n * 12;
+    this.ox = new Int32Array(buf, 0, this.n);
+    this.oz = new Int32Array(buf, this.n * 4, this.n);
+    this.oy = new Int32Array(buf, this.n * 8, this.n);
+    this.c = new Int32Array(buf, o, 3);
+    this.oc = new Int32Array(buf, o + 12, 3);
+    this.hsb = new Float32Array(buf, o + 24, 3);
+    this.cox = new Int32Array(buf, o + 36, 3);
+    this.coz = new Int32Array(buf, o + 48, 3);
+    this.coy = new Int32Array(buf, o + 60, 3);
     this.solo = bool2;
+    this.basecull = false;   // port: see the base culls in d()
     for (let j2 = 0; j2 < this.n; j2 = i32(j2 + 1)) {
       this.ox[j2] = ai[j2];
       this.oy[j2] = ai2[j2];
@@ -304,9 +321,9 @@ export class Plane {
         this.n = 16;
       }
     }
-    let ai = intArray(this.n);
-    let ai2 = intArray(this.n);
-    let ai3 = intArray(this.n);
+    let ai = scratch(0, this.n);
+    let ai2 = scratch(1, this.n);
+    let ai3 = scratch(2, this.n);
     if (this.embos === 0) {
       for (let j2 = 0; j2 < this.n; j2 = i32(j2 + 1)) {
         ai[j2] = i32(this.ox[j2] + i);
@@ -332,8 +349,8 @@ export class Plane {
         this.rot(ai, ai2, i, k, l, this.n);
         this.rot(ai, ai2, this.m.cx, this.m.cz, this.m.xz, this.n);
         this.rot(ai3, ai2, this.m.cy, this.m.cz, this.m.zy, this.n);
-        let ai4 = intArray(this.n);
-        let ai5 = intArray(this.n);
+        let ai4 = scratch(3, this.n);
+        let ai5 = scratch(4, this.n);
         for (let i3 = 0; i3 < this.n; i3 = i32(i3 + 1)) {
           ai4[i3] = this.xs(ai[i3], ai2[i3]);
           ai5[i3] = this.ys(ai3[i3], ai2[i3]);
@@ -403,8 +420,8 @@ export class Plane {
         if (i4 > 90) {
           byte2 = -1;
         }
-        let ai6 = intArray(3);
-        let ai7 = intArray(3);
+        let ai6 = scratch(5, 3);
+        let ai7 = scratch(6, 3);
         ai[0] = i32(this.ox[this.pa] + i);
         ai3[0] = i32(this.oy[this.pa] + j);
         ai2[0] = i32(this.oz[this.pa] + k);
@@ -631,9 +648,9 @@ export class Plane {
         }
         this.chip = 2;
       }
-      let ai8 = intArray(3);
-      let ai9 = intArray(3);
-      let ai10 = intArray(3);
+      let ai8 = scratch(7, 3);
+      let ai9 = scratch(8, 3);
+      let ai10 = scratch(9, 3);
       let k6 = 0;
       do {
         ai8[k6] = i32(this.cox[k6] + i);
@@ -666,8 +683,8 @@ export class Plane {
       }
       this.rot(ai8, ai9, this.m.cx, this.m.cz, this.m.xz, 3);
       this.rot(ai10, ai9, this.m.cy, this.m.cz, this.m.zy, 3);
-      let ai11 = intArray(3);
-      let ai12 = intArray(3);
+      let ai11 = scratch(10, 3);
+      let ai12 = scratch(11, 3);
       let l4 = 0;
       do {
         ai11[l4] = this.xs(ai8[l4], ai9[l4]);
@@ -716,8 +733,8 @@ export class Plane {
     }
     this.rot(ai, ai2, this.m.cx, this.m.cz, this.m.xz, this.n);
     let flag2 = false;
-    let ai13 = intArray(this.n);
-    let ai14 = intArray(this.n);
+    let ai13 = scratch(12, this.n);
+    let ai14 = scratch(13, this.n);
     let l6 = 500;
     for (let j5 = 0; j5 < this.n; j5 = i32(j5 + 1)) {
       ai13[j5] = this.xs(ai[j5], ai2[j5]);
@@ -755,8 +772,8 @@ export class Plane {
     }
     this.rot(ai3, ai2, this.m.cy, this.m.cz, this.m.zy, this.n);
     let flag3 = true;
-    let ai15 = intArray(this.n);
-    let ai16 = intArray(this.n);
+    let ai15 = scratch(14, this.n);
+    let ai16 = scratch(15, this.n);
     let j8 = 0;
     let l8 = 0;
     let j9 = 0;
@@ -942,6 +959,15 @@ export class Plane {
       }
       if ((this.flx !== 0) && (this.m.random() > 0.3)) {
         flag3 = false;
+      }
+      // port: an NFM2 stage's pieces keep the base port's culls (web/Plane.js, after `this.av`):
+      // gone past the piece's fade[disline] (Extended: 100000), and the special faces far,
+      // back-facing or in a tunnel. race.js sets basecull on those pieces only.
+      if (this.basecull && !this.m.trk) {
+        if (this.av > this.m.fade[this.disline]) flag3 = false;
+        if ((this.gr === -14 || this.gr === -15 || this.gr === -12) && (this.av > 11000 || flag2 || i11 === -111 || this.m.resdown === 2)) flag3 = false;
+        if (this.gr === -11 && this.av > 11000) flag3 = false;
+        if (this.glass === 2 && this.av > 6700) flag3 = false;
       }
     }
     if (flag3) {
@@ -1174,7 +1200,7 @@ export class Plane {
         }
       }
     } else if ((((((((this.road && (this.av <= 3000)) && !this.m.trk) && (this.m.fade[0] > 4000)) && !this.m.effect[10])) || glowlines)) && (((invisiblepiece === 255) || this.m.effect[9]))) {
-      let colours = intArray(3);
+      let colours = scratch(16, 3);
       for (let a = 0; a < 3; a = i32(a + 1)) {
         if (glowlines) {
           colours[a] = glowcolour[a];
@@ -1320,9 +1346,9 @@ export class Plane {
   }
 
   s(g, i, j, k, l, i1, j1, k1, groundlevel, teleported, telefade, shadcol, outoftrack) {
-    let ai = intArray(this.n);
-    let ai2 = intArray(this.n);
-    let ai3 = intArray(this.n);
+    let ai = scratch(17, this.n);
+    let ai2 = scratch(18, this.n);
+    let ai3 = scratch(19, this.n);
     for (let l2 = 0; l2 < this.n; l2 = i32(l2 + 1)) {
       ai[l2] = i32(this.ox[l2] + i);
       ai3[l2] = i32(this.oy[l2] + j);
@@ -1377,7 +1403,10 @@ export class Plane {
       }
       let i5 = idiv(((i32(i3 + j3))), 2);
       let i6 = idiv(((i32(k3 + l4))), 2);
-      for (let l7 = i32(this.t.nt - 1); l7 >= 0; l7 = i32(l7 - 1)) {
+      // port: only the trackers under the face's centre (trackgrid.js), same test, same order
+      const near = nearTrackers(this.t, i32(i5 + this.m.x), i32(i6 + this.m.z), 0);
+      for (let q = near ? near.length - 1 : this.t.nt - 1; q >= 0; q--) {
+        const l7 = near ? near[q] : q;
         if ((this.t.y[l7] === groundlevel) || !this.m.effect[9]) {
           if ((this.t.y[l7] <= groundlevel) || this.m.effect[9]) {
             let k6 = 0;
@@ -1416,8 +1445,8 @@ export class Plane {
       }
     }
     let flag = true;
-    let ai4 = intArray(this.n);
-    let ai5 = intArray(this.n);
+    let ai4 = scratch(20, this.n);
+    let ai5 = scratch(21, this.n);
     if (k1 === 2) {
       i2 = 80;
       j2 = 80;

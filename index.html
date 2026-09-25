@@ -232,6 +232,8 @@ body[data-page="race"] #bg, body[data-page="race"] .hint { display: none; }
   display: none;
 }
 body[data-page="race"] #log { display: block; }
+/* Settings -> Show performance: No leaves the line empty */
+body[data-page="race"] #log:empty { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
   /* every selection stays READABLE; it just stops flashing */

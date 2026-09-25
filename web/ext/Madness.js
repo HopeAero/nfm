@@ -4,6 +4,9 @@
 
 import { floatArray, fr, i32, idiv, intArray, random, trunc } from '../java.js';
 import { Color } from './jawt.js';
+// ext-patch sweep-import: the grid behind road-cell and wheel-sweep
+import { WheelSweep, nearTrackers } from './trackgrid.js';
+const WHEELS = new WheelSweep();
 
 export class Madness {
   constructor(medium, record, xtgraphics, i) {
@@ -1936,7 +1939,10 @@ export class Madness {
       array3[n6] = fr(array3[n6] + (fr(((fr((fr((fr(this.scz[0] + this.scz[1])) + this.scz[2])) + this.scz[3]))) / 4.0)));
     }
     this.roadtyp = 1;
-    for (let l4 = 0; l4 < trackers.nt; l4 = i32(l4 + 1)) {
+    // ext-patch road-cell: only the trackers under the car, ascending (trackgrid.js)
+    const road = nearTrackers(trackers, conto.x, conto.z, 0);
+    for (let q = 0, qn = road ? road.length : trackers.nt; q < qn; q = i32(q + 1)) {
+      const l4 = road ? road[q] : q;
       if ((((((Math.abs(trackers.zy[l4]) | 0) !== 90) && ((Math.abs(trackers.xy[l4]) | 0) !== 90)) && ((Math.abs(i32(conto.x - trackers.x[l4])) | 0) < trackers.radx[l4])) && ((Math.abs(i32(conto.z - trackers.z[l4])) | 0) < trackers.radz[l4])) && ((Math.abs(i32(conto.y - trackers.y[l4])) | 0) < 1000)) {
         this.roadtyp = trackers.skd[l4];
       }
@@ -2213,7 +2219,9 @@ export class Madness {
       coldetection = 0;
     }
     l6 = 0;
-    for (let j6 = 0; j6 < coldetection; j6 = i32(j6 + 1)) {
+    // ext-patch wheel-sweep: the trackers near the wheels, ascending (trackgrid.js WheelSweep)
+    const sweep = WHEELS.begin(trackers, af, af2, coldetection);
+    for (let j6 = sweep.next(); j6 >= 0; j6 = sweep.next()) {
       let l7 = 0;
       let j7 = 0;
       let i7 = 0;

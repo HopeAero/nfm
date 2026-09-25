@@ -9,6 +9,10 @@
 import { floatArray, fr, i32, idiv, intArray, objArray, random, setDrawPhase, trunc } from '../java.js';
 import { Arrays, ByteArrayInputStream, Color, DataInputStream, Integer, Random, StringBuilder, System, charAt, jstr } from './jawt.js';
 import { Plane } from './Plane.js';
+import { nearTrackers } from './trackgrid.js';
+
+// port: Trackers' colour rows are made as slots fill (ext-patch tracker-rows), not 2 x 67000 up front
+const trackerRow = (t) => { while (t.c.length <= t.nt) { t.c.push(intArray(3)); t.oc.push(intArray(3)); } };
 import { Wheels } from './Wheels.js';
 import { BaseDust } from './basedust.js';
 
@@ -557,6 +561,7 @@ export class ContO {
     }
     if (conto.tnt !== 0) {
       for (let k2 = 0; k2 < conto.tnt; k2 = i32(k2 + 1)) {
+        trackerRow(this.t);
         this.t.xy[this.t.nt] = trunc((fr((fr(fr(conto.txy[k2]) * this.m.cos(l))) - (fr(fr(conto.tzy[k2]) * this.m.sin(l))))));
         this.t.zy[this.t.nt] = trunc((fr((fr(fr(conto.tzy[k2]) * this.m.cos(l))) + (fr(fr(conto.txy[k2]) * this.m.sin(l))))));
         let i3 = 0;
@@ -737,13 +742,14 @@ export class ContO {
       for (f3 = fr((((0.17 - f5)) * localRandom.nextDouble())); Math.abs(fr(f4 - f3)) < (0.03 - (fr(f5 * 0.17599999904632568))); f3 = (f4 = fr((((0.17 - f5)) * localRandom.nextDouble())))) {
       }
       for (let i4 = 0; i4 < 3; i4 = i32(i4 + 1)) {
-        arrayOfInt6[i4] = idiv(((i32(this.m.cgrnd[i4] + this.m.cpol[i4]))), 2);
+        // port: an NFM 2 stage's hills keep the base's per-face shade (web/ContO.js pile), the f3 Extended draws but never uses
+        arrayOfInt6[i4] = this.m.baseLook ? trunc(fr((this.m.cpol[i4] + this.m.cgrnd[i4]) / (fr(fr(2.2 + f3) - f5)))) : idiv(((i32(this.m.cgrnd[i4] + this.m.cpol[i4]))), 2);
       }
       this.p[n] = new Plane(this.m, this.t, arrayOfInt7, arrayOfInt9, arrayOfInt8, 6, arrayOfInt6, 3, -8, 0, 0, 0, 0, this.disline, 0, false, 0, false);
     }
     f3 = fr((0.02 * localRandom.nextDouble()));
     for (let n = 0; n < 3; n = i32(n + 1)) {
-      arrayOfInt6[n] = idiv(((i32(this.m.cgrnd[n] + this.m.cpol[n]))), 2);
+      arrayOfInt6[n] = this.m.baseLook ? trunc(fr((this.m.cpol[n] + this.m.cgrnd[n]) / (fr(2.15 + f3)))) : idiv(((i32(this.m.cgrnd[n] + this.m.cpol[n]))), 2);
     }
     this.p[4] = new Plane(this.m, this.t, arrayOfInt3, arrayOfInt4, arrayOfInt5, 8, arrayOfInt6, 3, -8, 0, 0, 0, 0, this.disline, 0, false, 0, false);
     let arrayOfInt10 = intArray(2);
@@ -812,6 +818,7 @@ export class ContO {
       let y = this.t.y;
       let nt3 = this.t.nt;
       y[nt3] = i32(y[nt3] + this.y);
+      trackerRow(this.t);
       for (let i6 = 0; i6 < 3; i6 = i32(i6 + 1)) {
         this.t.c[this.t.nt][i6] = this.p[i3].oc[i6];
       }
@@ -843,6 +850,7 @@ export class ContO {
     this.t.z[this.t.nt] = i32((idiv(((i32(arrayOfInt11[0] + arrayOfInt11[1]))), 2)) + this.z);
     this.t.zy[this.t.nt] = 0;
     this.t.xy[this.t.nt] = 0;
+    trackerRow(this.t);
     for (let i3 = 0; i3 < 3; i3 = i32(i3 + 1)) {
       this.t.c[this.t.nt][i3] = this.p[4].oc[i3];
       this.t.oc[this.t.nt][i3] = this.p[4].oc[i3];
@@ -1096,7 +1104,10 @@ export class ContO {
         if (!this.m.crs) {
           if (k < 2000) {
             let flag = false;
-            for (let l2 = i32(this.t.nt - 1); l2 >= 0; l2 = i32(l2 - 1)) {
+            // port: only the trackers near the car (trackgrid.js), same test, same order
+            const near = nearTrackers(this.t, this.x, this.z, this.maxR);
+            for (let q = near ? near.length - 1 : this.t.nt - 1; q >= 0; q--) {
+              const l2 = near ? near[q] : q;
               if (((((Math.abs(this.t.zy[l2]) | 0) !== 90) && ((Math.abs(this.t.xy[l2]) | 0) !== 90)) && ((Math.abs(i32(this.x - this.t.x[l2])) | 0) < (i32(this.t.radx[l2] + this.maxR)))) && ((Math.abs(i32(this.z - this.t.z[l2])) | 0) < (i32(this.t.radz[l2] + this.maxR)))) {
                 flag = true;
                 break;
@@ -1144,7 +1155,8 @@ export class ContO {
         const camdist = this.camdist();
         if (this.bdust && !this.teleported && !this.m.effect[11]) this.bdust.draw(g, true, camdist);
         this.dsprk(g, true);
-        let ai2 = intArray(this.npl);
+        // port: the face order is kept per object -- every slot is rewritten below
+        let ai2 = this.faceOrder?.length === this.npl ? this.faceOrder : (this.faceOrder = intArray(this.npl));
         let i4 = 0;
         do {
           if (((this.stg[i4] !== 0) && !this.teleported) && !this.m.effect[11]) {
@@ -1334,7 +1346,12 @@ export class ContO {
     do {
       ai2[j2] = i32(this.groundlevel - this.m.y);
     } while (++j2 < 4);
-    for (let k1 = i32(this.t.nt - 1); k1 >= 0; k1 = i32(k1 - 1)) {
+    // port: only the trackers that can hold a corner (trackgrid.js), same test, same order
+    let reach = 0;
+    for (let q = 0; q < 4; q++) reach = Math.max(reach, Math.abs(ai[q] + this.m.x - this.x), Math.abs(ai3[q] + this.m.z - this.z));
+    const near = nearTrackers(this.t, this.x, this.z, reach);
+    for (let q = near ? near.length - 1 : this.t.nt - 1; q >= 0; q--) {
+      const k1 = near ? near[q] : q;
       if ((this.t.y[k1] === this.groundlevel) || !this.m.effect[9]) {
         if ((this.t.y[k1] <= this.groundlevel) || this.m.effect[9]) {
           let l1 = 0;

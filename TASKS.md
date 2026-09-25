@@ -1167,11 +1167,39 @@ AI and UI are the mod.
       `ext/patches.test.js`; draw.test.js still matches the jar call for call).
       Tick 13.9 -> 10.8 ms and redraw 9.6 -> 7.7 ms on a 16.5k-vertex scene;
       22-40% off race frames.
-- [x] ~~Perf: Record's per-cycle ContO copies~~ -- measured, not the cause:
+- [x] ~~Perf: Record's per-cycle ContO copies~~ -- measured, not the cause (6 cars; overturned below):
       `?spike=18` logged 5 frames over 18 ms in 20 s, none following a Record
       cycle (cntf 4..43), heap +3.4 MB/s of short-lived draw arrays. The copy
       constructor also consumes randoms (gr == -15 planes) and writes the
       source and the Trackers, so skipping copies would change the race.
+- [x] Perf (2026-09-25): with 19 cars Record's copies ARE the cause -- ~20k Planes per
+      shift reach the old generation; the major GCs were the 53-61 ms hitches. ext-patch
+      `record-shift` moves the older five snapshots and copies only the newest. The
+      objection above does not hold for cars: none of the 39 has a gr -15 face or a
+      track (checked in the browser), so the copy consumes no randoms and adds no
+      trackers; it writes `n = 16` on master faces, already 16 on a snapshot.
+      Selftest `271c3367` unchanged. Also `tracker-rows`, Medium ogpx/ogpz by stage.
+- [x] Perf: trackgrid.js -- ContO.d's shadow test, lowshadow, Plane.s and the base dust
+      scan only the trackers in the point's cell (conservative grid, same order, tested
+      against the full sweep). The start grid of NFM 2 stage 13 had 54-136 ms frames.
+- [x] Perf (2026-09-25): career stage 3's start (19 cars bunched). Madness.drive swept every
+      tracker twice per car per tick (road type; 4 wheels x every tracker) -- ext-patches
+      `road-cell` / `wheel-sweep` over trackgrid.js (the wheel sweep falls back to every tracker
+      after the last one visited once a pushed wheel leaves the safe box; tested against the
+      full sweep and on the captured drive() calls). Plane.d/sortpieces/s per-call arrays from
+      a pool; ContO.d's face order kept per object; Extended groundpolys' per-cell arrays
+      reused; each Plane's nine arrays are views of one buffer. `?bench=10&warmup=0` from the
+      start, grid vs `?grid=0`: sim 8.86 -> 3.75 ms/tick, draw 15.0 -> 11.1 ms/frame, 866 ->
+      595 ns/vert, 47.5 -> 54.6 fps, long tasks in 10 s 9 -> 2. Heap nodes 3.11M -> 1.86M.
+      Selftests unchanged: classic 4 `271c3367`, career 3 (19 cars, 600 ticks) `353ea4bf`.
+- [ ] Perf: Plane.d's own body (~2.3 us/face) is now most of the start's draw -- the
+      J2JS float/int wrappers; and the replay's 6 x 19 car snapshots (~20k Planes) that could
+      keep only the vertex arrays.
+- [x] Visual (2026-09-25): an NFM 2 stage in Extended looks and costs as in the base:
+      density 2n+1, disline x2, the base Plane culls (basecull), the base's ground
+      patches (web/Medium.js newpolys/groundpolys on Extended's Medium, seed approx.),
+      the base pile shading, nochekflk but on 1 and 11 (stagecompat.js baseLook /
+      baseGround). Stage 13: 19.2k verts submitted vs the base's 18.9k.
 - [ ] Visual: replay the tick draw's random sequence on redraws (the base's
       Medium random log), so sparks, dust and bolts keep their shape between
       ticks instead of re-rolling at 60 Hz.
@@ -1203,8 +1231,16 @@ AI and UI are the mod.
       strings in the i18n dictionary.
 - [ ] Input: touch joystick and two-finger trick; check Extended's own key map
       (A/S toggles, Shift lookback) against the base's.
-- [ ] Tooling: `?bench=`, `?spike=`, `?prof=1`, `?maxfps=`, `?debug=1` for the
-      Extended race.
+- [x] Career (2026-09-25): the jar's own stage select (base-port look + Extended's buttons, its
+      locked-stage screen), translated; a - per stat and held +/- in the car select.
+- [x] Career (2026-09-25): the real career in developer mode too (`?extdebug=1` for the debug
+      setup); Confirm / Undo for the car select's stat points; New career; a finished race
+      returns to the career's car select with the progress saved. Checked in the browser: a
+      forced win on stage 1 then 2 -> unlocked [1,2] -> [1,3], the next stage selected.
+- [x] Tooling (2026-09-25): `?bench=S` (window from the end of the countdown, `?warmup=`,
+      R reruns; the base's report plus Extended's slices), `?prof=1` (Plane.d, Plane.s,
+      Medium.d, Madness.drive/colide), `?maxfps=`, `?debug=1` (window.__nfm), `?spike=`
+      (with prof slices) -- web/ext/benchtools.js. Unlike the base, ?stats=1 does not imply ?bench.
 
 **Does not apply now** (decide when Extended gets multiplayer):
 - Netplay determinism fixes that deliberately depart from the Java: sound and

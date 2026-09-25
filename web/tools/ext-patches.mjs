@@ -60,7 +60,8 @@ const FACE_ORDER_FIND = `        let ai = intArray(this.npl);
           ai2[ai[k3]] = k3;
         }
 `;
-const FACE_ORDER_REPLACE = `        let ai2 = intArray(this.npl);
+const FACE_ORDER_REPLACE = `        // port: the face order is kept per object -- every slot is rewritten below
+        let ai2 = this.faceOrder?.length === this.npl ? this.faceOrder : (this.faceOrder = intArray(this.npl));
         let i4 = 0;
         do {
           if (((this.stg[i4] !== 0) && !this.teleported) && !this.m.effect[11]) {
@@ -226,7 +227,90 @@ const RADMOD_REPLACE = `    this.loaded = 1;
     this.path = s;
 `;
 
+/**
+ * Trackers allocates a 3-int colour row per tracker slot up front, 2 x 67000 of
+ * them: ~134k live typed arrays every major GC walks, for stages that use a few
+ * thousand. ContO's trackerRow grows both lists to the slot it is about to fill;
+ * a row it creates is zeros, as an untouched preallocated one was, and rows are
+ * kept across stages, as before.
+ */
+const TRACKER_ROWS_FIND = `    this.oc = objArray(67000).map(() => intArray(3));
+    this.c = objArray(67000).map(() => intArray(3));
+`;
+const TRACKER_ROWS_REPLACE = `    // ext-patch tracker-rows: rows added by ContO's trackerRow as slots fill
+    this.oc = [];
+    this.c = [];
+`;
+
+/**
+ * Record.rec shifts the replay's six car snapshots every 50 ticks by copying
+ * each one again: 6 ContO copies per car, a Plane with nine typed arrays per
+ * face, ~20k Planes per shift with 19 cars. They live long enough to reach the
+ * old generation, so they drive the major GCs (the base port measured the same
+ * site at ~74% of its allocation; web/Record.js "ghosts"). A copy of a copy
+ * holds the same geometry, and these snapshots are only ever read by copying
+ * them again (the replay, starcar), so the older five move instead; only the
+ * newest is copied. What a copy recomputes (c/hsb from m.snap) is recomputed
+ * by the replay's own copy.
+ */
+const RECORD_SHIFT_FIND = `        this.car[i2][i] = new ContO(1, this.car[i32(i2 + 1)][i], 0, 0, 0, 0);
+`;
+const RECORD_SHIFT_REPLACE = `        // ext-patch record-shift: move the snapshot, do not copy it again
+        this.car[i2][i] = this.car[i32(i2 + 1)][i];
+`;
+
+/**
+ * Madness.drive sweeps every tracker twice per car per tick: the road type under
+ * the car (last hit wins) and the wheel collisions (4 wheels x every tracker).
+ * With 19 cars that was most of drive(). Both now visit only the trackers that
+ * can hold the point(s), in the same ascending order, through web/ext/trackgrid.js
+ * (race.js builds the grid after loadstage); the wheel sweep falls back to every
+ * tracker after the last one visited as soon as a pushed wheel leaves the safe box.
+ * No grid (the jar's own tests), a stale one or no match: the full sweep.
+ */
+const SWEEP_PATCHES = [
+  { name: 'sweep-import', file: 'Madness.js',
+    find: `import { Color } from './jawt.js';
+`,
+    replace: `import { Color } from './jawt.js';
+// ext-patch sweep-import: the grid behind road-cell and wheel-sweep
+import { WheelSweep, nearTrackers } from './trackgrid.js';
+const WHEELS = new WheelSweep();
+` },
+  { name: 'road-cell', file: 'Madness.js',
+    find: `    for (let l4 = 0; l4 < trackers.nt; l4 = i32(l4 + 1)) {
+`,
+    replace: `    // ext-patch road-cell: only the trackers under the car, ascending (trackgrid.js)
+    const road = nearTrackers(trackers, conto.x, conto.z, 0);
+    for (let q = 0, qn = road ? road.length : trackers.nt; q < qn; q = i32(q + 1)) {
+      const l4 = road ? road[q] : q;
+` },
+  { name: 'wheel-sweep', file: 'Madness.js',
+    find: `    l6 = 0;
+    for (let j6 = 0; j6 < coldetection; j6 = i32(j6 + 1)) {
+`,
+    replace: `    l6 = 0;
+    // ext-patch wheel-sweep: the trackers near the wheels, ascending (trackgrid.js WheelSweep)
+    const sweep = WHEELS.begin(trackers, af, af2, coldetection);
+    for (let j6 = sweep.next(); j6 >= 0; j6 = sweep.next()) {
+` },
+];
+
+/**
+ * Settings -> Replay recording off (race.js sets record.ghosts = false, as the
+ * base port's ?ghost=0): no car snapshot is copied at all; Instant Replay says
+ * so instead of playing.
+ */
+const RECORD_GHOSTS_FIND = `      this.car[5][i] = new ContO(1, conto, 0, 0, 0, 0);
+`;
+const RECORD_GHOSTS_REPLACE = `      // ext-patch record-ghosts: no snapshot when the replay is not recorded (race.js)
+      if (this.ghosts !== false) this.car[5][i] = new ContO(1, conto, 0, 0, 0, 0);
+`;
+
 export const PATCHES = [
+  { name: 'record-ghosts', file: 'Record.js', find: RECORD_GHOSTS_FIND, replace: RECORD_GHOSTS_REPLACE },
+  { name: 'record-shift', file: 'Record.js', find: RECORD_SHIFT_FIND, replace: RECORD_SHIFT_REPLACE },
+  { name: 'tracker-rows', file: 'Trackers.js', find: TRACKER_ROWS_FIND, replace: TRACKER_ROWS_REPLACE },
   { name: 'radmod-lazy', file: 'RadicalMod.js', find: RADMOD_FIND, replace: RADMOD_REPLACE },
   { name: 'face-order', file: 'ContO.js', find: FACE_ORDER_FIND, replace: FACE_ORDER_REPLACE },
   { name: 'rot-hoist', file: 'ContO.js', ...rotHoist('this.m') },
@@ -234,6 +318,7 @@ export const PATCHES = [
   { name: 'rot-hoist', file: 'Medium.js', ...rotHoist('this') },
   ...SPARK_PATCHES,
   ...DUST_RATE,
+  ...SWEEP_PATCHES,
 ];
 
 /** 'applied' | 'pending' | throws when neither form is there exactly once. */
