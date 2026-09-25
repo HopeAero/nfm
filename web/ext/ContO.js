@@ -704,6 +704,9 @@ export class ContO {
       }
     }
     this.disp = 90;
+    // port: an NFM 2 stage's hills keep the base's cutoff, maxR / 17 (web/ContO.js pile): a
+    // fixed 90 drops a small hill once it is under 90 px wide -- only a few car lengths away
+    if (this.m.baseLook) this.disp = idiv(this.maxR, 17);
     let arrayOfInt6 = intArray(3);
     let f4 = -1.0;
     let f5 = fr(((fr((fr(f1 / f2)) - 0.33000001311302185))) / 33.400001525878906);
