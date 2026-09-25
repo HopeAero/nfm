@@ -133,7 +133,17 @@ export async function prepareBaseStage(params) {
  */
 export function baseGround(medium, notb) {
   medium.baseLook = !!notb;   // ContO's pile() reads it: the base's hill shading
-  if (!notb) { delete medium.newpolys; delete medium.groundpolys; return; }
+  if (!notb) {
+    delete medium.newpolys; delete medium.groundpolys;
+    // the base's newpolys sized cgpx/cgpz/ogpx/ogpz to its stage; Extended's writes up to its
+    // own 200000 cells, and past the end of the base's cgpz it read undefined, i32(NaN) is 0,
+    // and its walk out of a tracker never ended: the stage select froze on the next
+    // Extended stage after an NFM 2 one
+    if (medium.extGround) { Object.assign(medium, medium.extGround); medium.extGround = null; }
+    return;
+  }
+  const { cgpx, cgpz, ogpx, ogpz } = medium;
+  medium.extGround ??= { cgpx, cgpz, ogpx, ogpz };
   medium.newpolys = (a, b, c, d, t) => BaseMedium.prototype.newpolys.call(medium, a, b, c, d, t, notb());
   medium.groundpolys = BaseMedium.prototype.groundpolys;
 }

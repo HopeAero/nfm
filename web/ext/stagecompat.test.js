@@ -78,3 +78,14 @@ test("tracks.radq's stages on the old model list are renumbered, the rest left a
   assert.strictEqual(old, 24);
   assert.strictEqual(renumberOldStage('set(51,0,0,0)p\nchk(44,0,1,0)\nfix(45,1,2,3,0)'), 'set(47,0,0,0)p\nchk(40,0,1,0)\nfix(41,1,2,3,0)');
 });
+
+test('after an NFM 2 stage, Extended gets its own ground arrays back', async () => {
+  const { baseGround } = await import('./stagecompat.js');
+  const own = { cgpx: new Int32Array(200000), cgpz: new Int32Array(200000), ogpx: [], ogpz: [] };
+  const m = { ...own };
+  baseGround(m, () => 7);
+  Object.assign(m, { cgpx: new Int32Array(99), cgpz: new Int32Array(99), ogpx: [[0]], ogpz: [[0]] });   // as the base's newpolys leaves them
+  baseGround(m, null);
+  for (const k of Object.keys(own)) assert.strictEqual(m[k], own[k], k);
+  assert.strictEqual(m.newpolys, undefined);
+});

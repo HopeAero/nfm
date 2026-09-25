@@ -117,6 +117,7 @@ export class Medium {
     this.cpflik = false;
     this.nochekflk = false;
     this.baseLook = false;   // port: an NFM 2 stage drawn as the base draws it (stagecompat.js baseGround)
+    this.extGround = null;   // port: Extended's ground arrays while the base's newpolys has its own
     this.cntrn = 0;
     this.diup = null;
     this.rand = null;
