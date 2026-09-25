@@ -1041,15 +1041,33 @@ replay (`web/tools/ext-trace.mjs`, DiffRun `-Ddiffrun.trace=Class.method`).
       a car outside classic's 23-38). See WORK.md.
 - [ ] Watch: once, in career, a run ended on the stage preview (stage 4, after
       8 and 11) with no Enter sent; not reproduced in three repeats.
-- [ ] **Stage pick for Extended:** classic mode rolls a stage 1-17 on Enter,
-      as the jar does; career takes `?stage=` or its unlocked stage. The
-      launcher has no Extended stage list yet.
-- [ ] **Sound and music:** `getAudioClip` and `OggClip` are silent; `ext/` has
-      no `sounds/` or music yet (117 files: 63 `.radq` modules, 54 `.ogg`, the
-      career `.ogg` pairs 67 MB). `File.exists` already answers from
-      `web/ext/musicfiles.js` so `loadmusic` takes the jar's path. The base
-      port's BassoonTracker (modules) and an `HTMLAudioElement` (ogg) are the model.
-- [ ] **Saving:** `writedata` is a no-op (needs `ZipOutputStream`); `localStorage`.
+- [x] **Free Play for Extended (2026-09-24):** launcher -> Extended Edition ->
+      Free Play (`?ext=free`, `web/ext/freeplay.js`): Extended's own car select
+      with all 39 cars (run in the jar's normal mode; 0/38 limits added), then a
+      stage select that renders the stage (the jar's fase 1 fly-around, no title
+      card, no kB loading screen) under the port's DOM controls, in Spanish:
+      NFM 2 (the base's 32, classic mode, NFM2 models) / Extended (tracks.radq's
+      27, normal mode); arrows, Up/Down switch group, Enter races, Esc changes
+      car. The pick is remembered (`nfm.ext.free`). Classic stays at `?ext=classic`.
+- [x] Free Play fixes (2026-09-24): NFM 2 stages lost their ground tint (Extended
+      has no texture(); now polys()), and 24 Extended stages were on an old model
+      list (ids +4; renumbered). See WORK.md.
+- [x] Free Play, developer mode only: a Career group (careertracks.radq 1-31,
+      raced in career mode: its HUD levels, bots, per-stage AI). Hidden from
+      players so the career stays a surprise (the user, 2026-09-24).
+- [ ] Free Play: the Premier Tournament (Extended stage 26, matchtracks.radq's
+      five rounds) is not listed.
+- [ ] Free Play: the car select still draws BACK at car 0 and NEXT at 38 (the
+      jar hides them only in classic/career); they do nothing there.
+- [ ] Free Play: NFM 2 stages 1-10 and 28-32 have no classic twin, so they race
+      with classic stage 1's per-stage AI (Control has ~260 stage checks).
+- [x] **Sound and music (2026-09-25):** effects are the base port's (web/audio.js over
+      data/sounds.zip) behind getAudioClip by file name (web/ext/sound.js), plus caught/redflash
+      from Extended and the base's scrape sounds on the player's sparks; tracker music (.radq
+      .mod) through the base's BassoonTracker (web/ext/radmusic.js, `radmod-lazy` patch,
+      music.loadBytes); career .ogg through an <audio> OggClip. Assets in ext/data/Files
+      (77 MB, untouched copies). Needs a listen: the user checks by ear.
+- [x] **Saving (2026-09-25):** a real career saves to localStorage `nfm.ext.career` (web/ext/career-save.js, the savedata.radq fields); developer mode keeps the debug unlocks and saves nothing.
 - [x] **The race in the base shell (2026-09-24):** `web/main.html?ext=classic|career`
       (and the launcher's Extended Edition entries, through the same `boot()`)
       runs Extended's race on the base race's page, WebGL surface (`?res=`,
@@ -1077,16 +1095,18 @@ replay (`web/tools/ext-trace.mjs`, DiffRun `-Ddiffrun.trace=Class.method`).
 
 In this order of importance; content creation (below) waits behind them.
 
-- [ ] **Car select** for Extended from the launcher, keeping Extended's way of
-      listing cars and its special/health readout when arrowing through them.
-- [ ] **Career mode** working end to end.
-- [ ] **Music on every stage** (modules through BassoonTracker, career `.ogg`).
-- [ ] **Stage select** working.
+- [x] **Car select** for Extended: Free Play and Career run the jar's own car select (web/ext/menus.js).
+- [x] **Career mode** through the menus (2026-09-25): the jar's car select, a rendered stage select with
+      the career extras as Spanish DOM buttons (bonus stage, hard/scale/no levels, xp, scouting, change car,
+      menu), progress saved, no beta wall (all 31). Still to see by hand: a whole career run, level-ups,
+      bonus stages 1-4, the stage 23 boss music switch.
+- [x] **Music on every stage** (modules through BassoonTracker, career `.ogg`), 2026-09-25.
+- [x] **Stage select** working (rendered stage, DOM controls; free play and career).
 - [ ] **The base port's UI on Extended, keeping Extended's own pieces:** the
       special bar, the car list, health/special on car select, Extended's
       speedometer; the base's screen effects on pause and race end.
-- [ ] **Extended's own cars in Extended's free mode** (today classic races the
-      original cars with powers on the original stages).
+- [x] **Extended's own cars in Extended's free mode:** Free Play lists all 39 and
+      Extended's own stages (2026-09-24).
 - [ ] **Spanish** (HUD sprites, strings).
 
 ### Content from the base game's editors
@@ -1100,7 +1120,7 @@ Gameplay stays separate; Extended learns to read what the editors make.
       the base models: all 68 appended from the base `data/models.zip` after
       Extended's 129 (Extended reshapes some, e.g. giant trees); checked on NFM2 stage 30
       (cacti, slider, launchpad) and the Stage Maker example stage.
-- [ ] **Pick them from the launcher** for Extended: part of the stage select work.
+- [x] **Pick them from the launcher** for Extended: Free Play's NFM 2 group (Stage Maker stages not yet).
 - [ ] **Car Maker cars in Extended** (estimated 1-2 sessions): Extended has no
       CarDefine -- its 39 cars' physics are literal tables in Madness (46 per-car
       arrays) and xtGraphics (11 more, ~50 index-38 checks; Control ~28 `cn ===`

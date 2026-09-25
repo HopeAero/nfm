@@ -1,0 +1,42 @@
+// The career save (career-save.js) round-trips every field the jar's savedata.radq holds.
+
+import { test } from 'node:test';
+import assert from 'node:assert';
+import { loadCareer, saveCareer, snapshot } from './career-save.js';
+import { clipName } from './sound.js';
+
+const fresh = () => {
+  const n = (v = 0) => new Array(39).fill(v);
+  const xt = {
+    unlocked: [1, 1], realunlocked: [1, 1], kills: 0, wins: 0, statchangers: [0, 0], lastcar: 0, sc: n(), laststage: 1,
+    boncomp: [0, 0, 0, 0, 0, 0], carpoints: 0, statpoints: n(), killscn: n(), winscn: n(), extpoints: n(),
+    specialstats: n().map(() => [0, 1, 2, 3, 4, 5, 6].map(() => [0, 0, 0, 0, 0, 0])),
+    statsalc: n().map((_, a) => [0, 1, 2, 3, 4, 5].map((b) => (a + b) % 7)), rebsp: n(1), xbsp: n(0),
+  };
+  const m = { level: n(1), exp: n(), aitssp: n(), aiaccsp: n(), aigripsp: n(), aistusp: n(), aistrsp: n(), aiendsp: n() };
+  return { xt, cp: { stage: 1 }, m };
+};
+
+test('a career saves and loads back field for field', () => {
+  const a = fresh();
+  Object.assign(a.xt, { kills: 7, wins: 3, lastcar: 12, laststage: 9, carpoints: 4 });
+  a.xt.unlocked[1] = 9; a.xt.statchangers[1] = 1; a.xt.boncomp[4] = 1;
+  a.m.level[12] = 14; a.m.exp[12] = 1234; a.m.aistrsp[12] = 5; a.xt.statpoints[12] = 6; a.xt.extpoints[3] = 2;
+  a.xt.specialstats[12][a.xt.statsalc[12][2]][2] = 9; a.xt.rebsp[12] = 1.5; a.xt.xbsp[12] = 0.25;
+  const store = new Map();
+  const storage = { setItem: (k, v) => store.set(k, v), getItem: (k) => store.get(k) ?? null };
+  saveCareer(a.xt, a.cp, a.m, storage);
+  const b = fresh();
+  assert.strictEqual(loadCareer(b.xt, b.cp, b.m, storage), true);
+  assert.deepStrictEqual(snapshot(b.xt, b.cp, b.m), snapshot(a.xt, a.cp, a.m));
+  assert.strictEqual(b.cp.stage, 9);
+  assert.strictEqual(b.xt.sc[0], 12);
+  assert.strictEqual(b.xt.realunlocked[1], 9);
+  assert.strictEqual(loadCareer(fresh().xt, {}, fresh().m, { getItem: () => null }), false);
+});
+
+test("Extended's clip paths name the base port's clips", () => {
+  assert.strictEqual(clipName('data/Files/sounds/JavaNew/crash1.wav'), 'crash1');
+  assert.strictEqual(clipName('data/Files/sounds/JavaNew/42.wav'), '42');
+  assert.strictEqual(clipName('data/Files/sounds/caught.wav'), 'caught');
+});

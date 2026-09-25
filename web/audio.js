@@ -80,6 +80,14 @@ export class Audio {
     this.ready = true;
   }
 
+  /** Decode one more clip (a .wav's bytes) under `name`, after load(). */
+  async addClip(name, bytes) {
+    if (!this.ctx) return;
+    try {
+      this.buffers.set(name, await this.ctx.decodeAudioData(bytes.slice().buffer));
+    } catch { /* a clip that will not decode is simply silent */ }
+  }
+
   /** Resume the context. Must be called from a user gesture. */
   unlock() {
     if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();

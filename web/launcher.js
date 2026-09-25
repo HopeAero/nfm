@@ -193,9 +193,11 @@ const GM = ['NFM 1', 'NFM 2', 'Free Play'];
 $('gm-rows').innerHTML = GM.map((t, i) =>
   `<li class="item" role="menuitem" data-act="gm:${(i + 1) % 3}"><span class="label">${t}</span></li>`).join('');
 
-// Extended Edition: NFM2 Extended Mode v2.8's two race modes (its xtGraphics
-// menu's Classic Mode and career, opselect 2 and 1), raced by web/ext/race.js.
-const EXT = [['classic', 'Classic Race'], ['career', 'Career Mode']];
+// Extended Edition: NFM2 Extended Mode v2.8, raced by web/ext/race.js. Free
+// Play picks any of its 39 cars and an NFM 2 or Extended stage (freeplay.js);
+// career is its xtGraphics menu's RPG mode. The jar's Classic Mode stays at
+// ?ext=classic.
+const EXT = [['free', 'Free Play'], ['career', 'Career Mode']];
 $('ext-rows').innerHTML = EXT.map(([k, t]) =>
   `<li class="item" role="menuitem" data-act="ext:${k}"><span class="label">${t}</span></li>`).join('');
 
@@ -872,7 +874,6 @@ function fire() {
       return goPage('set');
     case 'gm':    return void startCarSelect(+arg);
     // Extended's race in the same shell as the base race (web/ext/race.js).
-    // ponytail: the jar's default car and stage; the launcher's pickers come next
     case 'ext':   return void startRace(null, { ext: arg });
     case 'opts':  return goPage('opts');
     case 'lang':  return applyLang();

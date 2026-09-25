@@ -13,7 +13,11 @@
 // `//tracks(4)`) has its blocks ignored by the base, so no collision; Extended's
 // ContO reads them unconditionally and fails on arrays tracks() never made.
 // Those blocks are dropped here, which is the base's behaviour.
-// Base-only stage lines (texture, soundtrack, stagemaker, publish) are left in:
+// The base's texture(r,g,b,k) tints the ground patches (Medium.newpolys) as
+// (ground*k + texture)/(1+k); Extended has no texture() and reads the patch
+// colour from polys(r,g,b) instead, else its whitish default 215,210,210 -- the
+// white blotches on NFM2 stages. So texture() becomes that polys().
+// Other base-only lines (soundtrack, stagemaker, publish) are left in:
 // Extended ignores what it does not know.
 
 import { TRACK_NAMES } from '../GameSparker.js';
@@ -53,7 +57,17 @@ export function extIndex(name) {
  * raw, Extended's chkfloat subtracts grat, so it is added back.
  */
 export function translateStage(text, grat) {
-  return text.split(/\r\n|\r|\n/).map((line) => {
+  const lines = text.split(/\r\n|\r|\n/);
+  const nums = (cmd) => {
+    const l = lines.find((x) => x.trim().startsWith(`${cmd}(`));
+    return l && l.slice(l.indexOf('(') + 1, l.indexOf(')')).split(',').map((v) => parseInt(v, 10));
+  };
+  const ground = nums('ground'), texture = nums('texture');
+  const [tr, tg, tb, tk] = texture || [0, 0, 0, 50];   // the base Medium's default texture
+  const k = Math.max(20, Math.min(60, tk));
+  const polys = ground && `polys(${[tr, tg, tb].map((t, i) => Math.trunc((ground[i] * k + t) / (1 + k))).join(',')})`;
+  return lines.map((line) => {
+    if (polys && line.trim().startsWith(texture ? 'texture(' : 'ground(')) return texture ? polys : `${line}\n${polys}`;
     const m = /^(\s*)(set|chk|fix)\((-?\d+)(,.*)$/.exec(line);
     if (!m) return line;
     const [, pad, cmd, id, rest] = m;
@@ -67,6 +81,19 @@ export function translateStage(text, grat) {
     }
     return `${pad}${cmd}(${eid}${rest}`;
   }).join('\n');
+}
+
+/**
+ * Extended's own stages on the OLD model list (tracks.radq, the jar's normal
+ * mode, which its menu marks UNAVAILABLE!): 24 of the 27 were made when four
+ * more models came before `road`, so every id is 4 too high -- checkpoint 44,
+ * fixpoint 45 -- and the pieces load as their neighbours. The jar does not
+ * renumber them. A checkpoint on 44 marks such a stage; stages 14, 16 and 27
+ * are already on the current list.
+ */
+export function renumberOldStage(text) {
+  if (!/^\s*chk\w*\(44,/m.test(text)) return text;
+  return text.replace(/^(\s*(?:set\w*|chk\w*|fix|teleset)\()(\d+),/gm, (m, head, id) => `${head}${+id - 4},`);
 }
 
 /**

@@ -583,5 +583,48 @@ export class RaceTick {
     const track = { 1: 61, 2: 74, 3: 67, 4: 73, 5: 35 }[xtgraphics.ptmatch];
     if (track !== undefined) xtgraphics.playsounds(amadness[0], gs.u[0], track);
     }
+    this.musicSwitch();
+  }
+
+  /**
+   * The career's two-part music: an .ogg intro played once ("a", the stage's
+   * switch(ms) long), then the looping "b". run() does this after every fase
+   * block, not in the race's (GameSparker.java:3336-3368), so it is not in the
+   * `fase == 0` code above and the race never left the intro without it.
+   */
+  musicSwitch() {
+    const { checkpoints, xtgraphics } = this.w;
+    if ((((xtgraphics.lastload >= 0) && (xtgraphics.stracks[xtgraphics.lastload] === null)) && (xtgraphics.fase !== 10)) && xtgraphics.mtracks[xtgraphics.lastload].nooggloop) {
+      if (xtgraphics.mtracks[xtgraphics.lastload].playingogg) {
+        xtgraphics.elapsed = (System.nanoTime() - xtgraphics.duration) + xtgraphics.pausetime;
+      } else if (xtgraphics.mtracks[xtgraphics.lastload].pausedogg) {
+        xtgraphics.pausetime = xtgraphics.elapsed + 500000000;
+        xtgraphics.duration = System.nanoTime();
+      }
+      if (xtgraphics.elapsed >= xtgraphics.musicswitch) {
+        xtgraphics.mtracks[xtgraphics.lastload].setPaused(true);
+        xtgraphics.mtracks[xtgraphics.lastload].unload();
+        xtgraphics.loadedt[xtgraphics.lastload] = false;
+        if (xtgraphics.careermode) {
+          if ((xtgraphics.lastload !== 77) && (xtgraphics.lastload < 94)) {
+            xtgraphics.mtracks[i32(checkpoints.stage + 63)].play();
+            xtgraphics.lastload = i32(checkpoints.stage + 63);
+          } else {
+            if (xtgraphics.lastload === 77) {
+              xtgraphics.mtracks[78].play();
+              xtgraphics.lastload = 78;
+            }
+            if (xtgraphics.lastload === 94) {
+              xtgraphics.mtracks[95].play();
+              xtgraphics.lastload = 95;
+            }
+            if (xtgraphics.lastload === (i32(checkpoints.stage + 99))) {
+              xtgraphics.mtracks[i32(checkpoints.stage + 100)].play();
+              xtgraphics.lastload = i32(checkpoints.stage + 100);
+            }
+          }
+        }
+      }
+    }
   }
 }

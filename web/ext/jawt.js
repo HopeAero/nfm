@@ -458,15 +458,41 @@ export class FileInputStream {
 }
 
 /**
- * RadicalMidi's .ogg player. ponytail: silent until the music is shipped in ext/;
- * then an HTMLAudioElement on this.path covers play/loop/pause/resume/stop.
+ * RadicalMidi's .ogg player (the career's music, ext/data/Files/careermusic):
+ * an HTMLAudioElement, created when loadmusic makes the clip so the file is
+ * already downloading by the countdown. play() once, loop() for good,
+ * pause/resume, stop, close. `OggClip.volume` is the Settings music level
+ * (race.js); SONG_TRIM in web/music.js sets an <audio> track against the engine.
  */
 export class OggClip {
-  constructor(input) { this.path = input.path; }
-  play() {}
-  loop() {}
-  pause() {}
-  resume() {}
-  stop() {}
-  close() {}
+  static volume = 1;
+  static base = '../';           // where ext/ is (race.js: detectFpath)
+  static all = new Set();
+  constructor(input) {
+    this.path = input.path;
+    this.el = typeof Audio === 'function' ? new Audio(`${OggClip.base}ext/${this.path}`) : null;
+    if (this.el) {
+      this.el.preload = 'auto';
+      this.el.volume = OggClip.level();
+      // an intro played once has ENDED, not been refused: unlock() must not start it again
+      this.el.onended = () => { this.wanted = false; };
+      OggClip.all.add(this);
+    }
+  }
+  static level() { return Math.max(0, Math.min(1, 0.6 * OggClip.volume)); }
+  start(loop) {
+    if (!this.el) return;
+    this.wanted = true;
+    this.el.loop = loop;
+    this.el.currentTime = 0;
+    this.el.play().catch(() => { /* no gesture yet: race.js retries on the first key */ });
+  }
+  play() { this.start(false); }
+  loop() { this.start(true); }
+  pause() { this.wanted = false; this.el?.pause(); }
+  resume() { this.wanted = true; if (this.el?.paused) this.el.play().catch(() => {}); }
+  stop() { this.pause(); }
+  close() { this.el?.pause(); if (this.el) this.el.src = ''; OggClip.all.delete(this); this.el = null; }
+  /** A key or click: start any clip asked to play before the page had a gesture. */
+  static unlock() { for (const c of OggClip.all) if (c.el && c.el.paused && c.wanted) c.el.play().catch(() => {}); }
 }

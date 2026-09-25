@@ -15,16 +15,23 @@
 // preview, music load, "press start" -- unseen, pressing Enter where the jar
 // waits for it, until fase 0. From then on each tick is one next().
 //
+// ?ext=free|career: the launcher's Free Play / Career Mode, car and stage select first (menus.js)
 // ?ext=classic|career  [&stage=N] [&car=M]  [&tickms=53] [&res=2] [&textres=1] [&aa=0|1]
 
-import { detectFpath, readBytes } from '../vfs.js';
-import { Panel, System, ZipInputStream, knownFiles, preload } from './jawt.js';
+import { detectFpath, readBytes, readText, readZip } from '../vfs.js';
+import { OggClip, Panel, System, ZipInputStream, knownFiles, preload } from './jawt.js';
 import { MUSIC_FILES } from './musicfiles.js';
 import { JGraphics, JGraphics2D } from './jgraphics.js';
 import { GameSparker } from './GameSparker.js';
 import { RaceTick } from './racetick.js';
 import { Madness } from './Madness.js';
-import { appendModels, prepareBaseStage, translateStage } from './stagecompat.js';
+import { appendModels, prepareBaseStage, renumberOldStage, translateStage } from './stagecompat.js';
+import { runMenus } from './menus.js';
+import { loadCareer, saveCareer } from './career-save.js';
+import { devMode } from '../devmode.js';
+import { installSound } from './sound.js';
+import { installMusic } from './radmusic.js';
+import { installSpanishSprites } from './sprites-es.js';
 import { random, setDrawPhase } from '../java.js';
 
 const W = 870, H = 480;   // Extended's game space (the base game's is 800x450)
@@ -42,8 +49,13 @@ const javaKey = (e) => KEYS[e.key] ?? (e.key.length === 1 ? e.key.charCodeAt(0) 
 export async function bootExtended(params, log, onExit) {
   const base = await detectFpath(params.get('path'));
   // the launcher reloads itself; main.html on its own goes back to the launcher
-  const exit = onExit || (() => { location.href = `${base}index.html`; });
-  const mode = params.get('ext') === 'career' ? 'career' : 'classic';
+  const leave = onExit || (() => { location.href = `${base}index.html`; });
+  let exit = () => { sound.stopAll(); tracker.stop(); for (const c of OggClip.all) c.pause(); leave(); };
+  const mode = ['career', 'free'].includes(params.get('ext')) ? params.get('ext') : 'classic';
+  const free = mode === 'free';
+  const menus = free || mode === 'career';
+  // a real career is saved (career-save.js); developer mode races it with everything open, unsaved
+  const realCareer = mode === 'career' && !devMode();
 
   // ---- the page: Extended's 870x480 in the shell's box ----------------------
   const stage = document.getElementById('stage');
@@ -72,9 +84,29 @@ export async function bootExtended(params, log, onExit) {
   knownFiles(MUSIC_FILES);
   // ?nfm2stage=N / ?mystage=NAME: an NFM2 or Stage Maker stage, translated for
   // Extended (stagecompat.js); it stands in for the stage the jar loads
-  const baseStage = await prepareBaseStage(params);
+  let baseStage = free ? null : await prepareBaseStage(params);
+  // Free play can race any of the base game's 32 stages: their text and models, up front
+  let nfm2 = null;
+  if (free) {
+    const [zip, ...texts] = await Promise.all([readZip('data/models.zip'),
+      ...Array.from({ length: 32 }, (_, i) => readText(`stages/${i + 1}.txt`))]);
+    const names = texts.map((t, i) => /name\(([^)]*)\)/.exec(t)?.[1] || `Stage ${i + 1}`);
+    nfm2 = { zip, texts, names };
+  }
   System.live = true;
   Panel.graphicsFor = (c, w, h) => new JGraphics(c, w, h);
+
+  // ---- sound: the base port's effects and tracker, the career's .ogg ---------
+  // Installed before run(): xtGraphics.loaddata takes its AudioClips on the first frames.
+  const sfxvol = +(params.get('sfxvol') ?? 100), musicvol = +(params.get('musicvol') ?? 100);
+  installSpanishSprites();          // the bitmaps with English on them (selectcar, next, back...), in Spanish
+  const sound = installSound(sfxvol);
+  const tracker = installMusic(musicvol);
+  OggClip.base = base;
+  OggClip.volume = musicvol / 100;
+  // the gesture that started the race was on the launcher: resume on this page's first key or click
+  const unlock = () => { sound.unlock(); tracker.unlock(); OggClip.unlock(); };
+  for (const ev of ['keydown', 'pointerdown', 'touchstart']) addEventListener(ev, unlock, true);
 
   // ---- the game -------------------------------------------------------------
   const gs = new GameSparker();
@@ -103,12 +135,22 @@ export async function bootExtended(params, log, onExit) {
   gs.readdata = function (x, madness, cp) {
     GameSparker.prototype.readdata.call(this, x, madness, cp);
     xt = x; checkpoints = cp;
-    // the debug setup the jar captures use (diffrun.debug): every stage open, no beta wall
-    xt.unlocked[0] = xt.realunlocked[0] = 27;
-    xt.unlocked[1] = xt.realunlocked[1] = 30;
+    // the whole career, not the jar's beta wall at stage 14 (the user, 2026-09-25)
     xt.betalimit = 100;
-    xt.statpoints.fill(999);
-    xt.carpoints = 999;
+    if (realCareer) {
+      loadCareer(xt, cp, madness);
+      const save = () => saveCareer(xt, checkpoints, madness);
+      // the jar saves after a race (fase 10), on a stat transfer and a sold car; here also on the way out
+      this.writedata = (x2) => { save(); x2.savefase = 2; };
+      const out = exit;
+      exit = () => { xt.laststage = checkpoints.stage; save(); out(); };
+    } else {
+      // the debug setup the jar captures use (diffrun.debug): every stage open, points to spend
+      xt.unlocked[0] = xt.realunlocked[0] = 27;
+      xt.unlocked[1] = xt.realunlocked[1] = 30;
+      xt.statpoints.fill(999);
+      xt.carpoints = 999;
+    }
     // what the menu does on Career / Classic Mode (xtGraphics.java:15198), then the
     // car select's Enter (xtGraphics.java:17538): classic races Extended's cars 23-38
     if (params.has('car')) xt.lastcar = +params.get('car');
@@ -124,38 +166,42 @@ export async function bootExtended(params, log, onExit) {
     xt.lastload = -11;
     xt.m.crs = false;
     xt.hardstage = false;
-    xt.fase = 6476;
+    xt.fase = menus ? -9 : 6476;       // free play and the career: the car select first (menus.js)
     // Extended's own menu is not the way out: back to the launcher, as the base race returns
-    xt.maini = exit;
+    xt.maini = () => exit();
   };
-  // ponytail: no saving yet (writedata needs ZipOutputStream); localStorage when careers matter
+  // no savedata.radq (writedata needs ZipOutputStream); a real career replaces this in readdata
   gs.writedata = () => {};
   // run()'s locals are what the race tick works on; loadstage is handed all of
   // them but Bots, which the first drive() of the race is.
   const w = {};
   gs.loadstage = function (aconto, aconto1, medium, trackers, cp, xtg, amadness, record, contva) {
     Object.assign(w, { aconto2: aconto, aconto: aconto1, medium, trackers, checkpoints: cp, xtgraphics: xtg, amadness, record, contva });
-    if (!baseStage) return GameSparker.prototype.loadstage.call(this, aconto, aconto1, medium, trackers, cp, xtg, amadness, record, contva);
-    // the base stage's text in place of the jar's stage file, while loadstage reads it
-    const text = translateStage(baseStage.text, (i) => aconto1[i].grat);
-    const bytes = Uint8Array.from(text, (c) => c.charCodeAt(0) & 255);
+    // the jar's normal mode reads tracks.radq, most of it on an old model list (renumberOldStage)
+    const normalMode = !xtg.careermode && !xtg.classicmode;
+    if (!baseStage && !normalMode) return GameSparker.prototype.loadstage.call(this, aconto, aconto1, medium, trackers, cp, xtg, amadness, record, contva);
+    const latin1 = (b) => Array.from(b, (c) => String.fromCharCode(c)).join('');
+    const toBytes = (t) => Uint8Array.from(t, (c) => c.charCodeAt(0) & 255);
+    // the stage text loadstage should read in place of the jar's stage file
+    const replace = baseStage ? () => translateStage(baseStage.text, (i) => aconto1[i].grat)
+      : (bytes) => renumberOldStage(latin1(bytes));
     const next = ZipInputStream.prototype.getNextEntry;
     ZipInputStream.prototype.getNextEntry = function () {
       const e = next.call(this);
-      if (e && e.getName() === `${cp.stage}.txt`) { this.bytes = bytes; this.pos = 0; }
+      if (e && e.getName() === `${cp.stage}.txt`) { this.bytes = toBytes(replace(this.bytes)); this.pos = 0; }
       return e;
     };
     try {
       return GameSparker.prototype.loadstage.call(this, aconto, aconto1, medium, trackers, cp, xtg, amadness, record, contva);
     } finally {
       ZipInputStream.prototype.getNextEntry = next;
-      if (baseStage.name) cp.name = baseStage.name;   // a Stage Maker stage is named by its file, as in the base
+      if (baseStage?.name) cp.name = baseStage.name;   // a Stage Maker stage is named by its file, as in the base
     }
   };
-  if (baseStage) {
+  if (baseStage || free) {
     gs.loadbase = function (aconto, medium, trackers, xtg) {
       const r = GameSparker.prototype.loadbase.call(this, aconto, medium, trackers, xtg);
-      appendModels(aconto, baseStage.zip, medium, trackers, xtg);
+      appendModels(aconto, (baseStage || nfm2).zip, medium, trackers, xtg);
       return r;
     };
   }
@@ -169,6 +215,40 @@ export async function bootExtended(params, log, onExit) {
 
   const frame = gs.run();          // the jar's loop; each next() is one frame
 
+  // ---- free play and the career: the car and stage select, shown ------------
+  // Until then run() is stepped unseen to readdata (the first frames), which
+  // hands over xtGraphics.
+  const keyDown = (e) => { const k = javaKey(e); if (k) { gs.keyDown({}, k); e.preventDefault(); } };
+  const keyUp = (e) => { const k = javaKey(e); if (k) { gs.keyUp({}, k); e.preventDefault(); } };
+  const at = (e) => { const r = glCanvas.getBoundingClientRect(); return [Math.round((e.clientX - r.left) * W / r.width), Math.round((e.clientY - r.top) * H / r.height)]; };
+  let menusUp = false;
+  // on the free stage select the jar's buttons are not drawn, so their hit areas must not answer
+  stage.addEventListener('mousedown', (e) => { if (!(menusUp && xt?.fase === 1)) gs.mouseDown({}, ...at(e)); });
+  stage.addEventListener('mousemove', (e) => gs.mouseMove({}, ...at(e)));
+  if (menus) {
+    for (let n = 0; !xt; n++) {
+      if (n > 500) throw new Error('Extended never reached readdata');
+      rd.begin();
+      frame.next();
+    }
+    const menuCanvas = document.createElement('canvas');
+    [menuCanvas.width, menuCanvas.height] = [W * 2, H * 2];
+    menuCanvas.style.cssText = `position:absolute;left:0;top:0;width:${W}px;height:${H}px;z-index:3`;
+    stage.append(menuCanvas);
+    addEventListener('keydown', keyDown);
+    addEventListener('keyup', keyUp);
+    menusUp = true;
+    log('');
+    window.xt = xt; window.checkpoints = checkpoints;   // for the console
+    await runMenus({
+      mode, gs, frame, xt, cp: checkpoints, gl: rd, menu: new JGraphics(menuCanvas, W, H), menuCanvas, host: stage,
+      nfm2Names: nfm2?.names, exit: () => exit(),
+      setBaseStage: (n) => { baseStage = n ? { name: null, text: nfm2.texts[n - 1], zip: nfm2.zip } : null; },
+    });
+    menuCanvas.remove();
+    menusUp = false;
+  }
+
   // ---- to the start line, unseen --------------------------------------------
   // Stage preview (fase 1) and "press start" (fase 6) wait for Enter; fase 176
   // counts down run()'s music wait. Nothing here is presented: rd.end() is not
@@ -177,7 +257,7 @@ export async function bootExtended(params, log, onExit) {
   // The overlay is a live Canvas2D, so the jar's own loading screens ("Loading
   // Stage Sound Track", the car silhouette) would show: the stage stays hidden
   // and the shell's log line is the loading screen, as in the base race.
-  log(`loading ${mode} stage ${params.get('stage') || "(the jar's pick)"}...`);
+  log(`loading ${mode} stage ${menus ? checkpoints.stage : params.get('stage') || "(the jar's pick)"}...`);
   stage.style.visibility = 'hidden';
   for (let n = 0; !(xt && xt.fase === 0 && w.bots); n++) {
     if (n > 5000) throw new Error(`Extended never reached the race (fase ${xt?.fase})`);
@@ -189,17 +269,14 @@ export async function bootExtended(params, log, onExit) {
   stage.style.visibility = '';
   const { medium } = w;
   const race = new RaceTick(gs, w);
+  sound.attach(xt, w.aconto2[0]);  // the player's sparks scrape
   log(`stage ${checkpoints.stage}: ${checkpoints.name}`);
   window.xt = xt; window.checkpoints = checkpoints;
   window.ext = { w, race };        // for the console
 
   // ---- input ------------------------------------------------------------------
   // GameSparker.keyDown is Extended's own map (arrows, handbrake, V for the view, ...).
-  addEventListener('keydown', (e) => { const k = javaKey(e); if (k) { gs.keyDown({}, k); e.preventDefault(); } });
-  addEventListener('keyup', (e) => { const k = javaKey(e); if (k) { gs.keyUp({}, k); e.preventDefault(); } });
-  const at = (e) => { const r = glCanvas.getBoundingClientRect(); return [Math.round((e.clientX - r.left) * W / r.width), Math.round((e.clientY - r.top) * H / r.height)]; };
-  stage.addEventListener('mousedown', (e) => gs.mouseDown({}, ...at(e)));
-  stage.addEventListener('mousemove', (e) => gs.mouseMove({}, ...at(e)));
+  if (!menus) { addEventListener('keydown', keyDown); addEventListener('keyup', keyUp); }
 
   // ---- the race loop: the base race's (web/main.js frameBody) -------------------
   // Fixed 53 ms tick (the jar's budget: 530 ms per 10 frames); physics never at

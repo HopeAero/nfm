@@ -196,7 +196,38 @@ const DUST_RATE = [
     replace: `conto.dustkeep = ${keep};   // ext-patch dust-rate-${name}: the base Mad's odds for the ring\n              ` + call };
 });
 
+/**
+ * RadicalMod's constructor reads its .radq synchronously and ModSlayer
+ * pre-renders the whole song for a javax.sound line the browser does not have.
+ * web/ext/radmusic.js plays the .mod through the base port's BassoonTracker
+ * instead, fetching it when loadMod asks; the constructor only keeps the path
+ * (loaded = 1, "file found", as the jar leaves it).
+ */
+const RADMOD_FIND = `    this.loaded = 1;
+    try {
+      let url = new URL(applet.getCodeBase(), s);
+      let zipinputstream = new ZipInputStream(url.openStream());
+      let zipentry = zipinputstream.getNextEntry();
+      let i = i32(zipentry.getSize());
+      this.modf = new Int8Array(i);
+      let j = 0;
+      while (i > 0) {
+        let k = zipinputstream.read(this.modf, j, i);
+        j = i32(j + k);
+        i = i32(i - k);
+      }
+    } catch (exception) {
+      System.out.println('Error loading Mod from zip file: ' + exception);
+      this.loaded = 0;
+    }
+`;
+const RADMOD_REPLACE = `    this.loaded = 1;
+    // ext-patch radmod-lazy: web/ext/radmusic.js reads the .radq when loadMod asks
+    this.path = s;
+`;
+
 export const PATCHES = [
+  { name: 'radmod-lazy', file: 'RadicalMod.js', find: RADMOD_FIND, replace: RADMOD_REPLACE },
   { name: 'face-order', file: 'ContO.js', find: FACE_ORDER_FIND, replace: FACE_ORDER_REPLACE },
   { name: 'rot-hoist', file: 'ContO.js', ...rotHoist('this.m') },
   { name: 'rot-hoist', file: 'Plane.js', ...rotHoist('this.m') },

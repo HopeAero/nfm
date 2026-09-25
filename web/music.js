@@ -249,6 +249,31 @@ export async function load(stage, trackvol = 200) {
   }
 }
 
+/**
+ * Load a module already in memory (a .mod's bytes) as the current track, with
+ * the Java's loadMod gain and bpm -- Extended's RadicalMod (web/ext/radmusic.js)
+ * brings its own from each .radq. Same contract as load(): never throws.
+ */
+export async function loadBytes(modBytes, gain = 200, bpm = 125) {
+  const mine = ++generation;
+  stageLoaded = false;
+  dropSong();
+  if (!getContext()) return false;
+  trackGain = gain / 300.0;
+  applyVolume();
+  try {
+    await BassoonTracker.processFile(modBytes.slice().buffer);
+    if (mine !== generation) return false;
+    if (typeof BassoonTracker.setBPM === 'function') BassoonTracker.setBPM(bpm);
+    stageLoaded = true;
+    return true;
+  } catch (e) {
+    if (mine === generation) stageLoaded = false;
+    console.warn('music: failed to load module', e);
+    return false;
+  }
+}
+
 export function play() {
   wantPlaying = true;
   if (backend === 'audio') { song.play().catch(() => {}); return; }

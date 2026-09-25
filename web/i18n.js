@@ -20,6 +20,7 @@
 
 import { CAREDITOR_ES, CAREDITOR_ES_PATTERNS } from './i18n-careditor.js';
 import { STAGEMAKER_ES, STAGEMAKER_ES_PATTERNS } from './i18n-stagemaker.js';
+import { EXT_ES, EXT_ES_PATTERNS } from './i18n-ext.js';
 
 const STORE_KEY = 'nfm.launcher';
 
@@ -52,6 +53,14 @@ const ES = {
   'off — win races to unlock': 'no — gana carreras para desbloquear',
   'Single Player': 'Un jugador', 'Multiplayer': 'Multijugador', 'Car Maker': 'Creador de autos', 'Stage Maker': 'Creador de pistas',
   'Extended Edition': 'Edición Extendida', 'Classic Race': 'Carrera clásica', 'Career Mode': 'Modo carrera',
+  'Race': 'Correr', 'Stages': 'Pistas',
+  'Back to the normal stage': 'Volver a la pista normal', 'BONUS STAGE!': '¡PISTA BONUS!', 'Scouting': 'Ver rivales', 'hard mode': 'modo difícil', 'scale levels': 'escalar niveles',
+  'no levels': 'sin niveles', 'Change car': 'Cambiar auto', 'Menu': 'Menú',
+  'xp gain: ENABLED': 'ganar XP: SÍ', 'xp gain: DISABLED': 'ganar XP: NO',
+  '+ bonus stat points': '+ puntos de stats extra', 'No bonus stat points': 'Sin puntos de stats extra',
+  '◂ ▸ stage · Enter race · Esc change car': '◂ ▸ pista · Enter correr · Esc cambiar auto',
+  '◂ ▸ stage · ▴ ▾ stages · Enter race · Esc change car':
+    '◂ ▸ pista · ▴ ▾ grupo · Enter correr · Esc cambiar auto', 'Career': 'Carrera',
   'Extended Edition is coming soon': 'La Edición Extendida llegará pronto',
   'Settings': 'Ajustes', 'Main menu': 'Menú principal',
   'press enter to race': 'presiona enter para correr', 'loading…': 'cargando…',
@@ -163,6 +172,9 @@ const ES_PATTERNS = [
   [/^You Lost!  At Stage(.*)$/, '¡Perdiste!  En la pista$1'],
   [/^Finished Watching Game!  At Stage(.*)$/, '¡Terminaste de ver la partida!  En la pista$1'],
   [/^Stage (\d+)  >$/, 'Pista $1  >'],
+  [/^Stage (\d+): (.*)$/, 'Pista $1: $2'],
+  [/^BONUS STAGE (\d+)$/, 'PISTA BONUS $1'],
+  [/^Opponents: level (\d+)$/, 'Rivales: nivel $1'],
   [/^Stage (\d+) is now unlocked!$/, '¡La pista $1 ya está desbloqueada!'],
   [/^(.*) has been unlocked!$/, '¡$1 ha sido desbloqueado!'],
   [/^This car unlocks when stage (\d+) is completed\.\.\.$/, 'Este auto se desbloquea al completar la pista $1...'],
@@ -188,6 +200,9 @@ Object.assign(ES, CAREDITOR_ES);
 ES_PATTERNS.push(...CAREDITOR_ES_PATTERNS);
 Object.assign(ES, STAGEMAKER_ES);
 ES_PATTERNS.push(...STAGEMAKER_ES_PATTERNS);
+// Extended's in-race text; its patterns are more specific than the base's ('X has wasted you!'), so first
+Object.assign(ES, EXT_ES);
+ES_PATTERNS.unshift(...EXT_ES_PATTERNS);
 
 /** Translate one string. Leading/trailing whitespace is kept as it was. */
 export function tr(s) {
