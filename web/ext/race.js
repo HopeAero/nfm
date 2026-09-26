@@ -45,7 +45,7 @@ import { lang } from '../i18n.js';
 import { random, setDrawPhase } from '../java.js';
 import { listAll, readCar } from '../carstore.js';
 import { NEW_BASE, newCars, setNewCars } from './newcars.js';
-import { carFromRad } from './newcars-stats.js';
+import { loadNewCars } from './newcars-stats.js';
 import { newCarModel } from './newcars-model.js';
 
 const W = 870, H = 480;   // Extended's game space (the base game's is 800x450)
@@ -121,17 +121,11 @@ export async function bootExtended(params, log, onExit) {
     const [name, donor] = params.get('newcar').split(':');
     newList = [{ name, donor: donor === undefined ? undefined : +donor }];
   } else if (free) {
-    newList = (await listAll()).map((name) => ({ name }));
+    // storage that will not list (private mode, a broken IndexedDB) means no new cars, not no race
+    newList = (await listAll().catch((e) => { console.log(`new cars unavailable: ${e?.message || e}`); return []; }))
+      .map((name) => ({ name }));
   }
-  const newcars = [];
-  for (const { name, donor } of newList) {
-    const text = await readCar(name);
-    const car = text && carFromRad(name, text);
-    // ?newcar=name:donor, a developer switch: the donor after ':' overrides the .rad's
-    if (car && Number.isInteger(donor) && donor >= 0 && donor < 39) car.donor = donor;
-    if (car) newcars.push(car); else console.log(`new car "${name}" skipped: not a car Extended can load`);
-  }
-  setNewCars(newcars);
+  setNewCars(await loadNewCars(newList, readCar));   // a car that fails is skipped, the race starts
   System.live = true;
   Panel.graphicsFor = (c, w, h) => new JGraphics(c, w, h);
 

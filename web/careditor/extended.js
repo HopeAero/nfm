@@ -5,6 +5,8 @@ import { EXT_CARS } from '../ext/catalog.js';
 import { SPECIALS } from '../ext/specials.js';
 import { NEW_BASE } from '../ext/newcars.js';
 import { tr } from '../i18n.js';
+import { carFromRad } from '../ext/newcars-stats.js';
+import { readPhysics } from './rad.js';
 
 export const TRY_KEY = 'nfm.ext.try';
 export const PICK_KEY = 'nfm.ext.free';
@@ -12,6 +14,20 @@ export const PICK_KEY = 'nfm.ext.free';
 const NONE = 'No description in the game.';
 export const specialLabel = (k) => `${EXT_CARS[k]} — ${tr(SPECIALS[k][0] ?? NONE)}`;
 export const specialText = (k) => (SPECIALS[k].length ? SPECIALS[k].map(tr).join('\n') : tr(NONE));
+
+/**
+ * '' when Extended can load this car, else why not. Extended skips a car it cannot load
+ * (race.js), and the remembered pick then falls back to car 38 -- so Try in Extended asks
+ * first. Besides being raceable, loadstat wants the crash calibrated (physics() value 16).
+ */
+export function whyNotExtended(name, text) {
+  if (carFromRad(name, text)) return '';
+  const p = readPhysics(text);
+  // ponytail: the web Car Maker cannot calibrate yet (only the applet's tab2.js computes actmag);
+  // cars made in the desktop Car Maker, or copied from one, carry it
+  if (p && !p.actmag) return "Extended can't load this car: its crash is not calibrated (Physics tab, Crash look).";
+  return "This car can't race yet — see the list under the preview.";
+}
 
 /** fn(text), computed again only when the text changes: every row of the tab reads it on each sync. */
 export function perText(fn) {

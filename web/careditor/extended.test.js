@@ -1,7 +1,7 @@
 // The Car Maker's Extended tab: its pure pieces (extended.js).
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { tryPick, specialLabel, specialText, perText } from './extended.js';
+import { tryPick, specialLabel, specialText, perText, whyNotExtended } from './extended.js';
 import { NEW_BASE } from '../ext/newcars.js';
 
 test('tryPick survives garbage and keeps group and stage', () => {
@@ -26,4 +26,14 @@ test('perText computes once per distinct text (the tab reads it from every row)'
   assert.strictEqual(calls, 1);
   assert.strictEqual(f('abcd'), 4);
   assert.strictEqual(calls, 2);
+});
+
+test("Try in Extended says why a car Extended cannot load, instead of racing car 38", async () => {
+  const fs = await import('node:fs');
+  const simple = fs.readFileSync(new URL('../../mycars/Simple Car.rad', import.meta.url), 'latin1');
+  assert.strictEqual(whyNotExtended('Simple Car', simple), '');
+  const uncalibrated = simple.replace(/^physics\((.*),\d+\)$/m, 'physics($1,0)');
+  assert.notStrictEqual(uncalibrated, simple);
+  assert.match(whyNotExtended('Simple Car', uncalibrated), /calibrat/i);
+  assert.match(whyNotExtended('junk', 'nothing\n'), /race/i);
 });

@@ -115,7 +115,9 @@ test('car maker: the Extended tab is translated', async () => {
   for (const s of ['By class (automatic)', 'Same as NFM 2', 'Try in Extended', 'Health and damage in Extended',
     'No description in the game.', 'invalid — ignored']) assert.notStrictEqual(es.tr(s), s, s);
   assert.ok(specialLabel(13).startsWith('Stampede — '));
-  for (const s of ['Author', 'Who made this car. The car select shows it as “Created by”.']) assert.notStrictEqual(es.tr(s), s, s);
+  for (const s of ['Author', 'Who made this car. The car select shows it as “Created by”.',
+    "Extended can't load this car: its crash is not calibrated (Physics tab, Crash look).",
+    "This car can't race yet — see the list under the preview."]) assert.notStrictEqual(es.tr(s), s, s);
   assert.strictEqual(es.tr('Created by Excalibur'), 'Creado por Excalibur');   // the car select's credit
 });
 

@@ -60,3 +60,24 @@ export function carFromRad(name, text) {
   const cclass = cd.cclass[SLOT];
   return { name, text, stat, cclass, donor: ext.special ?? defaultDonor(cclass), author: readAuthor(text) };
 }
+
+/**
+ * The new cars of a list ({ name, donor? }), read with `read(name)`. A car that does not
+ * load -- unreadable, not a car, or throwing -- is skipped with a line to `log`; the race
+ * starts with the rest. `donor` (0-38) overrides the .rad's (race.js's ?newcar=name:donor).
+ */
+export async function loadNewCars(list, read, log = console.log) {
+  const cars = [];
+  for (const { name, donor } of list) {
+    try {
+      const text = await read(name);
+      const car = text && carFromRad(name, text);
+      if (!car) { log(`new car "${name}" skipped: not a car Extended can load`); continue; }
+      if (Number.isInteger(donor) && donor >= 0 && donor < 39) car.donor = donor;
+      cars.push(car);
+    } catch (e) {
+      log(`new car "${name}" skipped: ${e?.message || e}`);
+    }
+  }
+  return cars;
+}

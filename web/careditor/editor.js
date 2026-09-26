@@ -32,7 +32,7 @@ import { Graphics2D } from '../graphics.js';
 import { tr, translateDocument } from '../i18n.js';
 import * as ext from '../ext/extlines.js';
 import { carFromRad, defaultDonor } from '../ext/newcars-stats.js';
-import { specialLabel, specialText, tryPick, perText, TRY_KEY, PICK_KEY } from './extended.js';
+import { specialLabel, specialText, tryPick, perText, whyNotExtended, TRY_KEY, PICK_KEY } from './extended.js';
 
 const $ = (id) => document.getElementById(id);
 const code = $('code'), pick = $('pick'), status = $('status'), err = $('err');
@@ -766,6 +766,9 @@ $('drive').onclick = async () => {
 // (index.html reads TRY_KEY at the end of its boot: no developer mode needed, unlike ?ext=).
 $('tryext').onclick = async () => {
   if (!current) return;
+  // a car Extended skips would open Free Play on car 38 instead: say why, and stay
+  const why = whyNotExtended(current, source());
+  if (why) { status.textContent = tr(why); return; }
   await save(current);
   try {
     localStorage.setItem(PICK_KEY, JSON.stringify(tryPick(localStorage.getItem(PICK_KEY), current)));

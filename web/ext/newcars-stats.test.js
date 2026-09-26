@@ -4,7 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
 import fs from 'node:fs';
-import { carFromRad, defaultDonor, STAT_FIELDS } from './newcars-stats.js';
+import { carFromRad, defaultDonor, STAT_FIELDS, loadNewCars } from './newcars-stats.js';
 import { setOwn, writeOwnStats, writeOwnPhys } from './extlines.js';
 
 const simple = fs.readFileSync(new URL('../../mycars/Simple Car.rad', import.meta.url), 'latin1');
@@ -69,4 +69,16 @@ test('the default donor is an NFM 2 car of the same class (Extended 23-38)', () 
 test("a new car's author is its carmaker() line; none, none", () => {
   assert.strictEqual(carFromRad('Simple Car', simple + '\ncarmaker(Excalibur)\n').author, 'Excalibur');
   assert.strictEqual(carFromRad('Simple Car', simple.replace(/^carmaker\(.*$/m, '')).author, '');
+});
+
+test('one car that fails to load is skipped; the others still race', async () => {
+  const read = async (name) => {
+    if (name === 'throws') throw new Error('IndexedDB said no');
+    if (name === 'junk') return 'nothing\n';
+    return simple;
+  };
+  const logs = [];
+  const cars = await loadNewCars([{ name: 'A' }, { name: 'throws' }, { name: 'junk' }, { name: 'B', donor: 13 }], read, (m) => logs.push(m));
+  assert.deepStrictEqual(cars.map((c) => [c.name, c.donor]), [['A', defaultDonor(cars[0].cclass)], ['B', 13]]);
+  assert.strictEqual(logs.length, 2);
 });
