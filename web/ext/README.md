@@ -29,6 +29,7 @@ optimisations over (`ext/patches.test.js` fails until you do):
 
 ```sh
 node web/tools/ext-patches.mjs
+node web/tools/ext-ident.mjs          # new cars: car-number comparisons ask id() (ident.test.js fails until you do)
 ```
 
 Hand-written: `radq.js` (the archives), `jawt.js` (the slice of the Java

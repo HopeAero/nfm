@@ -3,6 +3,7 @@
 // fix the transpiler or the source and regenerate.
 
 import { fr, i32, idiv, intArray, random, trunc } from '../java.js';
+import { id } from './newcars.js';   // ext-ident (web/tools/ext-ident.mjs)
 import { Arrays } from './jawt.js';
 
 export class Control {
@@ -325,8 +326,8 @@ export class Control {
               }
               Label_0489: {
                 if (checkpoints.stage === 10) {
-                  if (madness.cn !== 12) {
-                    if (madness.cn !== 35) {
+                  if (id(madness.cn) !== 12) {
+                    if (id(madness.cn) !== 35) {
                       this.clrnce = 3;
                       break Label_0489;
                     }
@@ -625,7 +626,7 @@ export class Control {
                 this.stuntf = 4;
                 this.saftey = 10;
               }
-              if (madness.cn === 12) {
+              if (id(madness.cn) === 12) {
                 this.stuntf = 1;
               }
             }
@@ -670,14 +671,14 @@ export class Control {
                     break Label_2466;
                   }
                 }
-                if (madness.cn !== 12) {
-                  if (madness.cn !== 8) {
+                if (id(madness.cn) !== 12) {
+                  if (id(madness.cn) !== 8) {
                     break Label_2466;
                   }
                 }
                 this.stuntf = 2;
               }
-              if (madness.cn === 14) {
+              if (id(madness.cn) === 14) {
                 this.stuntf = 6;
               }
             }
@@ -731,8 +732,8 @@ export class Control {
                       this.stuntf = 4;
                     }
                   }
-                  if (madness.cn !== 10) {
-                    if (madness.cn !== 33) {
+                  if (id(madness.cn) !== 10) {
+                    if (id(madness.cn) !== 33) {
                       this.saftey = 5;
                       break Label_2816;
                     }
@@ -770,8 +771,8 @@ export class Control {
                   Label_3026: {
                     Label_3022: {
                       if (checkpoints.stage === 9) {
-                        if (madness.cn !== 12) {
-                          if (madness.cn !== 35) {
+                        if (id(madness.cn) !== 12) {
+                          if (id(madness.cn) !== 35) {
                             break Label_3022;
                           }
                         }
@@ -792,8 +793,8 @@ export class Control {
                     this.saftey = 0;
                   }
                   this.stuntf = 4;
-                  if (madness.cn !== 13) {
-                    if (madness.cn !== 36) {
+                  if (id(madness.cn) !== 13) {
+                    if (id(madness.cn) !== 36) {
                       break Label_3109;
                     }
                   }
@@ -805,10 +806,10 @@ export class Control {
                   this.saftey = 0;
                   Label_3225: {
                     if (checkpoints.clear[madness.im] === 0) {
-                      if (madness.cn !== 1) {
-                        if (madness.cn !== 8) {
-                          if (madness.cn !== 24) {
-                            if (madness.cn !== 31) {
+                      if (id(madness.cn) !== 1) {
+                        if (id(madness.cn) !== 8) {
+                          if (id(madness.cn) !== 24) {
+                            if (id(madness.cn) !== 31) {
                               break Label_3225;
                             }
                           }
@@ -844,7 +845,7 @@ export class Control {
                       whichstuntf = 11;
                     }
                   }
-                  if (madness.cn === 17) {
+                  if (id(madness.cn) === 17) {
                     this.saftey = 0;
                     if (madness.pcleared !== 14) {
                       if (madness.pcleared !== 30) {
@@ -864,8 +865,8 @@ export class Control {
                 if (!xtgraphics.bonusstage[3]) {
                   Label_3540: {
                     if (madness.power >= 60.0) {
-                      if (madness.cn !== 13) {
-                        if (madness.cn !== 36) {
+                      if (id(madness.cn) !== 13) {
+                        if (id(madness.cn) !== 36) {
                           this.stuntf = 4;
                           break Label_3540;
                         }
@@ -883,8 +884,8 @@ export class Control {
                 Label_3656: {
                   Label_3651: {
                     if (madness.im !== 10) {
-                      if (madness.cn !== 13) {
-                        if (madness.cn !== 36) {
+                      if (id(madness.cn) !== 13) {
+                        if (id(madness.cn) !== 36) {
                           break Label_3651;
                         }
                       }
@@ -919,8 +920,8 @@ export class Control {
               if (checkpoints.stage === 23) {
                 Label_3911: {
                   if (madness.im !== 11) {
-                    if (madness.cn !== 13) {
-                      if (madness.cn !== 36) {
+                    if (id(madness.cn) !== 13) {
+                      if (id(madness.cn) !== 36) {
                         this.stuntf = 4;
                         this.saftey = 5;
                         if (madness.speed >= 500.0) {
@@ -948,18 +949,18 @@ export class Control {
                 if (checkpoints.stage === 13) {
                   this.stuntf = 4;
                   Label_4050: {
-                    if (madness.cn !== 13) {
-                      if (madness.cn !== 36) {
+                    if (id(madness.cn) !== 13) {
+                      if (id(madness.cn) !== 36) {
                         if (madness.beast[madness.im]) {
-                          if (madness.cn === 11) {
+                          if (id(madness.cn) === 11) {
                             break Label_4050;
                           }
-                          if (madness.cn === 34) {
+                          if (id(madness.cn) === 34) {
                             break Label_4050;
                           }
                         }
-                        if (madness.cn !== 18) {
-                          if (madness.cn !== 19) {
+                        if (id(madness.cn) !== 18) {
+                          if (id(madness.cn) !== 19) {
                             break Label_4056;
                           }
                         }
@@ -970,8 +971,8 @@ export class Control {
                 }
               }
               if (checkpoints.stage === 12) {
-                if (madness.cn !== 10) {
-                  if (madness.cn !== 33) {
+                if (id(madness.cn) !== 10) {
+                  if (id(madness.cn) !== 33) {
                     this.stuntf = 9;
                     break Label_4141;
                   }
@@ -1029,8 +1030,8 @@ export class Control {
             Label_4489: {
               if (checkpoints.stage === 11) {
                 if (!xtgraphics.bonusstage[1]) {
-                  if (madness.cn !== 12) {
-                    if (madness.cn !== 35) {
+                  if (id(madness.cn) !== 12) {
+                    if (id(madness.cn) !== 35) {
                       break Label_4489;
                     }
                   }
@@ -1044,8 +1045,8 @@ export class Control {
             }
             if (checkpoints.stage === 12) {
               if (!madness.beast[madness.im]) {
-                if (madness.cn !== 11) {
-                  if (madness.cn !== 34) {
+                if (id(madness.cn) !== 11) {
+                  if (id(madness.cn) !== 34) {
                     dodgecon = true;
                   }
                 }
@@ -1054,8 +1055,8 @@ export class Control {
             Label_4724: {
               if (checkpoints.stage === 13) {
                 if (!madness.beast[madness.im]) {
-                  if (madness.cn !== 13) {
-                    if (madness.cn !== 36) {
+                  if (id(madness.cn) !== 13) {
+                    if (id(madness.cn) !== 36) {
                       dodgecon = true;
                     }
                   }
@@ -1139,10 +1140,10 @@ export class Control {
                 for (let a2 = 8; a2 < 10; a2 = i32(a2 + 1)) {
                   if (!xtgraphics.invulnerable) {
                     if (bots.botbreak[a2]) {
-                      if (madness.cn === 12) {
+                      if (id(madness.cn) === 12) {
                         continue;
                       }
-                      if (madness.cn === 35) {
+                      if (id(madness.cn) === 35) {
                         continue;
                       }
                     }
@@ -1334,8 +1335,8 @@ export class Control {
               let flag2 = false;
               Label_6451: {
                 if (checkpoints.stage === 3) {
-                  if (madness.cn !== 9) {
-                    if (madness.cn !== 32) {
+                  if (id(madness.cn) !== 9) {
+                    if (id(madness.cn) !== 32) {
                       break Label_6451;
                     }
                   }
@@ -1346,8 +1347,8 @@ export class Control {
                 if (xtgraphics.classicmode) {
                   Label_6509: {
                     if (checkpoints.stage === 8) {
-                      if (madness.cn !== 11) {
-                        if (madness.cn !== 34) {
+                      if (id(madness.cn) !== 11) {
+                        if (id(madness.cn) !== 34) {
                           break Label_6509;
                         }
                       }
@@ -1392,8 +1393,8 @@ export class Control {
                     break Label_6737;
                   }
                 }
-                if (madness.cn !== 13) {
-                  if (madness.cn !== 36) {
+                if (id(madness.cn) !== 13) {
+                  if (id(madness.cn) !== 36) {
                     break Label_6737;
                   }
                 }
@@ -1412,8 +1413,8 @@ export class Control {
               }
               Label_6849: {
                 if (checkpoints.stage === 8) {
-                  if (madness.cn !== 11) {
-                    if (madness.cn !== 34) {
+                  if (id(madness.cn) !== 11) {
+                    if (id(madness.cn) !== 34) {
                       break Label_6849;
                     }
                   }
@@ -1440,20 +1441,20 @@ export class Control {
               }
               if (checkpoints.stage === 16) {
                 if (xtgraphics.classicmode) {
-                  if (madness.cn === 11) {
+                  if (id(madness.cn) === 11) {
                     if (checkpoints.clear[0] === 27) {
                       j2 = 0;
                     }
                   }
                   Label_7047: {
-                    if (madness.cn !== 15) {
-                      if (madness.cn !== 9) {
+                    if (id(madness.cn) !== 15) {
+                      if (id(madness.cn) !== 9) {
                         break Label_7047;
                       }
                     }
                     j2 = 50;
                   }
-                  if (madness.cn === 11) {
+                  if (id(madness.cn) === 11) {
                     j2 = 40;
                   }
                   if (checkpoints.pos[0] > checkpoints.pos[madness.im]) {
@@ -1492,8 +1493,8 @@ export class Control {
                     let l6 = Math.imul(2000, (i32((Math.abs(i32(checkpoints.clear[i4] - madness.clear)) | 0) + 1)));
                     Label_7427: {
                       if (checkpoints.stage === 3) {
-                        if (madness.cn !== 9) {
-                          if (madness.cn !== 32) {
+                        if (id(madness.cn) !== 9) {
+                          if (id(madness.cn) !== 32) {
                             break Label_7427;
                           }
                         }
@@ -1509,8 +1510,8 @@ export class Control {
                     }
                     Label_7522: {
                       if (checkpoints.stage === 8) {
-                        if (madness.cn !== 11) {
-                          if (madness.cn !== 34) {
+                        if (id(madness.cn) !== 11) {
+                          if (id(madness.cn) !== 34) {
                             break Label_7522;
                           }
                         }
@@ -1582,7 +1583,7 @@ export class Control {
                     }
                     if (checkpoints.stage === 16) {
                       if (xtgraphics.classicmode) {
-                        if (madness.cn === 13) {
+                        if (id(madness.cn) === 13) {
                           if (this.bulistc) {
                             if (this.oupnt === 33) {
                               l6 = 17000;
@@ -1599,14 +1600,14 @@ export class Control {
                           }
                         }
                         Label_8070: {
-                          if (madness.cn !== 15) {
-                            if (madness.cn !== 9) {
+                          if (id(madness.cn) !== 15) {
+                            if (id(madness.cn) !== 9) {
                               break Label_8070;
                             }
                           }
                           l6 = Math.imul(l6, i32((Math.abs(i32(checkpoints.clear[i4] - madness.clear)) | 0) + 1));
                         }
-                        if (madness.cn === 11) {
+                        if (id(madness.cn) === 11) {
                           l6 = Math.imul(4000, (i32((Math.abs(i32(checkpoints.clear[i4] - madness.clear)) | 0) + 1)));
                         }
                       }
@@ -1620,10 +1621,10 @@ export class Control {
                     Label_8269: {
                       if (checkpoints.stage === 16) {
                         if (xtgraphics.classicmode) {
-                          if (madness.cn !== 15) {
-                            if (madness.cn !== 9) {
-                              if (madness.cn !== 11) {
-                                if (madness.cn !== 14) {
+                          if (id(madness.cn) !== 15) {
+                            if (id(madness.cn) !== 9) {
+                              if (id(madness.cn) !== 11) {
+                                if (id(madness.cn) !== 14) {
                                   break Label_8269;
                                 }
                               }
@@ -1655,8 +1656,8 @@ export class Control {
                                 Label_8563: {
                                   if (checkpoints.stage === 8) {
                                     Label_8547: {
-                                      if (madness.cn !== 34) {
-                                        if (madness.cn === 36) {
+                                      if (id(madness.cn) !== 34) {
+                                        if (id(madness.cn) === 36) {
                                           if (this.bulistc) {
                                             break Label_8547;
                                           }
@@ -1706,7 +1707,7 @@ export class Control {
                                   f3 = 0.0;
                                 }
                                 if (checkpoints.stage === 11) {
-                                  if (madness.cn === 36) {
+                                  if (id(madness.cn) === 36) {
                                     if (this.bulistc) {
                                       if (i4 === 0) {
                                         f3 = 1.0;
@@ -1715,12 +1716,12 @@ export class Control {
                                   }
                                 }
                                 if (checkpoints.stage === 12) {
-                                  if (madness.cn !== 34) {
-                                    if (madness.cn !== 36) {
+                                  if (id(madness.cn) !== 34) {
+                                    if (id(madness.cn) !== 36) {
                                       f3 = 0.0;
                                     }
                                   }
-                                  if (madness.cn === 36) {
+                                  if (id(madness.cn) === 36) {
                                     if (i4 === 0) {
                                       f3 = 1.0;
                                     }
@@ -1740,14 +1741,14 @@ export class Control {
                                   }
                                 }
                                 if (checkpoints.stage === 16) {
-                                  if (madness.cn === 37) {
+                                  if (id(madness.cn) === 37) {
                                     f3 = fr(f3 * 0.5);
                                   } else if (checkpoints.pos[0] < checkpoints.pos[madness.im]) {
                                     if ((i32(checkpoints.clear[0] - checkpoints.clear[madness.im])) !== 1) {
                                       f3 = fr(f3 * 2.0);
                                     }
                                   }
-                                  if (madness.cn === 36) {
+                                  if (id(madness.cn) === 36) {
                                     if (i4 === 0) {
                                       f3 = 1.0;
                                     }
@@ -1768,8 +1769,8 @@ export class Control {
                                       f3 = 1.0;
                                     }
                                   }
-                                  if (madness.cn !== 33) {
-                                    if (madness.cn !== 35) {
+                                  if (id(madness.cn) !== 33) {
+                                    if (id(madness.cn) !== 35) {
                                       break Label_9205;
                                     }
                                   }
@@ -1803,13 +1804,13 @@ export class Control {
                                   if (checkpoints.stage < xtgraphics.unlocked[1]) {
                                     if (!xtgraphics.hardstage) {
                                       Label_9474: {
-                                        if (madness.cn !== 3) {
-                                          if (madness.cn !== 26) {
-                                            if (madness.cn !== 12) {
-                                              if (madness.cn !== 35) {
-                                                if (madness.cn !== 17) {
-                                                  if (madness.cn !== 1) {
-                                                    if (madness.cn !== 24) {
+                                        if (id(madness.cn) !== 3) {
+                                          if (id(madness.cn) !== 26) {
+                                            if (id(madness.cn) !== 12) {
+                                              if (id(madness.cn) !== 35) {
+                                                if (id(madness.cn) !== 17) {
+                                                  if (id(madness.cn) !== 1) {
+                                                    if (id(madness.cn) !== 24) {
                                                       break Label_9474;
                                                     }
                                                   }
@@ -1843,10 +1844,10 @@ export class Control {
                                             if (checkpoints.stage !== 16) {
                                               break Label_9621;
                                             }
-                                            if (madness.cn !== 15) {
-                                              if (madness.cn !== 3) {
-                                                if (madness.cn !== 38) {
-                                                  if (madness.cn !== 26) {
+                                            if (id(madness.cn) !== 15) {
+                                              if (id(madness.cn) !== 3) {
+                                                if (id(madness.cn) !== 38) {
+                                                  if (id(madness.cn) !== 26) {
                                                     break Label_9621;
                                                   }
                                                 }
@@ -1883,11 +1884,11 @@ export class Control {
                                       }
                                       Label_9843: {
                                         if (checkpoints.stage === 19) {
-                                          if (madness.cn !== 12) {
-                                            if (madness.cn !== 14) {
-                                              if (madness.cn !== 17) {
-                                                if (madness.cn !== 35) {
-                                                  if (madness.cn !== 37) {
+                                          if (id(madness.cn) !== 12) {
+                                            if (id(madness.cn) !== 14) {
+                                              if (id(madness.cn) !== 17) {
+                                                if (id(madness.cn) !== 35) {
+                                                  if (id(madness.cn) !== 37) {
                                                     break Label_9843;
                                                   }
                                                 }
@@ -1898,7 +1899,7 @@ export class Control {
                                         }
                                       }
                                       if (checkpoints.stage === 22) {
-                                        if (madness.cn === 18) {
+                                        if (id(madness.cn) === 18) {
                                           f3 = 0.0;
                                         }
                                       }
@@ -1907,11 +1908,11 @@ export class Control {
                                   }
                                   Label_9973: {
                                     if (checkpoints.stage === 3) {
-                                      if (madness.cn !== 2) {
-                                        if (madness.cn !== 6) {
-                                          if (madness.cn !== 25) {
-                                            if (madness.cn !== 29) {
-                                              if (madness.cn !== 9) {
+                                      if (id(madness.cn) !== 2) {
+                                        if (id(madness.cn) !== 6) {
+                                          if (id(madness.cn) !== 25) {
+                                            if (id(madness.cn) !== 29) {
+                                              if (id(madness.cn) !== 9) {
                                                 f3 = 0.0;
                                                 break Label_9973;
                                               }
@@ -1926,16 +1927,16 @@ export class Control {
                                     f3 = 0.0;
                                     if (i4 === 0) {
                                       Label_10033: {
-                                        if (madness.cn !== 13) {
-                                          if (madness.cn !== 36) {
+                                        if (id(madness.cn) !== 13) {
+                                          if (id(madness.cn) !== 36) {
                                             break Label_10033;
                                           }
                                         }
                                         f3 = 0.699999988079071;
                                       }
                                       Label_10127: {
-                                        if (madness.cn !== 11) {
-                                          if (madness.cn !== 34) {
+                                        if (id(madness.cn) !== 11) {
+                                          if (id(madness.cn) !== 34) {
                                             break Label_10127;
                                           }
                                         }
@@ -1974,8 +1975,8 @@ export class Control {
                                         }
                                       }
                                       Label_10372: {
-                                        if (madness.cn !== 13) {
-                                          if (madness.cn !== 36) {
+                                        if (id(madness.cn) !== 13) {
+                                          if (id(madness.cn) !== 36) {
                                             break Label_10372;
                                           }
                                         }
@@ -2009,14 +2010,14 @@ export class Control {
                                   Label_10618: {
                                     if (checkpoints.stage === 16) {
                                       Label_10577: {
-                                        if (madness.cn !== 15) {
-                                          if (madness.cn !== 14) {
-                                            if (madness.cn !== 12) {
-                                              if (madness.cn !== 10) {
-                                                if (madness.cn !== 33) {
-                                                  if (madness.cn !== 35) {
-                                                    if (madness.cn !== 37) {
-                                                      if (madness.cn !== 38) {
+                                        if (id(madness.cn) !== 15) {
+                                          if (id(madness.cn) !== 14) {
+                                            if (id(madness.cn) !== 12) {
+                                              if (id(madness.cn) !== 10) {
+                                                if (id(madness.cn) !== 33) {
+                                                  if (id(madness.cn) !== 35) {
+                                                    if (id(madness.cn) !== 37) {
+                                                      if (id(madness.cn) !== 38) {
                                                         break Label_10577;
                                                       }
                                                     }
@@ -2028,8 +2029,8 @@ export class Control {
                                         }
                                         f3 = 0.0;
                                       }
-                                      if (madness.cn !== 13) {
-                                        if (madness.cn !== 36) {
+                                      if (id(madness.cn) !== 13) {
+                                        if (id(madness.cn) !== 36) {
                                           break Label_10618;
                                         }
                                       }
@@ -2088,10 +2089,10 @@ export class Control {
                                     } else {
                                       Label_10894: {
                                         Label_10891: {
-                                          if (madness.cn !== 9) {
-                                            if (madness.cn !== 11) {
-                                              if (madness.cn !== 32) {
-                                                if (madness.cn !== 34) {
+                                          if (id(madness.cn) !== 9) {
+                                            if (id(madness.cn) !== 11) {
+                                              if (id(madness.cn) !== 32) {
+                                                if (id(madness.cn) !== 34) {
                                                   break Label_10891;
                                                 }
                                               }
@@ -2114,12 +2115,12 @@ export class Control {
                                   }
                                   Label_11092: {
                                     if (checkpoints.stage === 2) {
-                                      if (madness.cn !== 1) {
-                                        if (madness.cn !== 24) {
-                                          if (madness.cn !== 8) {
-                                            if (madness.cn !== 3) {
-                                              if (madness.cn !== 26) {
-                                                if (madness.cn !== 31) {
+                                      if (id(madness.cn) !== 1) {
+                                        if (id(madness.cn) !== 24) {
+                                          if (id(madness.cn) !== 8) {
+                                            if (id(madness.cn) !== 3) {
+                                              if (id(madness.cn) !== 26) {
+                                                if (id(madness.cn) !== 31) {
                                                   break Label_11092;
                                                 }
                                               }
@@ -2134,8 +2135,8 @@ export class Control {
                                     f3 = 0.0;
                                     if (i4 === 0) {
                                       Label_11150: {
-                                        if (madness.cn !== 13) {
-                                          if (madness.cn !== 36) {
+                                        if (id(madness.cn) !== 13) {
+                                          if (id(madness.cn) !== 36) {
                                             break Label_11150;
                                           }
                                         }
@@ -2158,7 +2159,7 @@ export class Control {
                                     }
                                   }
                                   if (checkpoints.stage === 19) {
-                                    if (madness.cn === 18) {
+                                    if (id(madness.cn) === 18) {
                                       f3 = 1.0;
                                     } else {
                                       Label_11478: {
@@ -2170,13 +2171,13 @@ export class Control {
                                                   break Label_11465;
                                                 }
                                               }
-                                              if (madness.cn !== 17) {
-                                                if (madness.cn !== 14) {
-                                                  if (madness.cn !== 12) {
-                                                    if (madness.cn !== 1) {
-                                                      if (madness.cn !== 24) {
-                                                        if (madness.cn !== 35) {
-                                                          if (madness.cn !== 37) {
+                                              if (id(madness.cn) !== 17) {
+                                                if (id(madness.cn) !== 14) {
+                                                  if (id(madness.cn) !== 12) {
+                                                    if (id(madness.cn) !== 1) {
+                                                      if (id(madness.cn) !== 24) {
+                                                        if (id(madness.cn) !== 35) {
+                                                          if (id(madness.cn) !== 37) {
                                                             f3 = 0.699999988079071;
                                                             break Label_11478;
                                                           }
@@ -2195,9 +2196,9 @@ export class Control {
                                   }
                                   Label_11563: {
                                     if (checkpoints.stage === 21) {
-                                      if (madness.cn !== 18) {
-                                        if (madness.cn !== 13) {
-                                          if (madness.cn !== 36) {
+                                      if (id(madness.cn) !== 18) {
+                                        if (id(madness.cn) !== 13) {
+                                          if (id(madness.cn) !== 36) {
                                             f3 = 0.0;
                                             break Label_11563;
                                           }
@@ -2221,19 +2222,19 @@ export class Control {
                                   if (checkpoints.stage === 23) {
                                     Label_11793: {
                                       if (i4 === 0) {
-                                        if (madness.cn !== 17) {
-                                          if (madness.cn !== 14) {
-                                            if (madness.cn !== 12) {
-                                              if (madness.cn === 1) {
+                                        if (id(madness.cn) !== 17) {
+                                          if (id(madness.cn) !== 14) {
+                                            if (id(madness.cn) !== 12) {
+                                              if (id(madness.cn) === 1) {
                                                 if (!madness.specialact) {
                                                   break Label_11793;
                                                 }
                                               }
                                               if (checkpoints.pos[madness.im] >= checkpoints.pos[0]) {
                                                 if (checkpoints.pos[madness.im] >= 3) {
-                                                  if (madness.cn !== 24) {
-                                                    if (madness.cn !== 35) {
-                                                      if (madness.cn !== 37) {
+                                                  if (id(madness.cn) !== 24) {
+                                                    if (id(madness.cn) !== 35) {
+                                                      if (id(madness.cn) !== 37) {
                                                         f3 = 1.0;
                                                         break Label_11804;
                                                       }
@@ -2279,8 +2280,8 @@ export class Control {
                                 }
                                 Label_12023: {
                                   if (checkpoints.stage === 18) {
-                                    if (madness.cn !== 13) {
-                                      if (madness.cn !== 36) {
+                                    if (id(madness.cn) !== 13) {
+                                      if (id(madness.cn) !== 36) {
                                         f3 = 0.0;
                                         break Label_12023;
                                       }
@@ -2314,8 +2315,8 @@ export class Control {
                                   } else {
                                     Label_12168: {
                                       Label_12165: {
-                                        if (madness.cn !== 9) {
-                                          if (madness.cn !== 32) {
+                                        if (id(madness.cn) !== 9) {
+                                          if (id(madness.cn) !== 32) {
                                             break Label_12165;
                                           }
                                         }
@@ -2392,8 +2393,8 @@ export class Control {
                               }
                               Label_12717: {
                                 if (checkpoints.stage === 8) {
-                                  if (madness.cn !== 11) {
-                                    if (madness.cn !== 34) {
+                                  if (id(madness.cn) !== 11) {
+                                    if (id(madness.cn) !== 34) {
                                       break Label_12717;
                                     }
                                   }
@@ -2469,10 +2470,10 @@ export class Control {
                               Label_13279: {
                                 if (checkpoints.stage === 16) {
                                   if (xtgraphics.classicmode) {
-                                    if (madness.cn !== 36) {
+                                    if (id(madness.cn) !== 36) {
                                       this.aim = fr(this.m.random() * 1.5);
                                       if ((Math.abs(i32(checkpoints.clear[i4] - madness.clear)) | 0) > 2) {
-                                        if (madness.cn !== 37) {
+                                        if (id(madness.cn) !== 37) {
                                           break Label_13279;
                                         }
                                       }
@@ -2535,19 +2536,19 @@ export class Control {
                       }
                       if (madness.specialact) {
                         if (!usermad.specialact) {
-                          if (madness.cn !== 23) {
-                            if (madness.cn !== 27) {
-                              if (madness.cn !== 30) {
+                          if (id(madness.cn) !== 23) {
+                            if (id(madness.cn) !== 27) {
+                              if (id(madness.cn) !== 30) {
                                 if (checkpoints.wasted < 5) {
                                   break Label_13821;
                                 }
-                                if (madness.cn !== 28) {
-                                  if (madness.cn !== 31) {
+                                if (id(madness.cn) !== 28) {
+                                  if (id(madness.cn) !== 31) {
                                     if (!this.variable.needhelp[10]) {
                                       break Label_13821;
                                     }
-                                    if (madness.cn !== 25) {
-                                      if (madness.cn !== 29) {
+                                    if (id(madness.cn) !== 25) {
+                                      if (id(madness.cn) !== 29) {
                                         break Label_13821;
                                       }
                                     }
@@ -2587,7 +2588,7 @@ export class Control {
                     this.attack = 30;
                   }
                   if (madness.specialact) {
-                    if (madness.cn !== 35) {
+                    if (id(madness.cn) !== 35) {
                       this.acr = 0;
                       this.attack = 30;
                     }
@@ -2611,8 +2612,8 @@ export class Control {
                     if (madness.specialact) {
                       if (madness.moment[madness.cn] > usermad.moment[usermad.cn]) {
                         Label_14160: {
-                          if (madness.cn !== 33) {
-                            if (madness.cn !== 32) {
+                          if (id(madness.cn) !== 33) {
+                            if (id(madness.cn) !== 32) {
                               break Label_14160;
                             }
                           }
@@ -2620,7 +2621,7 @@ export class Control {
                             break Label_14185;
                           }
                         }
-                        if (madness.cn !== 35) {
+                        if (id(madness.cn) !== 35) {
                           this.acr = 0;
                           this.attack = 20;
                         }
@@ -2685,8 +2686,8 @@ export class Control {
                               if (xtgraphics.floor[madness.im] === xtgraphics.floor[a3]) {
                                 if (!madness.specialact) {
                                   Label_14660: {
-                                    if (xtgraphics.sc[a3] !== 13) {
-                                      if (xtgraphics.sc[a3] !== 36) {
+                                    if (id(xtgraphics.sc[a3]) !== 13) {
+                                      if (id(xtgraphics.sc[a3]) !== 36) {
                                         break Label_14660;
                                       }
                                     }
@@ -2733,26 +2734,26 @@ export class Control {
                               if (madness.specialact) {
                                 Label_16760: {
                                   Label_16584: {
-                                    if (madness.cn !== 0) {
-                                      if (madness.cn !== 4) {
-                                        if (madness.cn !== 7) {
-                                          if (madness.cn !== 8) {
+                                    if (id(madness.cn) !== 0) {
+                                      if (id(madness.cn) !== 4) {
+                                        if (id(madness.cn) !== 7) {
+                                          if (id(madness.cn) !== 8) {
                                             Label_16528: {
                                               if (checkpoints.stage >= 2) {
-                                                if (madness.cn === 2) {
+                                                if (id(madness.cn) === 2) {
                                                   break Label_16584;
                                                 }
-                                                if (madness.cn === 6) {
+                                                if (id(madness.cn) === 6) {
                                                   break Label_16584;
                                                 }
-                                                if (madness.cn === 25) {
+                                                if (id(madness.cn) === 25) {
                                                   break Label_16584;
                                                 }
-                                                if (madness.cn === 29) {
+                                                if (id(madness.cn) === 29) {
                                                   break Label_16584;
                                                 }
-                                                if (madness.cn !== 5) {
-                                                  if (madness.cn !== 28) {
+                                                if (id(madness.cn) !== 5) {
+                                                  if (id(madness.cn) !== 28) {
                                                     break Label_16528;
                                                   }
                                                 }
@@ -2764,10 +2765,10 @@ export class Control {
                                                 }
                                               }
                                             }
-                                            if (madness.cn !== 23) {
-                                              if (madness.cn !== 27) {
-                                                if (madness.cn !== 30) {
-                                                  if (madness.cn !== 31) {
+                                            if (id(madness.cn) !== 23) {
+                                              if (id(madness.cn) !== 27) {
+                                                if (id(madness.cn) !== 30) {
+                                                  if (id(madness.cn) !== 31) {
                                                     break Label_16760;
                                                   }
                                                 }
@@ -2781,8 +2782,8 @@ export class Control {
                                   this.attack = 150;
                                   Label_16755: {
                                     if (checkpoints.pos[0] > 0) {
-                                      if (madness.cn !== 8) {
-                                        if (madness.cn !== 31) {
+                                      if (id(madness.cn) !== 8) {
+                                        if (id(madness.cn) !== 31) {
                                           Label_16736: {
                                             if (checkpoints.stage > 2) {
                                               if (checkpoints.stage === 3) {
@@ -2811,8 +2812,8 @@ export class Control {
                                   }
                                   this.acr = 0;
                                 }
-                                if (madness.cn !== 1) {
-                                  if (madness.cn !== 24) {
+                                if (id(madness.cn) !== 1) {
+                                  if (id(madness.cn) !== 24) {
                                     break Label_16875;
                                   }
                                 }
@@ -2834,17 +2835,17 @@ export class Control {
                               if (this.variable.freeze[a3]) {
                                 if (!this.variable.biglead[0]) {
                                   if (checkpoints.stage < 3) {
-                                    if (madness.cn !== 8) {
-                                      if (madness.cn !== 31) {
-                                        if (madness.cn !== 6) {
-                                          if (madness.cn !== 29) {
+                                    if (id(madness.cn) !== 8) {
+                                      if (id(madness.cn) !== 31) {
+                                        if (id(madness.cn) !== 6) {
+                                          if (id(madness.cn) !== 29) {
                                             if (!madness.specialact) {
                                               continue;
                                             }
-                                            if (madness.cn !== 5) {
-                                              if (madness.cn !== 2) {
-                                                if (madness.cn !== 25) {
-                                                  if (madness.cn !== 28) {
+                                            if (id(madness.cn) !== 5) {
+                                              if (id(madness.cn) !== 2) {
+                                                if (id(madness.cn) !== 25) {
+                                                  if (id(madness.cn) !== 28) {
                                                     continue;
                                                   }
                                                 }
@@ -2870,12 +2871,12 @@ export class Control {
                             }
                             Label_17230: {
                               if (checkpoints.stage === 2) {
-                                if (madness.cn !== 0) {
-                                  if (madness.cn !== 4) {
-                                    if (madness.cn !== 7) {
-                                      if (madness.cn !== 23) {
-                                        if (madness.cn !== 27) {
-                                          if (madness.cn !== 30) {
+                                if (id(madness.cn) !== 0) {
+                                  if (id(madness.cn) !== 4) {
+                                    if (id(madness.cn) !== 7) {
+                                      if (id(madness.cn) !== 23) {
+                                        if (id(madness.cn) !== 27) {
+                                          if (id(madness.cn) !== 30) {
                                             break Label_17230;
                                           }
                                         }
@@ -2894,16 +2895,16 @@ export class Control {
                                     break Label_17311;
                                   }
                                 }
-                                if (madness.cn === 2) {
+                                if (id(madness.cn) === 2) {
                                   break Label_17353;
                                 }
-                                if (madness.cn === 6) {
+                                if (id(madness.cn) === 6) {
                                   break Label_17353;
                                 }
-                                if (madness.cn === 25) {
+                                if (id(madness.cn) === 25) {
                                   break Label_17353;
                                 }
-                                if (madness.cn === 29) {
+                                if (id(madness.cn) === 29) {
                                   break Label_17353;
                                 }
                               }
@@ -2970,8 +2971,8 @@ export class Control {
                         if (madness.specialact) {
                           if (checkpoints.clear[0] >= 3) {
                             if (!madness.beast[madness.im]) {
-                              if (madness.cn !== 10) {
-                                if (madness.cn !== 33) {
+                              if (id(madness.cn) !== 10) {
+                                if (id(madness.cn) !== 33) {
                                   if (checkpoints.pos[madness.im] > checkpoints.pos[0]) {
                                     this.acr = 0;
                                     this.attack = 30;
@@ -2986,11 +2987,11 @@ export class Control {
                         }
                         Label_17885: {
                           if (this.variable.biglead[0]) {
-                            if (madness.cn !== 9) {
+                            if (id(madness.cn) !== 9) {
                               if (!madness.beast[madness.im]) {
-                                if (madness.cn !== 11) {
-                                  if (madness.cn !== 32) {
-                                    if (madness.cn !== 34) {
+                                if (id(madness.cn) !== 11) {
+                                  if (id(madness.cn) !== 32) {
+                                    if (id(madness.cn) !== 34) {
                                       break Label_17885;
                                     }
                                   }
@@ -3012,15 +3013,15 @@ export class Control {
                           if (madness.specialact) {
                             Label_18249: {
                               Label_18140: {
-                                if (madness.cn !== 2) {
-                                  if (madness.cn !== 25) {
-                                    if (madness.cn !== 5) {
-                                      if (madness.cn !== 28) {
-                                        if (madness.cn !== 6) {
-                                          if (madness.cn !== 29) {
+                                if (id(madness.cn) !== 2) {
+                                  if (id(madness.cn) !== 25) {
+                                    if (id(madness.cn) !== 5) {
+                                      if (id(madness.cn) !== 28) {
+                                        if (id(madness.cn) !== 6) {
+                                          if (id(madness.cn) !== 29) {
                                             Label_18084: {
-                                              if (madness.cn !== 8) {
-                                                if (madness.cn !== 31) {
+                                              if (id(madness.cn) !== 8) {
+                                                if (id(madness.cn) !== 31) {
                                                   break Label_18084;
                                                 }
                                               }
@@ -3028,10 +3029,10 @@ export class Control {
                                                 break Label_18140;
                                               }
                                             }
-                                            if (madness.cn !== 11) {
-                                              if (madness.cn !== 9) {
-                                                if (madness.cn !== 34) {
-                                                  if (madness.cn !== 32) {
+                                            if (id(madness.cn) !== 11) {
+                                              if (id(madness.cn) !== 9) {
+                                                if (id(madness.cn) !== 34) {
+                                                  if (id(madness.cn) !== 32) {
                                                     break Label_18249;
                                                   }
                                                 }
@@ -3059,14 +3060,14 @@ export class Control {
                                 this.acr = 0;
                               }
                             }
-                            if (madness.cn !== 0) {
-                              if (madness.cn !== 4) {
-                                if (madness.cn !== 7) {
-                                  if (madness.cn !== 10) {
-                                    if (madness.cn !== 23) {
-                                      if (madness.cn !== 27) {
-                                        if (madness.cn !== 30) {
-                                          if (madness.cn !== 33) {
+                            if (id(madness.cn) !== 0) {
+                              if (id(madness.cn) !== 4) {
+                                if (id(madness.cn) !== 7) {
+                                  if (id(madness.cn) !== 10) {
+                                    if (id(madness.cn) !== 23) {
+                                      if (id(madness.cn) !== 27) {
+                                        if (id(madness.cn) !== 30) {
+                                          if (id(madness.cn) !== 33) {
                                             break Label_18369;
                                           }
                                         }
@@ -3092,15 +3093,15 @@ export class Control {
                             }
                           }
                           Label_18480: {
-                            if (madness.cn >= 9) {
-                              if (madness.cn <= 11) {
+                            if (id(madness.cn) >= 9) {
+                              if (id(madness.cn) <= 11) {
                                 break Label_18480;
                               }
                             }
-                            if (madness.cn < 32) {
+                            if (id(madness.cn) < 32) {
                               break Label_18491;
                             }
-                            if (madness.cn > 34) {
+                            if (id(madness.cn) > 34) {
                               break Label_18491;
                             }
                           }
@@ -3145,8 +3146,8 @@ export class Control {
                       Label_18820: {
                         if (checkpoints.stage === 10) {
                           if (madness.specialact) {
-                            if (madness.cn !== 11) {
-                              if (madness.cn !== 34) {
+                            if (id(madness.cn) !== 11) {
+                              if (id(madness.cn) !== 34) {
                                 break Label_18820;
                               }
                             }
@@ -3161,10 +3162,10 @@ export class Control {
                         if (!xtgraphics.bonusstage[1]) {
                           Label_18968: {
                             if (madness.specialact) {
-                              if (madness.cn !== 11) {
-                                if (madness.cn !== 13) {
-                                  if (madness.cn !== 34) {
-                                    if (madness.cn !== 36) {
+                              if (id(madness.cn) !== 11) {
+                                if (id(madness.cn) !== 13) {
+                                  if (id(madness.cn) !== 34) {
+                                    if (id(madness.cn) !== 36) {
                                       break Label_18968;
                                     }
                                   }
@@ -3187,8 +3188,8 @@ export class Control {
                           if (madness.beast[madness.im]) {
                             if (!this.bulistc) {
                               if (this.variable.completed[0] >= 25) {
-                                if (madness.cn !== 11) {
-                                  if (madness.cn !== 34) {
+                                if (id(madness.cn) !== 11) {
+                                  if (id(madness.cn) !== 34) {
                                     break Label_19086;
                                   }
                                 }
@@ -3228,8 +3229,8 @@ export class Control {
                                 }
                               }
                             }
-                            if (madness.cn !== 10) {
-                              if (madness.cn !== 33) {
+                            if (id(madness.cn) !== 10) {
+                              if (id(madness.cn) !== 33) {
                                 if (!madness.beast[madness.im]) {
                                   this.acr = 0;
                                   this.attack = 30;
@@ -3260,14 +3261,14 @@ export class Control {
                             }
                             Label_19678: {
                               if (madness.specialact) {
-                                if (madness.cn !== 11) {
-                                  if (madness.cn !== 15) {
-                                    if (madness.cn !== 34) {
-                                      if (madness.cn !== 38) {
-                                        if (madness.cn !== 14) {
-                                          if (madness.cn !== 37) {
-                                            if (madness.cn !== 10) {
-                                              if (madness.cn !== 33) {
+                                if (id(madness.cn) !== 11) {
+                                  if (id(madness.cn) !== 15) {
+                                    if (id(madness.cn) !== 34) {
+                                      if (id(madness.cn) !== 38) {
+                                        if (id(madness.cn) !== 14) {
+                                          if (id(madness.cn) !== 37) {
+                                            if (id(madness.cn) !== 10) {
+                                              if (id(madness.cn) !== 33) {
                                                 break Label_19678;
                                               }
                                             }
@@ -3291,8 +3292,8 @@ export class Control {
                             }
                             Label_19734: {
                               if (this.variable.biglead[0]) {
-                                if (madness.cn !== 15) {
-                                  if (madness.cn !== 38) {
+                                if (id(madness.cn) !== 15) {
+                                  if (id(madness.cn) !== 38) {
                                     break Label_19734;
                                   }
                                 }
@@ -3302,10 +3303,10 @@ export class Control {
                             }
                             Label_19845: {
                               if (checkpoints.clear[0] < 3) {
-                                if (madness.cn !== 13) {
-                                  if (madness.cn !== 36) {
-                                    if (madness.cn !== 11) {
-                                      if (madness.cn !== 34) {
+                                if (id(madness.cn) !== 13) {
+                                  if (id(madness.cn) !== 36) {
+                                    if (id(madness.cn) !== 11) {
+                                      if (id(madness.cn) !== 34) {
                                         break Label_19845;
                                       }
                                     }
@@ -3361,14 +3362,14 @@ export class Control {
                           }
                           Label_20346: {
                             if (madness.specialact) {
-                              if (madness.cn !== 11) {
-                                if (madness.cn !== 34) {
-                                  if (madness.cn !== 9) {
-                                    if (madness.cn !== 32) {
-                                      if (madness.cn !== 14) {
-                                        if (madness.cn !== 10) {
-                                          if (madness.cn !== 33) {
-                                            if (madness.cn !== 37) {
+                              if (id(madness.cn) !== 11) {
+                                if (id(madness.cn) !== 34) {
+                                  if (id(madness.cn) !== 9) {
+                                    if (id(madness.cn) !== 32) {
+                                      if (id(madness.cn) !== 14) {
+                                        if (id(madness.cn) !== 10) {
+                                          if (id(madness.cn) !== 33) {
+                                            if (id(madness.cn) !== 37) {
                                               break Label_20346;
                                             }
                                           }
@@ -3391,10 +3392,10 @@ export class Control {
                           }
                           Label_20461: {
                             if (this.variable.biglead[0]) {
-                              if (madness.cn !== 13) {
-                                if (madness.cn !== 36) {
-                                  if (madness.cn !== 15) {
-                                    if (madness.cn !== 38) {
+                              if (id(madness.cn) !== 13) {
+                                if (id(madness.cn) !== 36) {
+                                  if (id(madness.cn) !== 15) {
+                                    if (id(madness.cn) !== 38) {
                                       break Label_20461;
                                     }
                                   }
@@ -3410,10 +3411,10 @@ export class Control {
                             }
                           }
                           if (madness.shadowcar) {
-                            if (madness.cn !== 11) {
-                              if (madness.cn !== 9) {
-                                if (madness.cn !== 32) {
-                                  if (madness.cn !== 34) {
+                            if (id(madness.cn) !== 11) {
+                              if (id(madness.cn) !== 9) {
+                                if (id(madness.cn) !== 32) {
+                                  if (id(madness.cn) !== 34) {
                                     break Label_20540;
                                   }
                                 }
@@ -3428,7 +3429,7 @@ export class Control {
                         if (!xtgraphics.bonusstage[3]) {
                           this.aim = fr((fr(this.m.random() / 2.0)) + 0.75);
                           Label_20761: {
-                            if (madness.cn === 16) {
+                            if (id(madness.cn) === 16) {
                               if (this.variable.needhelp[7]) {
                                 if (this.variable.needhelp[8]) {
                                   if (this.variable.needhelp[9]) {
@@ -3463,12 +3464,12 @@ export class Control {
                           }
                           Label_20935: {
                             if (madness.specialact) {
-                              if (madness.cn !== 15) {
-                                if (madness.cn !== 11) {
-                                  if (madness.cn !== 13) {
-                                    if (madness.cn !== 34) {
-                                      if (madness.cn !== 36) {
-                                        if (madness.cn !== 38) {
+                              if (id(madness.cn) !== 15) {
+                                if (id(madness.cn) !== 11) {
+                                  if (id(madness.cn) !== 13) {
+                                    if (id(madness.cn) !== 34) {
+                                      if (id(madness.cn) !== 36) {
+                                        if (id(madness.cn) !== 38) {
                                           break Label_20935;
                                         }
                                       }
@@ -3499,13 +3500,13 @@ export class Control {
                       Label_21728: {
                         if (checkpoints.stage === 19) {
                           this.aim = fr((fr(this.m.random() / 2.0)) + 0.75);
-                          if (madness.cn !== 14) {
-                            if (madness.cn !== 17) {
-                              if (madness.cn !== 1) {
-                                if (madness.cn !== 12) {
-                                  if (madness.cn !== 37) {
-                                    if (madness.cn !== 24) {
-                                      if (madness.cn !== 35) {
+                          if (id(madness.cn) !== 14) {
+                            if (id(madness.cn) !== 17) {
+                              if (id(madness.cn) !== 1) {
+                                if (id(madness.cn) !== 12) {
+                                  if (id(madness.cn) !== 37) {
+                                    if (id(madness.cn) !== 24) {
+                                      if (id(madness.cn) !== 35) {
                                         let triggered = false;
                                         for (let a4 = 0; a4 < xtgraphics.nplayers; a4 = i32(a4 + 1)) {
                                           for (let b = 0; b < xtgraphics.nplayers; b = i32(b + 1)) {
@@ -3645,9 +3646,9 @@ export class Control {
                                 }
                               }
                             }
-                            if (madness.cn !== 14) {
-                              if (madness.cn !== 17) {
-                                if (madness.cn !== 37) {
+                            if (id(madness.cn) !== 14) {
+                              if (id(madness.cn) !== 17) {
+                                if (id(madness.cn) !== 37) {
                                   break Label_22003;
                                 }
                               }
@@ -3677,7 +3678,7 @@ export class Control {
                         let watchout = false;
                         if (checkpoints.clear[0] >= 3) {
                           racer = true;
-                          if (madness.cn === 16) {
+                          if (id(madness.cn) === 16) {
                             attackuser2 = true;
                           }
                           if (this.variable.completed[0] >= 30) {
@@ -3733,11 +3734,11 @@ export class Control {
                           }
                         } else {
                           Label_22524: {
-                            if (madness.cn !== 16) {
-                              if (madness.cn !== 15) {
-                                if (madness.cn !== 13) {
-                                  if (madness.cn !== 36) {
-                                    if (madness.cn !== 38) {
+                            if (id(madness.cn) !== 16) {
+                              if (id(madness.cn) !== 15) {
+                                if (id(madness.cn) !== 13) {
+                                  if (id(madness.cn) !== 36) {
+                                    if (id(madness.cn) !== 38) {
                                       break Label_22524;
                                     }
                                   }
@@ -3754,9 +3755,9 @@ export class Control {
                           }
                         }
                         Label_22674: {
-                          if (madness.cn !== 17) {
-                            if (madness.cn !== 14) {
-                              if (madness.cn !== 37) {
+                          if (id(madness.cn) !== 17) {
+                            if (id(madness.cn) !== 14) {
+                              if (id(madness.cn) !== 37) {
                                 break Label_22674;
                               }
                             }
@@ -3788,7 +3789,7 @@ export class Control {
                           justrace = true;
                         }
                         if (xtgraphics.verydark) {
-                          if (madness.cn === 18) {
+                          if (id(madness.cn) === 18) {
                             if (!justrace) {
                               this.attack = 30;
                               this.acr = xtgraphics.targetcar;
@@ -3796,7 +3797,7 @@ export class Control {
                           }
                         }
                         if (madness.specialact) {
-                          if (madness.cn === 18) {
+                          if (id(madness.cn) === 18) {
                             if (!justrace) {
                               this.attack = 30;
                               this.acr = 0;
@@ -3813,7 +3814,7 @@ export class Control {
                         }
                       }
                       let justrace2 = false;
-                      if (madness.cn === 17) {
+                      if (id(madness.cn) === 17) {
                         justrace2 = true;
                       }
                       Label_22975: {
@@ -3862,8 +3863,8 @@ export class Control {
                   Label_15483: {
                     if (madness.specialact) {
                       if (madness.aistrsp[madness.cn] <= 0) {
-                        if (madness.cn !== 1) {
-                          if (madness.cn !== 24) {
+                        if (id(madness.cn) !== 1) {
+                          if (id(madness.cn) !== 24) {
                             break Label_15483;
                           }
                         }
@@ -3880,17 +3881,17 @@ export class Control {
                       if (!this.variable.lotswasted) {
                         if (!this.variable.biglead[0]) {
                           Label_15473: {
-                            if (madness.cn !== 2) {
-                              if (madness.cn !== 5) {
-                                if (madness.cn !== 6) {
-                                  if (madness.cn !== 8) {
-                                    if (madness.cn !== 11) {
-                                      if (madness.cn !== 15) {
-                                        if (madness.cn !== 25) {
-                                          if (madness.cn !== 28) {
-                                            if (madness.cn !== 29) {
-                                              if (madness.cn !== 31) {
-                                                if (madness.cn !== 34) {
+                            if (id(madness.cn) !== 2) {
+                              if (id(madness.cn) !== 5) {
+                                if (id(madness.cn) !== 6) {
+                                  if (id(madness.cn) !== 8) {
+                                    if (id(madness.cn) !== 11) {
+                                      if (id(madness.cn) !== 15) {
+                                        if (id(madness.cn) !== 25) {
+                                          if (id(madness.cn) !== 28) {
+                                            if (id(madness.cn) !== 29) {
+                                              if (id(madness.cn) !== 31) {
+                                                if (id(madness.cn) !== 34) {
                                                   this.acr = xtgraphics.randomcar[madness.im];
                                                   break Label_15473;
                                                 }
@@ -3927,10 +3928,10 @@ export class Control {
                     if (this.variable.biglead[a3]) {
                       Label_15597: {
                         if (this.variable.completed[a3] >= 65) {
-                          if (madness.cn !== 15) {
-                            if (madness.cn !== 16) {
-                              if (madness.cn !== 18) {
-                                if (madness.cn !== 38) {
+                          if (id(madness.cn) !== 15) {
+                            if (id(madness.cn) !== 16) {
+                              if (id(madness.cn) !== 18) {
+                                if (id(madness.cn) !== 38) {
                                   break Label_15597;
                                 }
                               }
@@ -3942,12 +3943,12 @@ export class Control {
                       }
                       Label_15713: {
                         if (this.variable.completed[a3] >= 75) {
-                          if (madness.cn !== 11) {
-                            if (madness.cn !== 13) {
-                              if (madness.cn !== 9) {
-                                if (madness.cn !== 32) {
-                                  if (madness.cn !== 34) {
-                                    if (madness.cn !== 36) {
+                          if (id(madness.cn) !== 11) {
+                            if (id(madness.cn) !== 13) {
+                              if (id(madness.cn) !== 9) {
+                                if (id(madness.cn) !== 32) {
+                                  if (id(madness.cn) !== 34) {
+                                    if (id(madness.cn) !== 36) {
                                       break Label_15713;
                                     }
                                   }
@@ -3970,17 +3971,17 @@ export class Control {
                   Label_15910: {
                     Label_15905: {
                       if (madness.power >= 45.0) {
-                        if (madness.cn !== 12) {
-                          if (madness.cn !== 3) {
-                            if (madness.cn !== 17) {
+                        if (id(madness.cn) !== 12) {
+                          if (id(madness.cn) !== 3) {
+                            if (id(madness.cn) !== 17) {
                               if (checkpoints.stage !== 14) {
                                 if (checkpoints.stage === 14) {
                                   if (!this.bulistc) {
                                     break Label_15905;
                                   }
                                 }
-                                if (madness.cn !== 26) {
-                                  if (madness.cn !== 35) {
+                                if (id(madness.cn) !== 26) {
+                                  if (id(madness.cn) !== 35) {
                                     break Label_15910;
                                   }
                                 }
@@ -4025,7 +4026,7 @@ export class Control {
                       justrace2 = true;
                     }
                     if (xtgraphics.verydark) {
-                      if (madness.cn === 18) {
+                      if (id(madness.cn) === 18) {
                         if (!justrace2) {
                           this.attack = 30;
                           this.acr = xtgraphics.targetcar;
@@ -4034,7 +4035,7 @@ export class Control {
                       }
                     }
                     if (madness.specialact) {
-                      if (madness.cn === 18) {
+                      if (id(madness.cn) === 18) {
                         if (!justrace2) {
                           this.attack = 30;
                           this.acr = 0;
@@ -4080,7 +4081,7 @@ export class Control {
                     }
                   }
                   if (this.variable.completed[0] >= 70) {
-                    if (madness.cn === 16) {
+                    if (id(madness.cn) === 16) {
                       if (checkpoints.pos[madness.im] > 2) {
                         if (checkpoints.pos[0] < checkpoints.pos[madness.im]) {
                           this.acr = 0;
@@ -4184,7 +4185,7 @@ export class Control {
                   }
                 }
                 let spatkcep = false;
-                if (madness.cn === 16) {
+                if (id(madness.cn) === 16) {
                   if (checkpoints.stage === 18) {
                     spatkcep = true;
                   }
@@ -4331,8 +4332,8 @@ export class Control {
                           break Label_24666;
                         }
                       }
-                      if (madness.cn !== 9) {
-                        if (madness.cn !== 32) {
+                      if (id(madness.cn) !== 9) {
+                        if (id(madness.cn) !== 32) {
                           break Label_24666;
                         }
                       }
@@ -4380,8 +4381,8 @@ export class Control {
                         }
                       } else {
                         Label_24925: {
-                          if (madness.cn !== 10) {
-                            if (madness.cn !== 33) {
+                          if (id(madness.cn) !== 10) {
+                            if (id(madness.cn) !== 33) {
                               k9 = 70;
                               break Label_24925;
                             }
@@ -4397,8 +4398,8 @@ export class Control {
                     if (checkpoints.stage === 8) {
                       if (!madness.beast[madness.im]) {
                         if (this.attack === 0) {
-                          if (madness.cn !== 11) {
-                            if (madness.cn !== 34) {
+                          if (id(madness.cn) !== 11) {
+                            if (id(madness.cn) !== 34) {
                               k9 = 50;
                               break Label_25059;
                             }
@@ -4424,15 +4425,15 @@ export class Control {
                         }
                       }
                       if (this.attack === 0) {
-                        if (madness.cn !== 13) {
-                          if (madness.cn !== 36) {
+                        if (id(madness.cn) !== 13) {
+                          if (id(madness.cn) !== 36) {
                             k9 = 50;
                             break Label_25218;
                           }
                         }
                       }
-                      if (madness.cn !== 13) {
-                        if (madness.cn !== 36) {
+                      if (id(madness.cn) !== 13) {
+                        if (id(madness.cn) !== 36) {
                           k9 = 70;
                           break Label_25218;
                         }
@@ -4440,7 +4441,7 @@ export class Control {
                       k9 = 80;
                     }
                     if (xtgraphics.bonstage) {
-                      if (madness.cn === 36) {
+                      if (id(madness.cn) === 36) {
                         k9 = 85;
                       }
                     }
@@ -4449,12 +4450,12 @@ export class Control {
                     let fixlvl = 50;
                     Label_25399: {
                       if (!madness.beast[madness.im]) {
-                        if (madness.cn !== 13) {
-                          if (madness.cn !== 36) {
-                            if (madness.cn < 16) {
+                        if (id(madness.cn) !== 13) {
+                          if (id(madness.cn) !== 36) {
+                            if (id(madness.cn) < 16) {
                               break Label_25399;
                             }
-                            if (madness.cn > 22) {
+                            if (id(madness.cn) > 22) {
                               break Label_25399;
                             }
                           }
@@ -4464,12 +4465,12 @@ export class Control {
                         fixlvl = 70;
                         Label_25334: {
                           Label_25330: {
-                            if (madness.cn >= 13) {
-                              if (madness.cn <= 22) {
+                            if (id(madness.cn) >= 13) {
+                              if (id(madness.cn) <= 22) {
                                 break Label_25330;
                               }
                             }
-                            if (madness.cn < 36) {
+                            if (id(madness.cn) < 36) {
                               break Label_25334;
                             }
                           }
@@ -4556,9 +4557,9 @@ export class Control {
                       if (this.attack !== 0) {
                         let wimpness = 80;
                         Label_25841: {
-                          if (madness.cn !== 14) {
-                            if (madness.cn !== 17) {
-                              if (madness.cn !== 37) {
+                          if (id(madness.cn) !== 14) {
+                            if (id(madness.cn) !== 17) {
+                              if (id(madness.cn) !== 37) {
                                 break Label_25841;
                               }
                             }
@@ -4566,11 +4567,11 @@ export class Control {
                           wimpness = 50;
                         }
                         Label_25936: {
-                          if (madness.cn !== 15) {
-                            if (madness.cn !== 16) {
-                              if (madness.cn !== 13) {
-                                if (madness.cn !== 36) {
-                                  if (madness.cn !== 38) {
+                          if (id(madness.cn) !== 15) {
+                            if (id(madness.cn) !== 16) {
+                              if (id(madness.cn) !== 13) {
+                                if (id(madness.cn) !== 36) {
+                                  if (id(madness.cn) !== 38) {
                                     break Label_25936;
                                   }
                                 }
@@ -4601,8 +4602,8 @@ export class Control {
                     Label_26138: {
                       if (this.attack === 0) {
                         Label_26108: {
-                          if (madness.cn !== 15) {
-                            if (madness.cn !== 38) {
+                          if (id(madness.cn) !== 15) {
+                            if (id(madness.cn) !== 38) {
                               break Label_26108;
                             }
                           }
@@ -4624,7 +4625,7 @@ export class Control {
                     if (!madness.beast[madness.im]) {
                       if (!madness.shadowcar) {
                         k9 = 55;
-                        if (madness.cn === 16) {
+                        if (id(madness.cn) === 16) {
                           k9 = 70;
                         }
                         break Label_26216;
@@ -4636,10 +4637,10 @@ export class Control {
               }
               if (checkpoints.stage === 16) {
                 if ((i32(checkpoints.clear[madness.im] - checkpoints.clear[0])) >= 5) {
-                  if (madness.cn !== 10) {
-                    if (madness.cn !== 12) {
-                      if (madness.cn !== 33) {
-                        if (madness.cn !== 35) {
+                  if (id(madness.cn) !== 10) {
+                    if (id(madness.cn) !== 12) {
+                      if (id(madness.cn) !== 33) {
+                        if (id(madness.cn) !== 35) {
                           if (xtgraphics.classicmode) {
                             k9 = 50;
                           }
@@ -4678,8 +4679,8 @@ export class Control {
               if (xtgraphics.careermode) {
                 Label_26518: {
                   if (checkpoints.stage === 8) {
-                    if (madness.cn !== 11) {
-                      if (madness.cn !== 34) {
+                    if (id(madness.cn) !== 11) {
+                      if (id(madness.cn) !== 34) {
                         break Label_26518;
                       }
                     }
@@ -4700,8 +4701,8 @@ export class Control {
                         }
                         hardstage2 = true;
                       }
-                      if (madness.cn !== 13) {
-                        if (madness.cn !== 36) {
+                      if (id(madness.cn) !== 13) {
+                        if (id(madness.cn) !== 36) {
                           if (!hardstage2) {
                             break Label_26752;
                           }
@@ -4729,7 +4730,7 @@ export class Control {
                               break Label_26632;
                             }
                           }
-                          if (madness.cn !== 33) {
+                          if (id(madness.cn) !== 33) {
                             break Label_26637;
                           }
                           if (!this.variable.biglead[0]) {
@@ -4743,8 +4744,8 @@ export class Control {
                 }
                 Label_26799: {
                   if (checkpoints.stage === 12) {
-                    if (madness.cn !== 13) {
-                      if (madness.cn !== 36) {
+                    if (id(madness.cn) !== 13) {
+                      if (id(madness.cn) !== 36) {
                         break Label_26799;
                       }
                     }
@@ -4761,11 +4762,11 @@ export class Control {
                     if (!xtgraphics.bonusstage[2]) {
                       if (checkpoints.clear[0] >= 3) {
                         Label_26972: {
-                          if (madness.cn !== 15) {
-                            if (madness.cn !== 38) {
+                          if (id(madness.cn) !== 15) {
+                            if (id(madness.cn) !== 38) {
                               Label_26959: {
-                                if (madness.cn !== 11) {
-                                  if (madness.cn !== 34) {
+                                if (id(madness.cn) !== 11) {
+                                  if (id(madness.cn) !== 34) {
                                     break Label_26959;
                                   }
                                 }
@@ -4790,8 +4791,8 @@ export class Control {
                 Label_27039: {
                   if (checkpoints.stage === 16) {
                     if (checkpoints.clear[0] >= 3) {
-                      if (madness.cn !== 13) {
-                        if (madness.cn !== 36) {
+                      if (id(madness.cn) !== 13) {
+                        if (id(madness.cn) !== 36) {
                           break Label_27039;
                         }
                       }
@@ -4801,8 +4802,8 @@ export class Control {
                 }
                 Label_27086: {
                   if (checkpoints.stage === 18) {
-                    if (madness.cn !== 13) {
-                      if (madness.cn !== 36) {
+                    if (id(madness.cn) !== 13) {
+                      if (id(madness.cn) !== 36) {
                         break Label_27086;
                       }
                     }
@@ -4818,9 +4819,9 @@ export class Control {
                 }
                 Label_27205: {
                   if (checkpoints.stage === 21) {
-                    if (madness.cn !== 18) {
-                      if (madness.cn !== 13) {
-                        if (madness.cn !== 36) {
+                    if (id(madness.cn) !== 18) {
+                      if (id(madness.cn) !== 13) {
+                        if (id(madness.cn) !== 36) {
                           break Label_27205;
                         }
                       }
@@ -4829,7 +4830,7 @@ export class Control {
                   }
                 }
                 if (checkpoints.stage === 23) {
-                  if (madness.cn === 18) {
+                  if (id(madness.cn) === 18) {
                     if (this.variable.lotswasted) {
                       this.bulistc = false;
                     } else {
@@ -4837,15 +4838,15 @@ export class Control {
                     }
                   }
                   Label_27296: {
-                    if (madness.cn !== 13) {
-                      if (madness.cn !== 36) {
+                    if (id(madness.cn) !== 13) {
+                      if (id(madness.cn) !== 36) {
                         break Label_27296;
                       }
                     }
                     this.bulistc = true;
                   }
-                  if (madness.cn !== 15) {
-                    if (madness.cn !== 38) {
+                  if (id(madness.cn) !== 15) {
+                    if (id(madness.cn) !== 38) {
                       break Label_27389;
                     }
                   }
@@ -4860,7 +4861,7 @@ export class Control {
               }
             }
             if (checkpoints.stage === 8) {
-              if (madness.cn === 34) {
+              if (id(madness.cn) === 34) {
                 if (madness.pcleared === 35) {
                   if (xtgraphics.classicmode) {
                     madness.pcleared = 73;
@@ -4872,14 +4873,14 @@ export class Control {
               }
             }
             if (checkpoints.stage === 11) {
-              if (madness.cn === 36) {
+              if (id(madness.cn) === 36) {
                 if (xtgraphics.classicmode) {
                   this.bulistc = true;
                 }
               }
             }
             if (checkpoints.stage === 12) {
-              if (madness.cn === 36) {
+              if (id(madness.cn) === 36) {
                 if (xtgraphics.classicmode) {
                   this.bulistc = true;
                 }
@@ -4897,13 +4898,13 @@ export class Control {
             }
             if (checkpoints.stage === 16) {
               if (xtgraphics.classicmode) {
-                if (madness.cn === 36) {
+                if (id(madness.cn) === 36) {
                   if (checkpoints.pcleared === 8) {
                     this.bulistc = true;
                     this.attack = 0;
                   }
                 }
-                if (madness.cn === 34) {
+                if (id(madness.cn) === 34) {
                   if ((i32(checkpoints.clear[0] - madness.clear)) >= 2) {
                     if (this.trfix === 0) {
                       this.bulistc = true;
@@ -4930,8 +4931,8 @@ export class Control {
                   }
                 }
               }
-              if (madness.cn !== 13) {
-                if (madness.cn !== 36) {
+              if (id(madness.cn) !== 13) {
+                if (id(madness.cn) !== 36) {
                   break Label_27894;
                 }
               }
@@ -4967,7 +4968,7 @@ export class Control {
           }
           if (xtgraphics.careermode) {
             if (checkpoints.stage === 22) {
-              if (madness.cn === 18) {
+              if (id(madness.cn) === 18) {
                 if (madness.pcleared === 111) {
                   heightlim = 15;
                 } else {
@@ -5110,10 +5111,10 @@ export class Control {
                                 }
                                 Label_57173: {
                                   if (checkpoints.stage === 14) {
-                                    if (madness.cn !== 14) {
-                                      if (madness.cn !== 10) {
-                                        if (madness.cn !== 33) {
-                                          if (madness.cn !== 37) {
+                                    if (id(madness.cn) !== 14) {
+                                      if (id(madness.cn) !== 10) {
+                                        if (id(madness.cn) !== 33) {
+                                          if (id(madness.cn) !== 37) {
                                             break Label_57173;
                                           }
                                         }
@@ -5159,8 +5160,8 @@ export class Control {
                                 if (checkpoints.stage === 21) {
                                   if (madness.nostunts < 2) {
                                     Label_57243: {
-                                      if (madness.cn !== 13) {
-                                        if (madness.cn !== 36) {
+                                      if (id(madness.cn) !== 13) {
+                                        if (id(madness.cn) !== 36) {
                                           this.abdelay = 3;
                                           break Label_57243;
                                         }
@@ -5361,8 +5362,8 @@ export class Control {
                         Label_58448: {
                           if (checkpoints.stage === 11) {
                             if (xtgraphics.bonusstage[1]) {
-                              if (madness.cn !== 13) {
-                                if (madness.cn !== 36) {
+                              if (id(madness.cn) !== 13) {
+                                if (id(madness.cn) !== 36) {
                                   this.uddirect = 1;
                                   break Label_58448;
                                 }
@@ -5376,9 +5377,9 @@ export class Control {
                         }
                         Label_58538: {
                           if (checkpoints.stage === 23) {
-                            if (madness.cn !== 13) {
-                              if (madness.cn !== 18) {
-                                if (madness.cn !== 36) {
+                            if (id(madness.cn) !== 13) {
+                              if (id(madness.cn) !== 18) {
+                                if (id(madness.cn) !== 36) {
                                   this.uddirect = 1;
                                   break Label_58538;
                                 }
@@ -5394,10 +5395,10 @@ export class Control {
                           this.uddirect = -1;
                           this.lrdirect = 0;
                           Label_58660: {
-                            if (madness.cn !== 34) {
-                              if (madness.cn !== 36) {
+                            if (id(madness.cn) !== 34) {
+                              if (id(madness.cn) !== 36) {
                                 this.udstart = 7;
-                                if (madness.cn === 37) {
+                                if (id(madness.cn) === 37) {
                                   if (madness.power > 30.0) {
                                     this.udstart = 14;
                                   }
@@ -5407,7 +5408,7 @@ export class Control {
                             }
                             this.udstart = 0;
                           }
-                          if (madness.cn === 34) {
+                          if (id(madness.cn) === 34) {
                             this.lrdirect = -1;
                             this.lrstart = 0;
                           }
@@ -5821,8 +5822,8 @@ export class Control {
             }
             Label_54083: {
               if (checkpoints.stage === 16) {
-                if (madness.cn !== 13) {
-                  if (madness.cn !== 36) {
+                if (id(madness.cn) !== 13) {
+                  if (id(madness.cn) !== 36) {
                     break Label_54083;
                   }
                 }
@@ -6235,11 +6236,11 @@ export class Control {
                         if (!xtgraphics.bonusstage[0]) {
                           Label_30812: {
                             if (madness.pcleared === 110) {
-                              if (madness.cn >= 10) {
-                                if (madness.cn < 23) {
+                              if (id(madness.cn) >= 10) {
+                                if (id(madness.cn) < 23) {
                                   break Label_30812;
                                 }
-                                if (madness.cn >= 33) {
+                                if (id(madness.cn) >= 33) {
                                   break Label_30812;
                                 }
                               }
@@ -6400,10 +6401,10 @@ export class Control {
                           }
                           Label_31775: {
                             if (this.hold !== 0) {
-                              if (madness.cn === 10) {
+                              if (id(madness.cn) === 10) {
                                 break Label_31775;
                               }
-                              if (madness.cn === 33) {
+                              if (id(madness.cn) === 33) {
                                 break Label_31775;
                               }
                             }
@@ -6486,8 +6487,8 @@ export class Control {
                       if (checkpoints.stage === 9) {
                         let predrange = 500;
                         Label_32377: {
-                          if (madness.cn === 12) {
-                            if (madness.cn === 35) {
+                          if (id(madness.cn) === 12) {
+                            if (id(madness.cn) === 35) {
                               break Label_32377;
                             }
                           }
@@ -6599,8 +6600,8 @@ export class Control {
                           Label_33276: {
                             if (i9 > 60) {
                               if (madness.specialact) {
-                                if (madness.cn !== 12) {
-                                  if (madness.cn !== 35) {
+                                if (id(madness.cn) !== 12) {
+                                  if (id(madness.cn) !== 35) {
                                     break Label_33276;
                                   }
                                 }
@@ -6623,8 +6624,8 @@ export class Control {
                           if (madness.pcleared === 69) {
                             Label_33424: {
                               if (madness.specialact) {
-                                if (madness.cn !== 12) {
-                                  if (madness.cn !== 35) {
+                                if (id(madness.cn) !== 12) {
+                                  if (id(madness.cn) !== 35) {
                                     break Label_33424;
                                   }
                                 }
@@ -6695,7 +6696,7 @@ export class Control {
                         if (madness.pcleared === 3) {
                           i9 = 12;
                         }
-                        if (madness.cn === 35) {
+                        if (id(madness.cn) === 35) {
                           if (!madness.specialact) {
                             this.variable.dontstunt[madness.im] = false;
                           } else {
@@ -6882,8 +6883,8 @@ export class Control {
                           this.turntyp = 0;
                           Label_35082: {
                             if (madness.specialact) {
-                              if (madness.cn !== 14) {
-                                if (madness.cn !== 37) {
+                              if (id(madness.cn) !== 14) {
+                                if (id(madness.cn) !== 37) {
                                   break Label_35082;
                                 }
                               }
@@ -7056,8 +7057,8 @@ export class Control {
                       Label_36805: {
                         if (checkpoints.stage === 10) {
                           Label_36622: {
-                            if (madness.cn !== 12) {
-                              if (madness.cn !== 35) {
+                            if (id(madness.cn) !== 12) {
+                              if (id(madness.cn) !== 35) {
                                 break Label_36622;
                               }
                             }
@@ -7174,8 +7175,8 @@ export class Control {
                                 if (!madness.specialact) {
                                   break Label_37290;
                                 }
-                                if (madness.cn !== 12) {
-                                  if (madness.cn !== 35) {
+                                if (id(madness.cn) !== 12) {
+                                  if (id(madness.cn) !== 35) {
                                     break Label_37290;
                                   }
                                 }
@@ -7256,12 +7257,12 @@ export class Control {
                             i9 = 307;
                           }
                           if (madness.specialact) {
-                            if (madness.cn !== 1) {
-                              if (madness.cn !== 12) {
-                                if (madness.cn !== 14) {
-                                  if (madness.cn !== 24) {
-                                    if (madness.cn !== 35) {
-                                      if (madness.cn !== 37) {
+                            if (id(madness.cn) !== 1) {
+                              if (id(madness.cn) !== 12) {
+                                if (id(madness.cn) !== 14) {
+                                  if (id(madness.cn) !== 24) {
+                                    if (id(madness.cn) !== 35) {
+                                      if (id(madness.cn) !== 37) {
                                         break Label_38174;
                                       }
                                     }
@@ -7362,10 +7363,10 @@ export class Control {
                       if (checkpoints.stage === 16) {
                         let spatt = false;
                         Label_38476: {
-                          if (madness.cn !== 12) {
-                            if (madness.cn !== 15) {
-                              if (madness.cn !== 35) {
-                                if (madness.cn !== 38) {
+                          if (id(madness.cn) !== 12) {
+                            if (id(madness.cn) !== 15) {
+                              if (id(madness.cn) !== 35) {
+                                if (id(madness.cn) !== 38) {
                                   break Label_38476;
                                 }
                               }
@@ -7535,9 +7536,9 @@ export class Control {
                         if (checkpoints.stage === 18) {
                           let correctcar = false;
                           Label_39506: {
-                            if (madness.cn !== 16) {
-                              if (madness.cn !== 12) {
-                                if (madness.cn !== 35) {
+                            if (id(madness.cn) !== 16) {
+                              if (id(madness.cn) !== 12) {
+                                if (id(madness.cn) !== 35) {
                                   if (!madness.shadowcar) {
                                     break Label_39506;
                                   }
@@ -7671,12 +7672,12 @@ export class Control {
                             }
                           }
                           if (madness.specialact) {
-                            if (madness.cn !== 16) {
-                              if (madness.cn !== 12) {
-                                if (madness.cn !== 9) {
-                                  if (madness.cn !== 17) {
-                                    if (madness.cn !== 32) {
-                                      if (madness.cn !== 35) {
+                            if (id(madness.cn) !== 16) {
+                              if (id(madness.cn) !== 12) {
+                                if (id(madness.cn) !== 9) {
+                                  if (id(madness.cn) !== 17) {
+                                    if (id(madness.cn) !== 32) {
+                                      if (id(madness.cn) !== 35) {
                                         break Label_40789;
                                       }
                                     }
@@ -7784,9 +7785,9 @@ export class Control {
                             if (madness.pcleared === 22) {
                               Label_40983: {
                                 if (madness.specialact) {
-                                  if (madness.cn !== 16) {
-                                    if (madness.cn !== 9) {
-                                      if (madness.cn !== 32) {
+                                  if (id(madness.cn) !== 16) {
+                                    if (id(madness.cn) !== 9) {
+                                      if (id(madness.cn) !== 32) {
                                         break Label_40983;
                                       }
                                     }
@@ -7833,9 +7834,9 @@ export class Control {
                             if (madness.pcleared === 71) {
                               Label_41251: {
                                 if (madness.specialact) {
-                                  if (madness.cn !== 16) {
-                                    if (madness.cn !== 9) {
-                                      if (madness.cn !== 32) {
+                                  if (id(madness.cn) !== 16) {
+                                    if (id(madness.cn) !== 9) {
+                                      if (id(madness.cn) !== 32) {
                                         break Label_41251;
                                       }
                                     }
@@ -7857,9 +7858,9 @@ export class Control {
                           Label_41397: {
                             Label_41384: {
                               if (madness.specialact) {
-                                if (madness.cn !== 16) {
-                                  if (madness.cn !== 9) {
-                                    if (madness.cn !== 32) {
+                                if (id(madness.cn) !== 16) {
+                                  if (id(madness.cn) !== 9) {
+                                    if (id(madness.cn) !== 32) {
                                       break Label_41384;
                                     }
                                   }
@@ -7893,13 +7894,13 @@ export class Control {
                             goodracing = true;
                           }
                           this.variable.dontmiss[madness.im] = false;
-                          if (madness.cn !== 17) {
-                            if (madness.cn !== 14) {
-                              if (madness.cn !== 1) {
-                                if (madness.cn !== 12) {
-                                  if (madness.cn !== 24) {
-                                    if (madness.cn !== 35) {
-                                      if (madness.cn !== 37) {
+                          if (id(madness.cn) !== 17) {
+                            if (id(madness.cn) !== 14) {
+                              if (id(madness.cn) !== 1) {
+                                if (id(madness.cn) !== 12) {
+                                  if (id(madness.cn) !== 24) {
+                                    if (id(madness.cn) !== 35) {
+                                      if (id(madness.cn) !== 37) {
                                         if (!goodracing) {
                                           break Label_42734;
                                         }
@@ -8019,7 +8020,7 @@ export class Control {
                           if (madness.pcleared === 30) {
                             this.stuntf = 4;
                             this.delayturn = false;
-                            if (madness.cn === 17) {
+                            if (id(madness.cn) === 17) {
                               if (madness.power >= 80.0) {
                                 i9 = 38;
                               }
@@ -8036,7 +8037,7 @@ export class Control {
                                 if (madness.power < 80.0) {
                                   break Label_42714;
                                 }
-                                if (madness.cn !== 17) {
+                                if (id(madness.cn) !== 17) {
                                   break Label_42714;
                                 }
                               }
@@ -8044,7 +8045,7 @@ export class Control {
                               i9 = 53;
                             }
                           }
-                          if (madness.cn === 36) {
+                          if (id(madness.cn) === 36) {
                             this.stuntf = 12;
                           }
                         }
@@ -8127,8 +8128,8 @@ export class Control {
                             }
                           }
                           if (madness.specialact) {
-                            if (madness.cn !== 16) {
-                              if (madness.cn !== 17) {
+                            if (id(madness.cn) !== 16) {
+                              if (id(madness.cn) !== 17) {
                                 break Label_43412;
                               }
                             }
@@ -8194,7 +8195,7 @@ export class Control {
                         this.variable.sharpturn[madness.im] = 0;
                         this.variable.dontstunt[madness.im] = false;
                         let specialcar = false;
-                        if (madness.cn === 17) {
+                        if (id(madness.cn) === 17) {
                           specialcar = true;
                         }
                         if (madness.pcleared === 132) {
@@ -8251,7 +8252,7 @@ export class Control {
                             Label_44135: {
                               if (madness.specialact) {
                                 if (!specialcar) {
-                                  if (madness.cn !== 16) {
+                                  if (id(madness.cn) !== 16) {
                                     break Label_44135;
                                   }
                                 }
@@ -8522,8 +8523,8 @@ export class Control {
                         let wideturn = false;
                         Label_46031: {
                           if (madness.specialact) {
-                            if (madness.cn !== 17) {
-                              if (madness.cn !== 16) {
+                            if (id(madness.cn) !== 17) {
+                              if (id(madness.cn) !== 16) {
                                 break Label_46031;
                               }
                             }
@@ -8569,8 +8570,8 @@ export class Control {
                       Label_46341: {
                         if (madness.pcleared !== 91) {
                           if (checkpoints.pos[0] < checkpoints.pos[madness.im]) {
-                            if (madness.cn !== 13) {
-                              if (madness.cn !== 36) {
+                            if (id(madness.cn) !== 13) {
+                              if (id(madness.cn) !== 36) {
                                 break Label_46341;
                               }
                             }
@@ -8953,7 +8954,7 @@ export class Control {
               if (xtgraphics.classicmode) {
                 let flag6 = false;
                 Label_49823: {
-                  if (madness.cn === 36) {
+                  if (id(madness.cn) === 36) {
                     if (!this.gowait) {
                       if (checkpoints.clear[0] === 1) {
                         if (this.m.random() <= 0.5) {
@@ -9068,7 +9069,7 @@ export class Control {
                     }
                   }
                 }
-                if (madness.cn === 34) {
+                if (id(madness.cn) === 34) {
                   flag6 = true;
                 }
                 if (flag6) {
@@ -9178,7 +9179,7 @@ export class Control {
                   let fixpoints = intArray(4);
                   let fixid = intArray(4);
                   let easyfix = false;
-                  if (madness.cn !== 14) {
+                  if (id(madness.cn) !== 14) {
                     easyfix = true;
                   }
                   for (let a7 = 0; a7 < checkpoints.n; a7 = i32(a7 + 1)) {
@@ -9464,7 +9465,7 @@ export class Control {
                           if (madness.speed <= 350.0) {
                             break Label_52779;
                           }
-                          if (madness.cn !== 17) {
+                          if (id(madness.cn) !== 17) {
                             break Label_52779;
                           }
                         }
@@ -9854,7 +9855,7 @@ export class Control {
         if (((xt.beastopponent[madness.im] && (((xt.unlocked[1] === 7) || xt.hardstage))) && (madness.im > 2)) && afuckingracer) {
           this.revstart = 30;
         }
-        if ((madness.cn === 10) || (madness.cn === 33)) {
+        if ((id(madness.cn) === 10) || (id(madness.cn) === 33)) {
           this.hold = 40;
         }
       }

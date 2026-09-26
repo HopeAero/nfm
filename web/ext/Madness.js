@@ -3,6 +3,7 @@
 // fix the transpiler or the source and regenerate.
 
 import { floatArray, fr, i32, idiv, intArray, random, trunc } from '../java.js';
+import { id } from './newcars.js';   // ext-ident (web/tools/ext-ident.mjs)
 import { Color } from './jawt.js';
 // ext-patch sweep-import: the grid behind road-cell and wheel-sweep
 import { WheelSweep, nearTrackers } from './trackgrid.js';
@@ -418,16 +419,16 @@ export class Madness {
             if ((conto.p[l].wz === 0) && (this.py(conto.keyx[i], conto.p[l].ox[k2], conto.keyz[i], conto.p[l].oz[k2]) < trunc((this.clrad[this.cn] * this.multiplier[this.im])))) {
               let dale = this.m.random();
               let dmgby = 20.0;
-              if (this.cn === 2) {
+              if (id(this.cn) === 2) {
                 dmgby = 10.0;
               }
-              if ((((this.cn === 11) || (this.cn === 13)) || (this.cn === 18)) || (this.cn === 36)) {
+              if ((((id(this.cn) === 11) || (id(this.cn) === 13)) || (id(this.cn) === 18)) || (id(this.cn) === 36)) {
                 dmgby = 50.0;
               }
-              if ((this.cn === 19) || (this.cn === 22)) {
+              if ((id(this.cn) === 19) || (id(this.cn) === 22)) {
                 dmgby = 80.0;
               }
-              if (this.cn === 20) {
+              if (id(this.cn) === 20) {
                 dmgby = 40.0;
               }
               if (dmgpc >= healthpc) {
@@ -591,16 +592,16 @@ export class Madness {
           if ((conto.p[j].wz === 0) && (this.py(conto.keyx[i], conto.p[j].ox[k], conto.keyz[i], conto.p[j].oz[k]) < trunc((this.clrad[this.cn] * this.multiplier[this.im])))) {
             let dale3 = this.m.random();
             let dmgby = 20.0;
-            if ((((this.cn === 11) || (this.cn === 13)) || (this.cn === 18)) || (this.cn === 36)) {
+            if ((((id(this.cn) === 11) || (id(this.cn) === 13)) || (id(this.cn) === 18)) || (id(this.cn) === 36)) {
               dmgby = 50.0;
             }
-            if (this.cn === 2) {
+            if (id(this.cn) === 2) {
               dmgby = 10.0;
             }
-            if ((this.cn === 19) || (this.cn === 22)) {
+            if ((id(this.cn) === 19) || (id(this.cn) === 22)) {
               dmgby = 80.0;
             }
-            if (this.cn === 20) {
+            if (id(this.cn) === 20) {
               dmgby = 40.0;
             }
             if (dmgpc >= healthpc) {
@@ -850,7 +851,7 @@ export class Madness {
               if (f < -300.0) {
                 f = -300.0;
               }
-              if (this.specialact && ((((this.cn === 15) || (this.cn === 25)) || (this.cn === 38)))) {
+              if (this.specialact && ((((id(this.cn) === 15) || (id(this.cn) === 25)) || (id(this.cn) === 38)))) {
                 f = 0.0;
               }
               let f2 = fr(this.scx[k] * this.push[this.cn]);
@@ -867,7 +868,7 @@ export class Madness {
                 madness.colidim = true;
               }
               let f3 = 1.0;
-              if (this.xt.classicmode && (madness.cn === 36)) {
+              if (this.xt.classicmode && (id(madness.cn) === 36)) {
                 f3 = 1.2699999809265137;
               }
               madness.regx(l, fr((fr((fr((fr((fr((fr((fr((fr((fr((fr((fr(f2 * this.moment[this.cn])) * f3)) * blmult)) * bravery)) * reversestr)) * fearless)) * protection)) * reversedef)) * lowpowdef)) * killstr)) * killdef), conto1, this.im);
@@ -904,7 +905,7 @@ export class Madness {
               if (f4 < -300.0) {
                 f4 = -300.0;
               }
-              if (this.specialact && ((((this.cn === 15) || (this.cn === 25)) || (this.cn === 38)))) {
+              if (this.specialact && ((((id(this.cn) === 15) || (id(this.cn) === 25)) || (id(this.cn) === 38)))) {
                 f4 = 0.0;
               }
               let f5 = fr(this.scz[k] * this.push[this.cn]);
@@ -915,7 +916,7 @@ export class Madness {
                 f5 = -300.0;
               }
               let f6 = 1.0;
-              if (this.xt.classicmode && (madness.cn === 36)) {
+              if (this.xt.classicmode && (id(madness.cn) === 36)) {
                 f6 = 1.2699999809265137;
               }
               let scz = madness.scz;
@@ -1189,16 +1190,16 @@ export class Madness {
           if ((conto.p[j].wz === 0) && (this.py(conto.keyx[i], conto.p[j].ox[k], conto.keyz[i], conto.p[j].oz[k]) < trunc((this.clrad[this.cn] * this.multiplier[this.im])))) {
             let dale3 = this.m.random();
             let dmgby = 20.0;
-            if ((((this.cn === 11) || (this.cn === 13)) || (this.cn === 18)) || (this.cn === 36)) {
+            if ((((id(this.cn) === 11) || (id(this.cn) === 13)) || (id(this.cn) === 18)) || (id(this.cn) === 36)) {
               dmgby = 50.0;
             }
-            if ((this.cn === 19) || (this.cn === 22)) {
+            if ((id(this.cn) === 19) || (id(this.cn) === 22)) {
               dmgby = 80.0;
             }
-            if (this.cn === 2) {
+            if (id(this.cn) === 2) {
               dmgby = 10.0;
             }
-            if (this.cn === 20) {
+            if (id(this.cn) === 20) {
               dmgby = 40.0;
             }
             if (dmgpc >= healthpc) {
@@ -1329,7 +1330,7 @@ export class Madness {
     this.xt.specialflag[this.im] = flag4;
     this.xz = i32(conto.xz + (Math.imul(this.xzadjust, 360)));
     let bouncemod = 1.0;
-    if ((this.xt.careermode && (checkpoints.stage === 24)) && (this.cn !== 19)) {
+    if ((this.xt.careermode && (checkpoints.stage === 24)) && (id(this.cn) !== 19)) {
       let gripmod = fr(((fr(this.grip[this.cn] - 28.5))) / 100.0);
       if (gripmod < 0.550000011920929) {
         gripmod = 0.550000011920929;
@@ -1417,19 +1418,19 @@ export class Madness {
       }
       let cheatboost = 0;
       if (this.im === 0) {
-        if (this.cn === 31) {
+        if (id(this.cn) === 31) {
           cheatboost = 60;
         }
-        if (this.cn === 32) {
+        if (id(this.cn) === 32) {
           cheatboost = 10;
         }
-        if (this.cn === 33) {
+        if (id(this.cn) === 33) {
           cheatboost = 12;
         }
-        if (this.cn === 36) {
+        if (id(this.cn) === 36) {
           cheatboost = 20;
         }
-        if ((((this.cn === 34) || (this.cn === 35)) || (this.cn === 37)) || (this.cn === 38)) {
+        if ((((id(this.cn) === 34) || (id(this.cn) === 35)) || (id(this.cn) === 37)) || (id(this.cn) === 38)) {
           cheatboost = 17;
         }
       }
@@ -1442,7 +1443,7 @@ export class Madness {
     }
     let waterdrag = 1.0;
     let aircres = 1.0;
-    if ((this.xt.careermode && (checkpoints.stage === 24)) && (this.cn !== 19)) {
+    if ((this.xt.careermode && (checkpoints.stage === 24)) && (id(this.cn) !== 19)) {
       let gripmod2 = fr(((fr(this.grip[this.cn] - 28.5))) / 100.0);
       if (gripmod2 < 0.550000011920929) {
         gripmod2 = 0.550000011920929;
@@ -1566,16 +1567,16 @@ export class Madness {
           let accelboost = 0;
           if (this.xt.careermode) {
             let cheatboost2 = 0;
-            if (this.cn === 32) {
+            if (id(this.cn) === 32) {
               cheatboost2 = 15;
             }
-            if (this.cn === 33) {
+            if (id(this.cn) === 33) {
               cheatboost2 = 12;
             }
-            if ((this.cn === 31) || (this.cn === 36)) {
+            if ((id(this.cn) === 31) || (id(this.cn) === 36)) {
               cheatboost2 = 10;
             }
-            if ((((this.cn === 34) || (this.cn === 35)) || (this.cn === 37)) || (this.cn === 38)) {
+            if ((((id(this.cn) === 34) || (id(this.cn) === 35)) || (id(this.cn) === 37)) || (id(this.cn) === 38)) {
               cheatboost2 = 17;
             }
             accelboost = i32((i32(this.aiaccsp[this.cn] - ((i32(this.level[this.cn] - 1))))) - cheatboost2);
@@ -1586,7 +1587,7 @@ export class Madness {
           f5 = fr(f5 * ((0.76 + ((accelboost * 0.24) / 75.0))));
         }
         let accelmod = 1.0;
-        if ((this.xt.careermode && (checkpoints.stage === 24)) && (this.cn !== 19)) {
+        if ((this.xt.careermode && (checkpoints.stage === 24)) && (id(this.cn) !== 19)) {
           let gripmod3 = fr(((fr(this.grip[this.cn] - 28.5))) / 100.0);
           if (gripmod3 < 0.550000011920929) {
             gripmod3 = 0.550000011920929;
@@ -1616,16 +1617,16 @@ export class Madness {
               }
               let cheatboost3 = 0;
               if (this.im === 0) {
-                if (this.cn === 32) {
+                if (id(this.cn) === 32) {
                   cheatboost3 = 15;
                 }
-                if (this.cn === 33) {
+                if (id(this.cn) === 33) {
                   cheatboost3 = 12;
                 }
-                if ((this.cn === 31) || (this.cn === 36)) {
+                if ((id(this.cn) === 31) || (id(this.cn) === 36)) {
                   cheatboost3 = 10;
                 }
-                if ((((this.cn === 34) || (this.cn === 35)) || (this.cn === 37)) || (this.cn === 38)) {
+                if ((((id(this.cn) === 34) || (id(this.cn) === 35)) || (id(this.cn) === 37)) || (id(this.cn) === 38)) {
                   cheatboost3 = 17;
                 }
               }
@@ -1780,7 +1781,7 @@ export class Madness {
       conto.wzy = i32(conto.wzy - 45);
     }
     let turnmod = 1.0;
-    if ((this.xt.careermode && (checkpoints.stage === 24)) && (this.cn !== 19)) {
+    if ((this.xt.careermode && (checkpoints.stage === 24)) && (id(this.cn) !== 19)) {
       let gripmod3 = fr(((fr(this.grip[this.cn] - 28.5))) / 100.0);
       if (gripmod3 < 0.550000011920929) {
         gripmod3 = 0.550000011920929;
@@ -1968,7 +1969,7 @@ export class Madness {
         f7 = fr(f7 * 0.55);
       }
       if (this.xt.careermode) {
-        if ((((checkpoints.stage === 16) && (this.cn !== 3)) && (this.cn !== 15)) && (this.cn !== 38)) {
+        if ((((checkpoints.stage === 16) && (id(this.cn) !== 3)) && (id(this.cn) !== 15)) && (id(this.cn) !== 38)) {
           let gripmod4 = fr(((fr(this.grip[this.cn] - 31.0))) / 54.0);
           if (gripmod4 < 0.5) {
             gripmod4 = 0.5;
@@ -1990,7 +1991,7 @@ export class Madness {
             f7 = fr(f7 * (fr(0.25 + (fr(gripaffect4 * 0.20000000298023224)))));
           }
         }
-        if (((checkpoints.stage === 18) && (this.cn !== 16)) && !this.xt.bonusstage[3]) {
+        if (((checkpoints.stage === 18) && (id(this.cn) !== 16)) && !this.xt.bonusstage[3]) {
           let gripmod4 = fr(((fr(this.grip[this.cn] - 33.5))) / 59.0);
           if (gripmod4 < 0.5) {
             gripmod4 = 0.5;
@@ -2002,7 +2003,7 @@ export class Madness {
           this.speedmulti = fr(0.44999998807907104 + (fr(gripaffect4 * 0.44999998807907104)));
           this.powermulti = fr(2.5 - (fr(gripaffect4 * 1.2999999523162842)));
         }
-        if ((checkpoints.stage === 24) && (this.cn !== 19)) {
+        if ((checkpoints.stage === 24) && (id(this.cn) !== 19)) {
           let gripmod4 = fr(((fr(this.grip[this.cn] - 28.5))) / 100.0);
           if (gripmod4 < 0.550000011920929) {
             gripmod4 = 0.550000011920929;
@@ -2895,16 +2896,16 @@ export class Madness {
                 }
                 let cheatboost4 = 0;
                 if (this.im === 0) {
-                  if (this.cn === 32) {
+                  if (id(this.cn) === 32) {
                     cheatboost4 = 15;
                   }
-                  if (this.cn === 33) {
+                  if (id(this.cn) === 33) {
                     cheatboost4 = 12;
                   }
-                  if ((this.cn === 31) || (this.cn === 36)) {
+                  if ((id(this.cn) === 31) || (id(this.cn) === 36)) {
                     cheatboost4 = 10;
                   }
-                  if ((((this.cn === 34) || (this.cn === 35)) || (this.cn === 37)) || (this.cn === 38)) {
+                  if ((((id(this.cn) === 34) || (id(this.cn) === 35)) || (id(this.cn) === 37)) || (id(this.cn) === 38)) {
                     cheatboost4 = 17;
                   }
                 }
@@ -3055,19 +3056,19 @@ export class Madness {
     if (this.xt.careermode) {
       let cheatboost5 = 0;
       if (this.im === 0) {
-        if (this.cn === 31) {
+        if (id(this.cn) === 31) {
           cheatboost5 = 25;
         }
-        if (this.cn === 32) {
+        if (id(this.cn) === 32) {
           cheatboost5 = 10;
         }
-        if (this.cn === 33) {
+        if (id(this.cn) === 33) {
           cheatboost5 = 12;
         }
-        if (this.cn === 36) {
+        if (id(this.cn) === 36) {
           cheatboost5 = 20;
         }
-        if ((((this.cn === 34) || (this.cn === 35)) || (this.cn === 37)) || (this.cn === 38)) {
+        if ((((id(this.cn) === 34) || (id(this.cn) === 35)) || (id(this.cn) === 37)) || (id(this.cn) === 38)) {
           cheatboost5 = 17;
         }
       }
@@ -3255,7 +3256,7 @@ export class Madness {
           this.pzy = 0;
           this.teleport(conto, this.im);
           if ((this.slowstable >= 4) && (conto.telefade < 15)) {
-            if ((((!this.specialact || (this.cn === 13)) || (this.cn === 36))) && this.telechk) {
+            if ((((!this.specialact || (id(this.cn) === 13)) || (id(this.cn) === 36))) && this.telechk) {
               bots.botbreak[this.im] = false;
               this.telechk = false;
             }
@@ -3282,7 +3283,7 @@ export class Madness {
             if ((this.spatk === 120.0) && !this.specialact) {
               whichset = i32((Math.imul(((i32(3 - this.sendtofloor))), 2)) + 2);
             }
-            if ((this.cn === 13) || (this.cn === 36)) {
+            if ((id(this.cn) === 13) || (id(this.cn) === 36)) {
               whichset = i32((i32(3 - this.sendtofloor)) + 1);
             }
             bots.specialtimer[this.im] = bots.botoffset[whichset][this.im];
@@ -3522,7 +3523,7 @@ export class Madness {
     if (this.xt.careermode) {
       if (this.xt.bonusstage[1]) {
         let health = fr((fr(100.0 * fr(this.hitmag))) / fr(this.maxmag[this.cn]));
-        if ((this.beast[this.im] && (health < 85.0)) && (this.cn === 36)) {
+        if ((this.beast[this.im] && (health < 85.0)) && (id(this.cn) === 36)) {
           this.nofix = true;
         }
       }

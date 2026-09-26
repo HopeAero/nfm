@@ -3,6 +3,7 @@
 // fix the transpiler or the source and regenerate.
 
 import { floatArray, fr, i32, idiv, intArray, jround, objArray, trunc } from '../java.js';
+import { id } from './newcars.js';   // ext-ident (web/tools/ext-ident.mjs)
 import { Applet, BufferedReader, ByteArrayInputStream, Color, Cursor, DataInputStream, Date, File, FileInputStream, FileOutputStream, InputStreamReader, Integer, RenderingHints, StringBuilder, System, Thread, URL, ZipEntry, ZipInputStream, ZipOutputStream, charAt, jstr } from './jawt.js';
 import { Bots } from './Bots.js';
 // ext-patch newcar-import
@@ -2195,7 +2196,7 @@ export class GameSparker extends Applet {
         }
         for (let a6 = 1; a6 < xtgraphics.nplayers; a6 = i32(a6 + 1)) {
           if (((xtgraphics.careermode && (checkpoints.stage === 11)) && !xtgraphics.bonusstage[1]) && ((xtgraphics.hardstage || (xtgraphics.unlocked[1] === 11)))) {
-            if ((amadness[a6].cn === 12) && !bots.botbreak[a6]) {
+            if ((id(amadness[a6].cn) === 12) && !bots.botbreak[a6]) {
               for (let b = 1; b < xtgraphics.nplayers; b = i32(b + 1)) {
                 ghostmode[a6][b] = true;
               }
@@ -2307,7 +2308,7 @@ export class GameSparker extends Applet {
               if (amadness[0].moment[amadness[0].cn] > amadness[bot].moment[amadness[bot].cn]) {
                 worthdodging = true;
               }
-              if ((((((((distap2 < 6500) && ((i32(checkpoints.clear[bot] - checkpoints.clear[0])) >= 4)) && worthdodging)) || (amadness[bot].cn !== 16)) || amadness[bot].frozen) || contva.biglead[0]) || cantbot) {
+              if ((((((((distap2 < 6500) && ((i32(checkpoints.clear[bot] - checkpoints.clear[0])) >= 4)) && worthdodging)) || (id(amadness[bot].cn) !== 16)) || amadness[bot].frozen) || contva.biglead[0]) || cantbot) {
                 bots.botbreak[bot] = true;
               }
               amadness[bot].isabot = true;
@@ -2449,13 +2450,13 @@ export class GameSparker extends Applet {
             viewboost = -200;
           }
           let whichfol = thebot;
-          if (amadness[whichfol].cn === 18) {
+          if (id(amadness[whichfol].cn) === 18) {
             viewboost = 65;
           }
-          if (amadness[whichfol].cn === 20) {
+          if (id(amadness[whichfol].cn) === 20) {
             viewboost = 130;
           }
-          if (amadness[whichfol].cn === 22) {
+          if (id(amadness[whichfol].cn) === 22) {
             viewboost = 300;
           }
           if ((((xtgraphics.careermode && (checkpoints.stage === 6)) && xtgraphics.shownghost) && amadness[0].dest) && (xtgraphics.holdcnt > 85)) {

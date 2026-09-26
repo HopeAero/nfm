@@ -3,6 +3,7 @@
 // fix the transpiler or the source and regenerate.
 
 import { floatArray, fr, i32, idiv, intArray, jround, objArray, random, trunc } from '../java.js';
+import { id } from './newcars.js';   // ext-ident (web/tools/ext-ident.mjs)
 import { Arrays, BigDecimal, BufferedWriter, Color, Cursor, DataInputStream, File, FileWriter, Font, MediaTracker, MemoryImageSource, Panel, PixelGrabber, Polygon, RenderingHints, StringBuilder, System, Thread, Toolkit, URL, ZipInputStream, jstr } from './jawt.js';
 import { RadicalMidi } from './RadicalMidi.js';
 import { RadicalMod } from './RadicalMod.js';
@@ -4361,13 +4362,13 @@ export class xtGraphics extends Panel {
                   }
                 }
                 if (!this.dontdisplay) {
-                  if ((this.sc[newnumbers] !== 32) && (this.sc[newnumbers] !== 25)) {
+                  if ((id(this.sc[newnumbers]) !== 32) && (id(this.sc[newnumbers]) !== 25)) {
                     this.rd.drawString(this.names[this.sc[newnumbers]], i32(820 - (idiv(this.ftm.stringWidth(this.names[this.sc[newnumbers]]), 2))), i32(131 + (Math.imul(30, newnumber))));
                   } else {
-                    if (this.sc[newnumbers] === 32) {
+                    if (id(this.sc[newnumbers]) === 32) {
                       this.rd.drawString('SoJ', i32(820 - (idiv(this.ftm.stringWidth('SoJ'), 2))), i32(131 + (Math.imul(30, newnumber))));
                     }
-                    if (this.sc[newnumbers] === 25) {
+                    if (id(this.sc[newnumbers]) === 25) {
                       this.rd.drawString('Wow C.', i32(820 - (idiv(this.ftm.stringWidth('Wow C.'), 2))), i32(131 + (Math.imul(30, newnumber))));
                     }
                   }
@@ -5032,25 +5033,25 @@ export class xtGraphics extends Panel {
             }
             let doublechance = 1.0;
             let levelbarrier = Math.imul(((i32(this.sc[0] - 7))), 5);
-            if ((this.sc[0] <= 7) || (((this.sc[0] >= 23) && (this.sc[0] <= 30)))) {
+            if ((id(this.sc[0]) <= 7) || (((id(this.sc[0]) >= 23) && (id(this.sc[0]) <= 30)))) {
               levelbarrier = 0;
             }
-            if (this.sc[0] === 20) {
+            if (id(this.sc[0]) === 20) {
               levelbarrier = 55;
             }
-            if (this.sc[0] === 21) {
+            if (id(this.sc[0]) === 21) {
               levelbarrier = 60;
             }
-            if (this.sc[0] === 22) {
+            if (id(this.sc[0]) === 22) {
               levelbarrier = 70;
             }
-            if ((this.sc[0] >= 31) && (this.sc[0] <= 33)) {
+            if ((id(this.sc[0]) >= 31) && (id(this.sc[0]) <= 33)) {
               levelbarrier = 15;
             }
-            if ((this.sc[0] >= 34) && (this.sc[0] <= 36)) {
+            if ((id(this.sc[0]) >= 34) && (id(this.sc[0]) <= 36)) {
               levelbarrier = 30;
             }
-            if ((this.sc[0] === 37) || (this.sc[0] === 38)) {
+            if ((id(this.sc[0]) === 37) || (id(this.sc[0]) === 38)) {
               levelbarrier = 40;
             }
             if (madness[0].level[this.sc[0]] <= levelbarrier) {
@@ -5066,22 +5067,22 @@ export class xtGraphics extends Panel {
             }
             let plshelp = 1.0;
             if (madness[0].level[this.sc[0]] >= 10) {
-              if ((((this.sc[0] < 8) || (((this.sc[0] >= 23) && (this.sc[0] <= 30))))) && (this.extpoints[this.sc[0]] < trunc((madness[0].level[this.sc[0]] * 0.5)))) {
+              if ((((id(this.sc[0]) < 8) || (((id(this.sc[0]) >= 23) && (id(this.sc[0]) <= 30))))) && (this.extpoints[this.sc[0]] < trunc((madness[0].level[this.sc[0]] * 0.5)))) {
                 plshelp = 1.5;
               }
-              if (((((this.sc[0] === 8) || (this.sc[0] === 9)) || (this.sc[0] === 10))) && (this.extpoints[this.sc[0]] < madness[0].level[this.sc[0]])) {
+              if (((((id(this.sc[0]) === 8) || (id(this.sc[0]) === 9)) || (id(this.sc[0]) === 10))) && (this.extpoints[this.sc[0]] < madness[0].level[this.sc[0]])) {
                 plshelp = 1.5;
               }
-              if (((((this.sc[0] === 11) || (this.sc[0] === 12)) || (((this.sc[0] >= 31) && (this.sc[0] <= 35))))) && (this.extpoints[this.sc[0]] < trunc((madness[0].level[this.sc[0]] * 1.5)))) {
+              if (((((id(this.sc[0]) === 11) || (id(this.sc[0]) === 12)) || (((id(this.sc[0]) >= 31) && (id(this.sc[0]) <= 35))))) && (this.extpoints[this.sc[0]] < trunc((madness[0].level[this.sc[0]] * 1.5)))) {
                 plshelp = 1.5;
               }
-              if ((((((this.sc[0] >= 13) && (this.sc[0] <= 17))) || (((this.sc[0] >= 36) && (this.sc[0] <= 38))))) && (this.extpoints[this.sc[0]] < (Math.imul(madness[0].level[this.sc[0]], 2)))) {
+              if ((((((id(this.sc[0]) >= 13) && (id(this.sc[0]) <= 17))) || (((id(this.sc[0]) >= 36) && (id(this.sc[0]) <= 38))))) && (this.extpoints[this.sc[0]] < (Math.imul(madness[0].level[this.sc[0]], 2)))) {
                 plshelp = 1.5;
               }
-              if (((((this.sc[0] === 18) || (this.sc[0] === 20)) || (this.sc[0] === 21))) && (this.extpoints[this.sc[0]] < trunc((madness[0].level[this.sc[0]] * 2.5)))) {
+              if (((((id(this.sc[0]) === 18) || (id(this.sc[0]) === 20)) || (id(this.sc[0]) === 21))) && (this.extpoints[this.sc[0]] < trunc((madness[0].level[this.sc[0]] * 2.5)))) {
                 plshelp = 1.5;
               }
-              if ((((this.sc[0] === 19) || (this.sc[0] === 22))) && (this.extpoints[this.sc[0]] < (Math.imul(madness[0].level[this.sc[0]], 3)))) {
+              if ((((id(this.sc[0]) === 19) || (id(this.sc[0]) === 22))) && (this.extpoints[this.sc[0]] < (Math.imul(madness[0].level[this.sc[0]], 3)))) {
                 plshelp = 1.5;
               }
             }
@@ -5327,25 +5328,25 @@ export class xtGraphics extends Panel {
                 this.killchance[0] = 1000000;
               }
               let levelbarrier2 = Math.imul(((i32(this.sc[0] - 7))), 5);
-              if ((this.sc[0] <= 7) || (((this.sc[0] >= 23) && (this.sc[0] <= 30)))) {
+              if ((id(this.sc[0]) <= 7) || (((id(this.sc[0]) >= 23) && (id(this.sc[0]) <= 30)))) {
                 levelbarrier2 = 0;
               }
-              if (this.sc[0] === 20) {
+              if (id(this.sc[0]) === 20) {
                 levelbarrier2 = 55;
               }
-              if (this.sc[0] === 21) {
+              if (id(this.sc[0]) === 21) {
                 levelbarrier2 = 60;
               }
-              if (this.sc[0] === 22) {
+              if (id(this.sc[0]) === 22) {
                 levelbarrier2 = 70;
               }
-              if ((this.sc[0] >= 31) && (this.sc[0] <= 33)) {
+              if ((id(this.sc[0]) >= 31) && (id(this.sc[0]) <= 33)) {
                 levelbarrier2 = 15;
               }
-              if ((this.sc[0] >= 34) && (this.sc[0] <= 36)) {
+              if ((id(this.sc[0]) >= 34) && (id(this.sc[0]) <= 36)) {
                 levelbarrier2 = 30;
               }
-              if ((this.sc[0] === 37) || (this.sc[0] === 38)) {
+              if ((id(this.sc[0]) === 37) || (id(this.sc[0]) === 38)) {
                 levelbarrier2 = 40;
               }
               let doublechance2 = 1.0;
@@ -5354,22 +5355,22 @@ export class xtGraphics extends Panel {
               }
               let plshelp2 = 1.0;
               if (madness[0].level[this.sc[0]] >= 10) {
-                if ((((this.sc[0] < 8) || (((this.sc[0] >= 23) && (this.sc[0] <= 30))))) && (this.extpoints[this.sc[0]] < trunc((madness[0].level[this.sc[0]] * 0.5)))) {
+                if ((((id(this.sc[0]) < 8) || (((id(this.sc[0]) >= 23) && (id(this.sc[0]) <= 30))))) && (this.extpoints[this.sc[0]] < trunc((madness[0].level[this.sc[0]] * 0.5)))) {
                   plshelp2 = 1.5;
                 }
-                if (((((this.sc[0] === 8) || (this.sc[0] === 9)) || (this.sc[0] === 10))) && (this.extpoints[this.sc[0]] < madness[0].level[this.sc[0]])) {
+                if (((((id(this.sc[0]) === 8) || (id(this.sc[0]) === 9)) || (id(this.sc[0]) === 10))) && (this.extpoints[this.sc[0]] < madness[0].level[this.sc[0]])) {
                   plshelp2 = 1.5;
                 }
-                if (((((this.sc[0] === 11) || (this.sc[0] === 12)) || (((this.sc[0] >= 31) && (this.sc[0] <= 35))))) && (this.extpoints[this.sc[0]] < trunc((madness[0].level[this.sc[0]] * 1.5)))) {
+                if (((((id(this.sc[0]) === 11) || (id(this.sc[0]) === 12)) || (((id(this.sc[0]) >= 31) && (id(this.sc[0]) <= 35))))) && (this.extpoints[this.sc[0]] < trunc((madness[0].level[this.sc[0]] * 1.5)))) {
                   plshelp2 = 1.5;
                 }
-                if ((((((this.sc[0] >= 13) && (this.sc[0] <= 17))) || (((this.sc[0] >= 36) && (this.sc[0] <= 38))))) && (this.extpoints[this.sc[0]] < (Math.imul(madness[0].level[this.sc[0]], 2)))) {
+                if ((((((id(this.sc[0]) >= 13) && (id(this.sc[0]) <= 17))) || (((id(this.sc[0]) >= 36) && (id(this.sc[0]) <= 38))))) && (this.extpoints[this.sc[0]] < (Math.imul(madness[0].level[this.sc[0]], 2)))) {
                   plshelp2 = 1.5;
                 }
-                if (((((this.sc[0] === 18) || (this.sc[0] === 20)) || (this.sc[0] === 21))) && (this.extpoints[this.sc[0]] < trunc((madness[0].level[this.sc[0]] * 2.5)))) {
+                if (((((id(this.sc[0]) === 18) || (id(this.sc[0]) === 20)) || (id(this.sc[0]) === 21))) && (this.extpoints[this.sc[0]] < trunc((madness[0].level[this.sc[0]] * 2.5)))) {
                   plshelp2 = 1.5;
                 }
-                if ((((this.sc[0] === 19) || (this.sc[0] === 22))) && (this.extpoints[this.sc[0]] < (Math.imul(madness[0].level[this.sc[0]], 3)))) {
+                if ((((id(this.sc[0]) === 19) || (id(this.sc[0]) === 22))) && (this.extpoints[this.sc[0]] < (Math.imul(madness[0].level[this.sc[0]], 3)))) {
                   plshelp2 = 1.5;
                 }
               }
@@ -6319,7 +6320,7 @@ export class xtGraphics extends Panel {
   healthcalc(initialhealth, statpoints, carid, modifier) {
     let increment = 500;
     if (trunc((initialhealth / 20.0)) >= 500) {
-      if ((((((((trunc((initialhealth / 20.0)) <= 1250) || (carid === 11)) || (carid === 13)) || (carid === 36)) || (carid === 18)) || (carid === 19)) || (carid === 20)) || (carid === 22)) {
+      if ((((((((trunc((initialhealth / 20.0)) <= 1250) || (id(carid) === 11)) || (id(carid) === 13)) || (id(carid) === 36)) || (id(carid) === 18)) || (id(carid) === 19)) || (id(carid) === 20)) || (id(carid) === 22)) {
         increment = idiv(initialhealth, 20);
       } else {
         increment = 1250;
@@ -6668,15 +6669,15 @@ export class xtGraphics extends Panel {
     do {
       let specception = false;
       if (this.careermode) {
-        if (((((this.unlocked[1] === 9) || this.hardstage)) && (checkpoints.stage === 9)) && (this.sc[ai] === 0)) {
+        if (((((this.unlocked[1] === 9) || this.hardstage)) && (checkpoints.stage === 9)) && (id(this.sc[ai]) === 0)) {
           specception = true;
         }
         if (checkpoints.stage === 13) {
           if ((this.unlocked[1] === 13) || this.hardstage) {
-            if (!madness[ai].teleported && (((((this.sc[ai] === 14) || (this.sc[ai] === 10)) || ((((this.sc[ai] === 11) && !conto[ai].floorguardian) && !this.beastopponent[ai]))) || this.makebot))) {
+            if (!madness[ai].teleported && (((((id(this.sc[ai]) === 14) || (id(this.sc[ai]) === 10)) || ((((id(this.sc[ai]) === 11) && !conto[ai].floorguardian) && !this.beastopponent[ai]))) || this.makebot))) {
               specception = true;
             }
-          } else if (((!madness[ai].teleported && !this.scalelevels) && !this.nolevels) && (((this.sc[ai] === 14) || this.makebot))) {
+          } else if (((!madness[ai].teleported && !this.scalelevels) && !this.nolevels) && (((id(this.sc[ai]) === 14) || this.makebot))) {
             specception = true;
           }
         }
@@ -6726,15 +6727,15 @@ export class xtGraphics extends Panel {
     }
     for (let a2 = 0; a2 < this.nplayers; a2 = i32(a2 + 1)) {
       if (this.fixspecials[a2] && !madness[a2].dest) {
-        if (((((((((((this.sc[a2] === 1) || (this.sc[a2] === 24)) || (this.sc[a2] === 2)) || (this.sc[a2] === 25)) || (this.sc[a2] === 9)) || (this.sc[a2] === 32)) || (this.sc[a2] === 12)) || (this.sc[a2] === 35)) || (this.sc[a2] === 16)) || (this.sc[a2] === 17)) || (this.sc[a2] === 22)) {
+        if (((((((((((id(this.sc[a2]) === 1) || (id(this.sc[a2]) === 24)) || (id(this.sc[a2]) === 2)) || (id(this.sc[a2]) === 25)) || (id(this.sc[a2]) === 9)) || (id(this.sc[a2]) === 32)) || (id(this.sc[a2]) === 12)) || (id(this.sc[a2]) === 35)) || (id(this.sc[a2]) === 16)) || (id(this.sc[a2]) === 17)) || (id(this.sc[a2]) === 22)) {
           madness[a2].power = 98.0;
         }
-        if (((((((((((((((((((((this.sc[a2] === 0) || (this.sc[a2] === 23)) || (this.sc[a2] === 7)) || (this.sc[a2] === 30)) || (this.sc[a2] === 2)) || (this.sc[a2] === 25)) || (this.sc[a2] === 20)) || (this.sc[a2] === 10)) || (this.sc[a2] === 33)) || (this.sc[a2] === 13)) || (this.sc[a2] === 14)) || (this.sc[a2] === 37)) || (this.sc[a2] === 36)) || (this.sc[a2] === 15)) || (this.sc[a2] === 17)) || (this.sc[a2] === 18)) || (this.sc[a2] === 19)) || (this.sc[a2] === 22)) || (this.sc[a2] === 38))) && !this.fixhealth[a2][0]) {
+        if (((((((((((((((((((((id(this.sc[a2]) === 0) || (id(this.sc[a2]) === 23)) || (id(this.sc[a2]) === 7)) || (id(this.sc[a2]) === 30)) || (id(this.sc[a2]) === 2)) || (id(this.sc[a2]) === 25)) || (id(this.sc[a2]) === 20)) || (id(this.sc[a2]) === 10)) || (id(this.sc[a2]) === 33)) || (id(this.sc[a2]) === 13)) || (id(this.sc[a2]) === 14)) || (id(this.sc[a2]) === 37)) || (id(this.sc[a2]) === 36)) || (id(this.sc[a2]) === 15)) || (id(this.sc[a2]) === 17)) || (id(this.sc[a2]) === 18)) || (id(this.sc[a2]) === 19)) || (id(this.sc[a2]) === 22)) || (id(this.sc[a2]) === 38))) && !this.fixhealth[a2][0]) {
           this.updatehealth[a2] = true;
           this.proportion[a2] = fr(fr(madness[a2].hitmag) / fr(madness[a2].maxmag[this.sc[a2]]));
           this.fixhealth[a2][0] = true;
         }
-        if (((((((this.sc[a2] === 0) || (this.sc[a2] === 23)) || (this.sc[a2] === 9)) || (this.sc[a2] === 32)) || (this.sc[a2] === 14)) || (this.sc[a2] === 37)) || (this.sc[a2] === 19)) {
+        if (((((((id(this.sc[a2]) === 0) || (id(this.sc[a2]) === 23)) || (id(this.sc[a2]) === 9)) || (id(this.sc[a2]) === 32)) || (id(this.sc[a2]) === 14)) || (id(this.sc[a2]) === 37)) || (id(this.sc[a2]) === 19)) {
           if (!nodebuff) {
             this.randomise(madness, a2, checkpoints.stage);
             if (this.affected[a2] && !madness[this.randomcar[a2]].frozen) {
@@ -6759,7 +6760,7 @@ export class xtGraphics extends Panel {
           }
           this.finalfix[0][a2] = true;
         }
-        if ((this.sc[a2] === 1) || (this.sc[a2] === 24)) {
+        if ((id(this.sc[a2]) === 1) || (id(this.sc[a2]) === 24)) {
           if (!nodebuff) {
             this.randomise(madness, a2, checkpoints.stage);
             if (this.affected[a2]) {
@@ -6772,7 +6773,7 @@ export class xtGraphics extends Panel {
           }
           this.finalfix[1][a2] = true;
         }
-        if (((((((this.sc[a2] === 2) || (this.sc[a2] === 25)) || (this.sc[a2] === 6)) || (this.sc[a2] === 29)) || (this.sc[a2] === 11)) || (this.sc[a2] === 34)) || (this.sc[a2] === 16)) {
+        if (((((((id(this.sc[a2]) === 2) || (id(this.sc[a2]) === 25)) || (id(this.sc[a2]) === 6)) || (id(this.sc[a2]) === 29)) || (id(this.sc[a2]) === 11)) || (id(this.sc[a2]) === 34)) || (id(this.sc[a2]) === 16)) {
           if (!nodebuff) {
             this.randomise(madness, a2, checkpoints.stage);
             if (this.affected[a2]) {
@@ -6802,9 +6803,9 @@ export class xtGraphics extends Panel {
           }
           this.finalfix[3][a2] = true;
         }
-        if ((((((((((((this.sc[a2] === 3) || (this.sc[a2] === 26)) || (this.sc[a2] === 4)) || (this.sc[a2] === 27)) || (this.sc[a2] === 10)) || (this.sc[a2] === 33)) || (this.sc[a2] === 12)) || (this.sc[a2] === 35)) || (this.sc[a2] === 13)) || (this.sc[a2] === 36)) || (this.sc[a2] === 18)) || (this.sc[a2] === 20)) {
+        if ((((((((((((id(this.sc[a2]) === 3) || (id(this.sc[a2]) === 26)) || (id(this.sc[a2]) === 4)) || (id(this.sc[a2]) === 27)) || (id(this.sc[a2]) === 10)) || (id(this.sc[a2]) === 33)) || (id(this.sc[a2]) === 12)) || (id(this.sc[a2]) === 35)) || (id(this.sc[a2]) === 13)) || (id(this.sc[a2]) === 36)) || (id(this.sc[a2]) === 18)) || (id(this.sc[a2]) === 20)) {
           if (!nodebuff) {
-            if ((((this.sc[a2] === 3) || (this.sc[a2] === 26)) || (this.sc[a2] === 12)) || (this.sc[a2] === 35)) {
+            if ((((id(this.sc[a2]) === 3) || (id(this.sc[a2]) === 26)) || (id(this.sc[a2]) === 12)) || (id(this.sc[a2]) === 35)) {
               for (let d2 = 0; d2 < this.nplayers; d2 = i32(d2 + 1)) {
                 if (a2 !== d2) {
                   if (checkpoints.pos[a2] !== 0) {
@@ -7079,28 +7080,28 @@ export class xtGraphics extends Panel {
             }
           }
         }
-        if (((((this.sc[a3] === 3) || (this.sc[a3] === 8)) || (this.sc[a3] === 10)) || (this.sc[a3] === 15)) || (this.sc[a3] === 11)) {
+        if (((((id(this.sc[a3]) === 3) || (id(this.sc[a3]) === 8)) || (id(this.sc[a3]) === 10)) || (id(this.sc[a3]) === 15)) || (id(this.sc[a3]) === 11)) {
           spdspboost = 0.3 * specialboost;
         }
-        if (this.sc[a3] === 26) {
+        if (id(this.sc[a3]) === 26) {
           spdspboost = 0.35 * specialboost;
         }
-        if (this.sc[a3] === 12) {
+        if (id(this.sc[a3]) === 12) {
           spdspboost = 0.25 * specialboost;
         }
-        if (((((((((this.sc[a3] === 16) || (this.sc[a3] === 17)) || (this.sc[a3] === 14)) || (this.sc[a3] === 37)) || (this.sc[a3] === 22)) || (this.sc[a3] === 6)) || (this.sc[a3] === 29)) || (this.sc[a3] === 1)) || (this.sc[a3] === 24)) {
+        if (((((((((id(this.sc[a3]) === 16) || (id(this.sc[a3]) === 17)) || (id(this.sc[a3]) === 14)) || (id(this.sc[a3]) === 37)) || (id(this.sc[a3]) === 22)) || (id(this.sc[a3]) === 6)) || (id(this.sc[a3]) === 29)) || (id(this.sc[a3]) === 1)) || (id(this.sc[a3]) === 24)) {
           spdspboost = 0.15 * specialboost;
         }
-        if (((this.sc[a3] === 9) || (this.sc[a3] === 32)) || (this.sc[a3] === 19)) {
+        if (((id(this.sc[a3]) === 9) || (id(this.sc[a3]) === 32)) || (id(this.sc[a3]) === 19)) {
           spdspboost = 0.1 * specialboost;
         }
-        if (this.sc[a3] === 20) {
+        if (id(this.sc[a3]) === 20) {
           spdspboost = -0.1 * specialboost;
         }
-        if ((((((this.sc[a3] === 18) || (this.sc[a3] === 31)) || (this.sc[a3] === 33)) || (this.sc[a3] === 35)) || (this.sc[a3] === 34)) || (this.sc[a3] === 38)) {
+        if ((((((id(this.sc[a3]) === 18) || (id(this.sc[a3]) === 31)) || (id(this.sc[a3]) === 33)) || (id(this.sc[a3]) === 35)) || (id(this.sc[a3]) === 34)) || (id(this.sc[a3]) === 38)) {
           spdspboost = 0.2 * specialboost;
         }
-        if ((this.sc[a3] === 5) || (this.sc[a3] === 28)) {
+        if ((id(this.sc[a3]) === 5) || (id(this.sc[a3]) === 28)) {
           if ((Math.imul(madness[a3].hitmag, 2)) < madness[a3].maxmag[this.sc[a3]]) {
             spdspboost = 0.25 * specialboost;
           } else {
@@ -7108,13 +7109,13 @@ export class xtGraphics extends Panel {
           }
         }
         let maxaccel2 = accel[a3][0];
-        if (this.sc[a3] === 15) {
+        if (id(this.sc[a3]) === 15) {
           maxaccel2 = fr(accel[a3][0] * ((fr(1.0 + (fr(0.30000001192092896 * fr(specialboost)))))));
         }
-        if (this.sc[a3] === 38) {
+        if (id(this.sc[a3]) === 38) {
           maxaccel2 = fr(accel[a3][0] * ((fr(1.0 + (fr(0.20000000298023224 * fr(specialboost)))))));
         }
-        if (this.sc[a3] === 22) {
+        if (id(this.sc[a3]) === 22) {
           maxaccel2 = fr(accel[a3][0] * ((fr(1.0 + (fr(1.0 * fr(specialboost)))))));
         }
         madness[a3].acelf[this.sc[a3]][0] = maxaccel2;
@@ -7123,107 +7124,107 @@ export class xtGraphics extends Panel {
         madness[a3].grip[this.sc[a3]] = contgrip[a3];
         madness[a3].airs[this.sc[a3]] = statairs[a3];
         madness[a3].airc[this.sc[a3]] = statairc[a3];
-        if (this.sc[a3] === 8) {
+        if (id(this.sc[a3]) === 8) {
           let contstat = fr((fr(((fr(contgrip[a3] - 10.0))) * 5.0)) * ((fr(1.0 + (fr(1.0 * fr(specialboost)))))));
           let backtogrip = fr((fr(contstat * 0.20000000298023224)) + 10.0);
           madness[a3].grip[this.sc[a3]] = backtogrip;
         }
-        if (this.sc[a3] === 31) {
+        if (id(this.sc[a3]) === 31) {
           let contstat = fr((fr(((fr(contgrip[a3] - 10.0))) * 5.0)) * ((fr(1.0 + (fr(0.75 * fr(specialboost)))))));
           let backtogrip = fr((fr(contstat * 0.20000000298023224)) + 10.0);
           madness[a3].grip[this.sc[a3]] = backtogrip;
         }
-        if (this.sc[a3] === 16) {
+        if (id(this.sc[a3]) === 16) {
           let contstat = fr((fr(((fr(contgrip[a3] - 10.0))) * 5.0)) * ((fr(1.0 + (fr(0.5 * fr(specialboost)))))));
           let backtogrip = fr((fr(contstat * 0.20000000298023224)) + 10.0);
           madness[a3].grip[this.sc[a3]] = backtogrip;
         }
-        if (this.sc[a3] === 15) {
+        if (id(this.sc[a3]) === 15) {
           let contstat = fr((fr(((fr(contgrip[a3] - 10.0))) * 5.0)) * ((fr(1.0 + (fr(0.30000001192092896 * fr(specialboost)))))));
           let backtogrip = fr((fr(contstat * 0.20000000298023224)) + 10.0);
           madness[a3].grip[this.sc[a3]] = backtogrip;
         }
-        if (this.sc[a3] === 38) {
+        if (id(this.sc[a3]) === 38) {
           let contstat = fr((fr(((fr(contgrip[a3] - 10.0))) * 5.0)) * ((fr(1.0 + (fr(0.20000000298023224 * fr(specialboost)))))));
           let backtogrip = fr((fr(contstat * 0.20000000298023224)) + 10.0);
           madness[a3].grip[this.sc[a3]] = backtogrip;
         }
-        if ((((this.sc[a3] === 17) || (this.sc[a3] === 7)) || (this.sc[a3] === 30)) || (this.sc[a3] === 37)) {
+        if ((((id(this.sc[a3]) === 17) || (id(this.sc[a3]) === 7)) || (id(this.sc[a3]) === 30)) || (id(this.sc[a3]) === 37)) {
           this.healthmulti[a3] = fr(1.0 + (fr(0.5 * fr(specialboost))));
         }
-        if ((((((((this.sc[a3] === 0) || (this.sc[a3] === 23)) || (this.sc[a3] === 36)) || (this.sc[a3] === 22)) || (this.sc[a3] === 33)) || (this.sc[a3] === 2)) || (this.sc[a3] === 25)) || (this.sc[a3] === 19)) {
+        if ((((((((id(this.sc[a3]) === 0) || (id(this.sc[a3]) === 23)) || (id(this.sc[a3]) === 36)) || (id(this.sc[a3]) === 22)) || (id(this.sc[a3]) === 33)) || (id(this.sc[a3]) === 2)) || (id(this.sc[a3]) === 25)) || (id(this.sc[a3]) === 19)) {
           this.healthmulti[a3] = fr(1.0 + (fr(0.30000001192092896 * fr(specialboost))));
         }
-        if (((this.sc[a3] === 10) || (this.sc[a3] === 13)) || (this.sc[a3] === 20)) {
+        if (((id(this.sc[a3]) === 10) || (id(this.sc[a3]) === 13)) || (id(this.sc[a3]) === 20)) {
           this.healthmulti[a3] = fr(1.0 + (fr(0.4000000059604645 * fr(specialboost))));
         }
-        if (this.sc[a3] === 14) {
+        if (id(this.sc[a3]) === 14) {
           this.healthmulti[a3] = fr(1.0 + (fr(0.699999988079071 * fr(specialboost))));
         }
-        if (this.sc[a3] === 18) {
+        if (id(this.sc[a3]) === 18) {
           this.healthmulti[a3] = fr(1.0 + (fr(0.25 * fr(specialboost))));
         }
-        if (this.sc[a3] === 3) {
+        if (id(this.sc[a3]) === 3) {
           madness[a3].airs[this.sc[a3]] = fr(statairs[a3] * ((fr(1.0 + (fr(0.75 * fr(specialboost)))))));
           madness[a3].airc[this.sc[a3]] = trunc((statairc[a3] * ((1.0 + (0.75 * specialboost)))));
         }
-        if (this.sc[a3] === 26) {
+        if (id(this.sc[a3]) === 26) {
           madness[a3].airs[this.sc[a3]] = fr(statairs[a3] * ((fr(1.0 + (fr(0.6000000238418579 * fr(specialboost)))))));
           madness[a3].airc[this.sc[a3]] = trunc((statairc[a3] * ((1.0 + (0.6 * specialboost)))));
         }
-        if (this.sc[a3] === 14) {
+        if (id(this.sc[a3]) === 14) {
           madness[a3].airs[this.sc[a3]] = fr(statairs[a3] * ((fr(1.0 + (fr(1.0 * fr(specialboost)))))));
           madness[a3].airc[this.sc[a3]] = trunc((statairc[a3] * ((1.0 + (1.0 * specialboost)))));
         }
-        if (this.sc[a3] === 15) {
+        if (id(this.sc[a3]) === 15) {
           madness[a3].airs[this.sc[a3]] = fr(statairs[a3] * ((fr(1.0 + (fr(0.30000001192092896 * fr(specialboost)))))));
           madness[a3].airc[this.sc[a3]] = trunc((statairc[a3] * ((1.0 + (0.3 * specialboost)))));
           this.healthmulti[a3] = fr(1.0 + (fr(0.30000001192092896 * fr(specialboost))));
         }
-        if (this.sc[a3] === 38) {
+        if (id(this.sc[a3]) === 38) {
           madness[a3].airs[this.sc[a3]] = fr(statairs[a3] * ((fr(1.0 + (fr(0.20000000298023224 * fr(specialboost)))))));
           madness[a3].airc[this.sc[a3]] = trunc((statairc[a3] * ((1.0 + (0.2 * specialboost)))));
           this.healthmulti[a3] = fr(1.0 + (fr(0.20000000298023224 * fr(specialboost))));
         }
         if (!madness[a3].strswap) {
-          if (((this.sc[a3] === 0) || (this.sc[a3] === 6)) || (this.sc[a3] === 29)) {
+          if (((id(this.sc[a3]) === 0) || (id(this.sc[a3]) === 6)) || (id(this.sc[a3]) === 29)) {
             strspboost = fr(0.5 * fr(specialboost));
           }
-          if (this.sc[a3] === 23) {
+          if (id(this.sc[a3]) === 23) {
             strspboost = fr(0.550000011920929 * fr(specialboost));
           }
-          if ((this.sc[a3] === 4) || (this.sc[a3] === 27)) {
+          if ((id(this.sc[a3]) === 4) || (id(this.sc[a3]) === 27)) {
             strspboost = fr(0.699999988079071 * fr(specialboost));
           }
-          if (((this.sc[a3] === 20) || (this.sc[a3] === 7)) || (this.sc[a3] === 30)) {
+          if (((id(this.sc[a3]) === 20) || (id(this.sc[a3]) === 7)) || (id(this.sc[a3]) === 30)) {
             strspboost = fr(0.6000000238418579 * fr(specialboost));
           }
-          if (this.sc[a3] === 22) {
+          if (id(this.sc[a3]) === 22) {
             strspboost = fr(0.15000000596046448 * fr(specialboost));
           }
-          if ((this.sc[a3] === 19) || (this.sc[a3] === 38)) {
+          if ((id(this.sc[a3]) === 19) || (id(this.sc[a3]) === 38)) {
             strspboost = fr(0.20000000298023224 * fr(specialboost));
           }
-          if ((((((this.sc[a3] === 14) || (this.sc[a3] === 32)) || (this.sc[a3] === 13)) || (this.sc[a3] === 11)) || (this.sc[a3] === 9)) || (this.sc[a3] === 31)) {
+          if ((((((id(this.sc[a3]) === 14) || (id(this.sc[a3]) === 32)) || (id(this.sc[a3]) === 13)) || (id(this.sc[a3]) === 11)) || (id(this.sc[a3]) === 9)) || (id(this.sc[a3]) === 31)) {
             strspboost = fr(0.4000000059604645 * fr(specialboost));
           }
-          if ((this.sc[a3] === 5) || (this.sc[a3] === 28)) {
+          if ((id(this.sc[a3]) === 5) || (id(this.sc[a3]) === 28)) {
             if ((Math.imul(madness[a3].hitmag, 2)) < madness[a3].maxmag[this.sc[a3]]) {
               strspboost = fr(0.30000001192092896 * fr(specialboost));
             } else {
               strspboost = fr(0.6000000238418579 * fr(specialboost));
             }
           }
-          if (((((this.sc[a3] === 33) || (this.sc[a3] === 15)) || (this.sc[a3] === 16)) || (this.sc[a3] === 34)) || (this.sc[a3] === 36)) {
+          if (((((id(this.sc[a3]) === 33) || (id(this.sc[a3]) === 15)) || (id(this.sc[a3]) === 16)) || (id(this.sc[a3]) === 34)) || (id(this.sc[a3]) === 36)) {
             strspboost = fr(0.30000001192092896 * fr(specialboost));
           }
-          if ((this.sc[a3] === 37) || (this.sc[a3] === 10)) {
+          if ((id(this.sc[a3]) === 37) || (id(this.sc[a3]) === 10)) {
             strspboost = fr(0.3499999940395355 * fr(specialboost));
           }
-          if (((this.sc[a3] === 2) || (this.sc[a3] === 25)) || (this.sc[a3] === 8)) {
+          if (((id(this.sc[a3]) === 2) || (id(this.sc[a3]) === 25)) || (id(this.sc[a3]) === 8)) {
             strspboost = fr(0.44999998807907104 * fr(specialboost));
           }
-          if (this.sc[a3] === 18) {
+          if (id(this.sc[a3]) === 18) {
             strspboost = fr(0.25 * fr(specialboost));
           }
         }
@@ -8348,7 +8349,7 @@ export class xtGraphics extends Panel {
       let defence = trunc((fr(end * 100.0)));
       let healthinc = 500;
       if ((idiv(madness[0].healthreset[this.sc[0]], 20)) >= 500) {
-        if (((((((madness[0].healthreset[this.sc[0]] <= 25000) || (this.sc[0] === 11)) || (this.sc[0] === 13)) || (this.sc[0] === 36)) || (this.sc[0] === 18)) || (this.sc[0] === 19)) || (this.sc[0] === 20)) {
+        if (((((((madness[0].healthreset[this.sc[0]] <= 25000) || (id(this.sc[0]) === 11)) || (id(this.sc[0]) === 13)) || (id(this.sc[0]) === 36)) || (id(this.sc[0]) === 18)) || (id(this.sc[0]) === 19)) || (id(this.sc[0]) === 20)) {
           healthinc = idiv(madness[0].healthreset[this.sc[0]], 20);
         } else {
           healthinc = 1250;
@@ -9059,7 +9060,7 @@ export class xtGraphics extends Panel {
       }
     }
     for (let a2 = 1; a2 < this.nplayers; a2 = i32(a2 + 1)) {
-      if ((((((madness[a2].beast[a2] && (checkpoints.stage < 11)) && !this.bonstage)) || (this.sc[a2] === 18)) || (this.sc[a2] === 22)) || (this.sc[a2] === 19)) {
+      if ((((((madness[a2].beast[a2] && (checkpoints.stage < 11)) && !this.bonstage)) || (id(this.sc[a2]) === 18)) || (id(this.sc[a2]) === 22)) || (id(this.sc[a2]) === 19)) {
         if (this.tempinv < 200) {
           this.nohit[a2] = true;
           this.tempinv = i32(this.tempinv + 1);
@@ -10209,10 +10210,10 @@ export class xtGraphics extends Panel {
         let statadjust = intArray(6);
         for (let c = 0; c < 6; c = i32(c + 1)) {
           statadjust[c] = 0;
-          if (this.sc[g] >= 31) {
+          if (id(this.sc[g]) >= 31) {
             statadjust[c] = 7;
           }
-          if (this.sc[g] === 36) {
+          if (id(this.sc[g]) === 36) {
             statadjust[0] = 47;
           }
         }
@@ -10363,7 +10364,7 @@ export class xtGraphics extends Panel {
           }
         }
         if (g < (i32(this.nplayers - 1))) {
-          if ((this.sc[g] === 0) || (this.sc[g] === 23)) {
+          if ((id(this.sc[g]) === 0) || (id(this.sc[g]) === 23)) {
             if (((checkpoints.stage !== 6) && (checkpoints.stage !== 9)) && (checkpoints.stage !== 11)) {
               if (!this.beastopponent[g]) {
                 madness[g].aistusp[this.sc[g]] = idiv(this.totalsp[g], 2);
@@ -10420,7 +10421,7 @@ export class xtGraphics extends Panel {
               }
             }
           }
-          if ((this.sc[g] === 1) || (this.sc[g] === 24)) {
+          if ((id(this.sc[g]) === 1) || (id(this.sc[g]) === 24)) {
             if (((checkpoints.stage !== 6) && !this.beastopponent[g]) && (checkpoints.stage !== 10)) {
               if ((checkpoints.stage !== 14) && (checkpoints.stage !== 5)) {
                 madness[g].aitssp[this.sc[g]] = idiv(this.totalsp[g], 2);
@@ -10461,7 +10462,7 @@ export class xtGraphics extends Panel {
               }
             }
           }
-          if ((this.sc[g] === 2) || (this.sc[g] === 25)) {
+          if ((id(this.sc[g]) === 2) || (id(this.sc[g]) === 25)) {
             if (((((checkpoints.stage !== 6) && (checkpoints.stage !== 7)) && (checkpoints.stage !== 8))) || !this.beastopponent[g]) {
               madness[g].aistrsp[this.sc[g]] = idiv(this.totalsp[g], 2);
               madness[g].aiendsp[this.sc[g]] = idiv(this.totalsp[g], 2);
@@ -10513,7 +10514,7 @@ export class xtGraphics extends Panel {
               }
             }
           }
-          if ((this.sc[g] === 3) || (this.sc[g] === 26)) {
+          if ((id(this.sc[g]) === 3) || (id(this.sc[g]) === 26)) {
             if ((checkpoints.stage !== 10) && (checkpoints.stage !== 5)) {
               if ((checkpoints.stage !== 14) && (checkpoints.stage !== 9)) {
                 madness[g].aitssp[this.sc[g]] = idiv(this.totalsp[g], 2);
@@ -10555,12 +10556,12 @@ export class xtGraphics extends Panel {
               }
             }
           }
-          if ((this.sc[g] === 4) || (this.sc[g] === 27)) {
+          if ((id(this.sc[g]) === 4) || (id(this.sc[g]) === 27)) {
             madness[g].aiendsp[this.sc[g]] = idiv((Math.imul(this.totalsp[g], 9)), 16);
             madness[g].aistrsp[this.sc[g]] = idiv(this.totalsp[g], 4);
             madness[g].aitssp[this.sc[g]] = i32(this.totalsp[g] - ((i32(madness[g].aiendsp[this.sc[g]] + madness[g].aistrsp[this.sc[g]]))));
           }
-          if ((this.sc[g] === 5) || (this.sc[g] === 28)) {
+          if ((id(this.sc[g]) === 5) || (id(this.sc[g]) === 28)) {
             if ((((((checkpoints.stage !== 6) && (checkpoints.stage !== 10)) && (checkpoints.stage !== 5)) && (checkpoints.stage !== 7)) && (checkpoints.stage !== 9)) && (checkpoints.stage !== 13)) {
               madness[g].aiendsp[this.sc[g]] = idiv((Math.imul(this.totalsp[g], 3)), 8);
               madness[g].aistrsp[this.sc[g]] = idiv((Math.imul(this.totalsp[g], 3)), 8);
@@ -10658,7 +10659,7 @@ export class xtGraphics extends Panel {
               }
             }
           }
-          if ((this.sc[g] === 6) || (this.sc[g] === 29)) {
+          if ((id(this.sc[g]) === 6) || (id(this.sc[g]) === 29)) {
             if (!this.beastopponent[g] && (checkpoints.stage !== 13)) {
               if ((checkpoints.stage !== 9) && (checkpoints.stage !== 11)) {
                 madness[g].aiendsp[this.sc[g]] = idiv((Math.imul(this.totalsp[g], 9)), 16);
@@ -10757,7 +10758,7 @@ export class xtGraphics extends Panel {
               madness[g].aistrsp[this.sc[g]] = idiv(this.totalsp[g], 2);
             }
           }
-          if ((this.sc[g] === 7) || (this.sc[g] === 30)) {
+          if ((id(this.sc[g]) === 7) || (id(this.sc[g]) === 30)) {
             if (((checkpoints.stage !== 6) && (checkpoints.stage !== 7)) && (checkpoints.stage !== 8)) {
               if (!this.beastopponent[g]) {
                 madness[g].aistrsp[this.sc[g]] = idiv(this.totalsp[g], 3);
@@ -10819,7 +10820,7 @@ export class xtGraphics extends Panel {
               }
             }
           }
-          if ((this.sc[g] === 8) || (this.sc[g] === 31)) {
+          if ((id(this.sc[g]) === 8) || (id(this.sc[g]) === 31)) {
             if ((((checkpoints.stage < 5) || (checkpoints.stage > 14))) && !this.beastopponent[g]) {
               madness[g].aistrsp[this.sc[g]] = idiv((Math.imul(this.totalsp[g], 3)), 8);
               madness[g].aitssp[this.sc[g]] = idiv(this.totalsp[g], 8);
@@ -10930,7 +10931,7 @@ export class xtGraphics extends Panel {
               }
             }
           }
-          if ((this.sc[g] === 9) || (this.sc[g] === 32)) {
+          if ((id(this.sc[g]) === 9) || (id(this.sc[g]) === 32)) {
             if (((((((((((((checkpoints.stage !== 11) && (checkpoints.stage !== 5)) && (checkpoints.stage !== 8)) && (checkpoints.stage !== 6)) && (checkpoints.stage !== 7)) && (checkpoints.stage !== 12)) && (checkpoints.stage !== 16)) && (checkpoints.stage !== 17)) && (checkpoints.stage !== 18))) || this.beastopponent[g])) && !this.bonusstage[2]) {
               if (!this.beastopponent[g] || (checkpoints.stage !== 12)) {
                 if ((((((checkpoints.stage !== 16) && (checkpoints.stage !== 17)) && (checkpoints.stage !== 18)) && (checkpoints.stage !== 6)) && (checkpoints.stage !== 7)) && (checkpoints.stage !== 8)) {
@@ -11098,7 +11099,7 @@ export class xtGraphics extends Panel {
               }
             }
           }
-          if ((this.sc[g] === 10) || (this.sc[g] === 33)) {
+          if ((id(this.sc[g]) === 10) || (id(this.sc[g]) === 33)) {
             if ((((checkpoints.stage < 8) || (checkpoints.stage > 16))) && !this.beastopponent[g]) {
               madness[g].aitssp[this.sc[g]] = idiv(this.totalsp[g], 4);
               madness[g].aiendsp[this.sc[g]] = i32(this.totalsp[g] - madness[g].aitssp[this.sc[g]]);
@@ -11258,7 +11259,7 @@ export class xtGraphics extends Panel {
                   madness[g].aitssp[this.sc[g]] = i32((i32(this.totalsp[g] - madness[g].aiendsp[this.sc[g]])) - madness[g].aistrsp[this.sc[g]]);
                 }
               }
-              if ((this.sc[g] === 33) && this.bonusstage[1]) {
+              if ((id(this.sc[g]) === 33) && this.bonusstage[1]) {
                 madness[g].aistrsp[this.sc[g]] = idiv(this.totalsp[g], 4);
                 madness[g].aitssp[this.sc[g]] = idiv(this.totalsp[g], 4);
                 madness[g].aiendsp[this.sc[g]] = idiv(this.totalsp[g], 2);
@@ -11280,7 +11281,7 @@ export class xtGraphics extends Panel {
               }
             }
           }
-          if ((this.sc[g] === 11) || (this.sc[g] === 34)) {
+          if ((id(this.sc[g]) === 11) || (id(this.sc[g]) === 34)) {
             if (((((((checkpoints.stage !== 11) && !this.beastopponent[g]) && (checkpoints.stage !== 12)) && (checkpoints.stage !== 15)) && (checkpoints.stage !== 16)) && (checkpoints.stage !== 17)) && (checkpoints.stage !== 18)) {
               if (checkpoints.stage === 9) {
                 let startgrip2 = madness[g].gripreset[this.sc[g]] + ((((madness[g].level[this.sc[g]] + statadjust[2]) - 1.0)) / 5.0);
@@ -11429,7 +11430,7 @@ export class xtGraphics extends Panel {
               }
             }
           }
-          if ((this.sc[g] === 12) || (this.sc[g] === 35)) {
+          if ((id(this.sc[g]) === 12) || (id(this.sc[g]) === 35)) {
             if (((((((checkpoints.stage !== 11) && !this.beastopponent[g]) && (checkpoints.stage !== 13)) && (checkpoints.stage !== 14)) && (checkpoints.stage !== 15)) && (checkpoints.stage !== 16)) && (checkpoints.stage !== 18)) {
               madness[g].aitssp[this.sc[g]] = idiv(this.totalsp[g], 2);
               madness[g].aiendsp[this.sc[g]] = idiv(this.totalsp[g], 4);
@@ -11546,7 +11547,7 @@ export class xtGraphics extends Panel {
               }
             }
           }
-          if ((this.sc[g] === 13) || (this.sc[g] === 36)) {
+          if ((id(this.sc[g]) === 13) || (id(this.sc[g]) === 36)) {
             if ((!this.bonusstage[1] && !this.bonusstage[2]) && !this.bonusstage[3]) {
               if (((checkpoints.stage !== 16) && (checkpoints.stage !== 17)) && (checkpoints.stage !== 18)) {
                 if ((((((checkpoints.stage !== 13) && (checkpoints.stage !== 15)) && (checkpoints.stage !== 21)) && (checkpoints.stage !== 19)) && (checkpoints.stage !== 22)) && (checkpoints.stage !== 23)) {
@@ -11671,7 +11672,7 @@ export class xtGraphics extends Panel {
               madness[g].aistrsp[this.sc[g]] = i32(this.totalsp[g] - madness[g].aitssp[this.sc[g]]);
             }
           }
-          if ((this.sc[g] === 14) || (this.sc[g] === 37)) {
+          if ((id(this.sc[g]) === 14) || (id(this.sc[g]) === 37)) {
             if ((checkpoints.stage !== 21) && (checkpoints.stage !== 22)) {
               if (((!this.beastopponent[g] || (checkpoints.stage === 16)) || (checkpoints.stage === 17)) || (checkpoints.stage === 18)) {
                 if ((checkpoints.stage < 15) && (checkpoints.stage > 19)) {
@@ -11730,7 +11731,7 @@ export class xtGraphics extends Panel {
                   madness[g].aistrsp[this.sc[g]] = idiv((Math.imul(this.totalsp[g], 7)), 16);
                   madness[g].aiendsp[this.sc[g]] = i32(this.totalsp[g] - ((i32(madness[g].aitssp[this.sc[g]] + madness[g].aistrsp[this.sc[g]]))));
                 }
-              } else if (this.sc[g] === 37) {
+              } else if (id(this.sc[g]) === 37) {
                 madness[g].aitssp[this.sc[g]] = idiv((Math.imul(this.totalsp[g], 3)), 32);
                 madness[g].aistrsp[this.sc[g]] = idiv(this.totalsp[g], 4);
                 madness[g].aiendsp[this.sc[g]] = i32(this.totalsp[g] - ((i32(madness[g].aitssp[this.sc[g]] + madness[g].aistrsp[this.sc[g]]))));
@@ -11760,7 +11761,7 @@ export class xtGraphics extends Panel {
               }
             }
           }
-          if ((this.sc[g] === 15) || (this.sc[g] === 38)) {
+          if ((id(this.sc[g]) === 15) || (id(this.sc[g]) === 38)) {
             if (!this.bonstage) {
               if ((checkpoints.stage < 17) || this.scalelevels) {
                 madness[g].aistrsp[this.sc[g]] = idiv(this.totalsp[g], 2);
@@ -11777,7 +11778,7 @@ export class xtGraphics extends Panel {
                 }
                 let toostrong = false;
                 let userstrength2 = fr(madness[0].momentreset[this.sc[0]] + (fr(fr(madness[0].aistrsp[this.sc[0]]) * 0.02500000037252903)));
-                if ((((userstrength2 > 13.75) && (((this.unlocked[1] === checkpoints.stage) || this.hardstage))) && !madness[g].shadowcar) && (((this.sc[0] === 18) || (this.sc[0] === 22)))) {
+                if ((((userstrength2 > 13.75) && (((this.unlocked[1] === checkpoints.stage) || this.hardstage))) && !madness[g].shadowcar) && (((id(this.sc[0]) === 18) || (id(this.sc[0]) === 22)))) {
                   toostrong = true;
                 }
                 if (checkpoints.stage === 22) {
@@ -11853,7 +11854,7 @@ export class xtGraphics extends Panel {
               madness[g].aistrsp[this.sc[g]] = i32(this.totalsp[g] - madness[g].aitssp[this.sc[g]]);
             }
           }
-          if (this.sc[g] === 16) {
+          if (id(this.sc[g]) === 16) {
             if (!this.beastopponent[g]) {
               if ((checkpoints.stage < 21) || this.scalelevels) {
                 let gripboost2 = 0;
@@ -11872,7 +11873,7 @@ export class xtGraphics extends Panel {
                 }
                 let toostrong = false;
                 let userstrength2 = fr(madness[0].momentreset[this.sc[0]] + (fr(fr(madness[0].aistrsp[this.sc[0]]) * 0.02500000037252903)));
-                if ((((userstrength2 > 13.75) && (((this.unlocked[1] === checkpoints.stage) || this.hardstage))) && !madness[g].shadowcar) && (((this.sc[0] === 18) || (this.sc[0] === 22)))) {
+                if ((((userstrength2 > 13.75) && (((this.unlocked[1] === checkpoints.stage) || this.hardstage))) && !madness[g].shadowcar) && (((id(this.sc[0]) === 18) || (id(this.sc[0]) === 22)))) {
                   toostrong = true;
                 }
                 if ((checkpoints.stage === 22) || (checkpoints.stage === 23)) {
@@ -11924,7 +11925,7 @@ export class xtGraphics extends Panel {
               }
             }
           }
-          if (this.sc[g] === 17) {
+          if (id(this.sc[g]) === 17) {
             if ((checkpoints.stage < 21) || this.scalelevels) {
               madness[g].aiendsp[this.sc[g]] = idiv((Math.imul(this.totalsp[g], 3)), 4);
               madness[g].aitssp[this.sc[g]] = i32(this.totalsp[g] - madness[g].aiendsp[this.sc[g]]);
@@ -11964,7 +11965,7 @@ export class xtGraphics extends Panel {
               }
             }
           }
-          if (this.sc[g] === 18) {
+          if (id(this.sc[g]) === 18) {
             if ((checkpoints.stage < 24) || this.scalelevels) {
               if ((checkpoints.stage !== 23) || this.scalelevels) {
                 if (!this.beastopponent[g]) {
@@ -11993,22 +11994,22 @@ export class xtGraphics extends Panel {
               }
             }
           }
-          if (this.sc[g] === 19) {
+          if (id(this.sc[g]) === 19) {
             madness[g].aiendsp[this.sc[g]] = idiv(this.totalsp[g], 4);
             madness[g].aitssp[this.sc[g]] = idiv(this.totalsp[g], 8);
             madness[g].aistrsp[this.sc[g]] = i32((i32(this.totalsp[g] - madness[g].aiendsp[this.sc[g]])) - madness[g].aitssp[this.sc[g]]);
           }
-          if (this.sc[g] === 20) {
+          if (id(this.sc[g]) === 20) {
             madness[g].aitssp[this.sc[g]] = idiv((Math.imul(this.totalsp[g], 9)), 32);
             madness[g].aistrsp[this.sc[g]] = idiv((Math.imul(this.totalsp[g], 5)), 8);
             madness[g].aiendsp[this.sc[g]] = i32((i32(this.totalsp[g] - madness[g].aitssp[this.sc[g]])) - madness[g].aistrsp[this.sc[g]]);
           }
-          if (this.sc[g] === 21) {
+          if (id(this.sc[g]) === 21) {
             madness[g].aiendsp[this.sc[g]] = idiv(this.totalsp[g], 2);
             madness[g].aigripsp[this.sc[g]] = idiv(this.totalsp[g], 4);
             madness[g].aitssp[this.sc[g]] = idiv(this.totalsp[g], 4);
           }
-          if (this.sc[g] === 22) {
+          if (id(this.sc[g]) === 22) {
             madness[g].aitssp[this.sc[g]] = idiv((Math.imul(this.totalsp[g], 3)), 16);
             madness[g].aistrsp[this.sc[g]] = idiv((Math.imul(this.totalsp[g], 11)), 16);
             madness[g].aiendsp[this.sc[g]] = i32((i32(this.totalsp[g] - madness[g].aitssp[this.sc[g]])) - madness[g].aistrsp[this.sc[g]]);
@@ -12601,49 +12602,49 @@ export class xtGraphics extends Panel {
             } while (++l < this.nplayers);
             random();
             let n = this.proba[this.sc[k]];
-            if ((((((i !== 11) && (i !== 12)) && (k !== 1)) && (k !== 2)) && (this.sc[k] === 13)) && !this.careermode) {
+            if ((((((i !== 11) && (i !== 12)) && (k !== 1)) && (k !== 2)) && (id(this.sc[k]) === 13)) && !this.careermode) {
               aflag[k] = false;
             }
             if (!this.careermode) {
               continue;
             }
-            if ((i === 4) && (((((this.sc[k] <= 4) && (this.sc[k] !== 2))) || ((((this.sc[k] >= 23) && (this.sc[k] <= 27)) && (this.sc[k] !== 25)))))) {
+            if ((i === 4) && (((((id(this.sc[k]) <= 4) && (id(this.sc[k]) !== 2))) || ((((id(this.sc[k]) >= 23) && (id(this.sc[k]) <= 27)) && (id(this.sc[k]) !== 25)))))) {
               aflag[k] = false;
             }
-            if ((i === 12) && (((((((this.sc[k] <= 4) || (this.sc[k] === 7)) || (this.sc[k] === 12)) || (this.sc[k] === 30)) || (this.sc[k] === 35)) || (((this.sc[k] >= 23) && (this.sc[k] <= 27)))))) {
+            if ((i === 12) && (((((((id(this.sc[k]) <= 4) || (id(this.sc[k]) === 7)) || (id(this.sc[k]) === 12)) || (id(this.sc[k]) === 30)) || (id(this.sc[k]) === 35)) || (((id(this.sc[k]) >= 23) && (id(this.sc[k]) <= 27)))))) {
               aflag[k] = false;
             }
-            if ((i === 6) && (((((((this.sc[k] <= 4) && (this.sc[k] !== 2))) || (this.sc[k] === 9)) || (this.sc[k] === 32)) || ((((this.sc[k] >= 23) && (this.sc[k] <= 27)) && (this.sc[k] !== 25)))))) {
+            if ((i === 6) && (((((((id(this.sc[k]) <= 4) && (id(this.sc[k]) !== 2))) || (id(this.sc[k]) === 9)) || (id(this.sc[k]) === 32)) || ((((id(this.sc[k]) >= 23) && (id(this.sc[k]) <= 27)) && (id(this.sc[k]) !== 25)))))) {
               aflag[k] = false;
             }
-            if ((i === 7) && (((((((((this.sc[k] <= 4) && (this.sc[k] !== 2))) || (this.sc[k] === 9)) || (this.sc[k] === 10)) || (this.sc[k] === 32)) || (this.sc[k] === 33)) || ((((this.sc[k] >= 23) && (this.sc[k] <= 27)) && (this.sc[k] !== 25)))))) {
+            if ((i === 7) && (((((((((id(this.sc[k]) <= 4) && (id(this.sc[k]) !== 2))) || (id(this.sc[k]) === 9)) || (id(this.sc[k]) === 10)) || (id(this.sc[k]) === 32)) || (id(this.sc[k]) === 33)) || ((((id(this.sc[k]) >= 23) && (id(this.sc[k]) <= 27)) && (id(this.sc[k]) !== 25)))))) {
               aflag[k] = false;
             }
-            if ((i === 8) && (((((this.sc[k] <= 5) && (this.sc[k] !== 2))) || ((((this.sc[k] >= 23) && (this.sc[k] <= 28)) && (this.sc[k] !== 25)))))) {
+            if ((i === 8) && (((((id(this.sc[k]) <= 5) && (id(this.sc[k]) !== 2))) || ((((id(this.sc[k]) >= 23) && (id(this.sc[k]) <= 28)) && (id(this.sc[k]) !== 25)))))) {
               aflag[k] = false;
             }
-            if ((i === 11) && (((((((((((this.sc[k] <= 7) && (this.sc[k] !== 0))) || (this.sc[k] === 8)) || (this.sc[k] === 11)) || (this.sc[k] === 12)) || ((((this.sc[k] >= 23) && (this.sc[k] <= 30)) && (this.sc[k] !== 29)))) || (this.sc[k] === 31)) || (this.sc[k] === 34)) || (this.sc[k] === 35)))) {
+            if ((i === 11) && (((((((((((id(this.sc[k]) <= 7) && (id(this.sc[k]) !== 0))) || (id(this.sc[k]) === 8)) || (id(this.sc[k]) === 11)) || (id(this.sc[k]) === 12)) || ((((id(this.sc[k]) >= 23) && (id(this.sc[k]) <= 30)) && (id(this.sc[k]) !== 29)))) || (id(this.sc[k]) === 31)) || (id(this.sc[k]) === 34)) || (id(this.sc[k]) === 35)))) {
               aflag[k] = false;
             }
-            if ((((i === 13) && (((k % 3)) === 2)) && (k < 9)) && (((((((this.sc[k] <= 7) && (this.sc[k] !== 5))) || (((this.sc[k] >= 11) && (this.sc[k] <= 13)))) || ((((this.sc[k] >= 23) && (this.sc[k] <= 30)) && (this.sc[k] !== 28)))) || (((this.sc[k] >= 34) && (this.sc[k] <= 36)))))) {
+            if ((((i === 13) && (((k % 3)) === 2)) && (k < 9)) && (((((((id(this.sc[k]) <= 7) && (id(this.sc[k]) !== 5))) || (((id(this.sc[k]) >= 11) && (id(this.sc[k]) <= 13)))) || ((((id(this.sc[k]) >= 23) && (id(this.sc[k]) <= 30)) && (id(this.sc[k]) !== 28)))) || (((id(this.sc[k]) >= 34) && (id(this.sc[k]) <= 36)))))) {
               aflag[k] = false;
             }
-            if (((((((((i === 17) && (this.sc[k] !== 14)) && (this.sc[k] !== 13)) && (this.sc[k] !== 11)) && (this.sc[k] !== 15)) && (this.sc[k] !== 37)) && (this.sc[k] !== 36)) && (this.sc[k] !== 34)) && (this.sc[k] !== 38)) {
+            if (((((((((i === 17) && (id(this.sc[k]) !== 14)) && (id(this.sc[k]) !== 13)) && (id(this.sc[k]) !== 11)) && (id(this.sc[k]) !== 15)) && (id(this.sc[k]) !== 37)) && (id(this.sc[k]) !== 36)) && (id(this.sc[k]) !== 34)) && (id(this.sc[k]) !== 38)) {
               aflag[k] = false;
             }
-            if ((((i === 19) && (this.sc[k] !== 15)) && (this.sc[k] !== 16)) && (this.sc[k] !== 38)) {
+            if ((((i === 19) && (id(this.sc[k]) !== 15)) && (id(this.sc[k]) !== 16)) && (id(this.sc[k]) !== 38)) {
               aflag[k] = false;
             }
-            if ((i === 23) && (((((this.sc[k] <= 12) || (this.sc[k] === 14)) || (((this.sc[k] >= 23) && (this.sc[k] <= 35)))) || (this.sc[k] === 37)))) {
+            if ((i === 23) && (((((id(this.sc[k]) <= 12) || (id(this.sc[k]) === 14)) || (((id(this.sc[k]) >= 23) && (id(this.sc[k]) <= 35)))) || (id(this.sc[k]) === 37)))) {
               aflag[k] = false;
             }
-            if ((i === 24) && ((((this.sc[k] <= 14) || (this.sc[k] === 17)) || (((this.sc[k] >= 23) && (this.sc[k] <= 37)))))) {
+            if ((i === 24) && ((((id(this.sc[k]) <= 14) || (id(this.sc[k]) === 17)) || (((id(this.sc[k]) >= 23) && (id(this.sc[k]) <= 37)))))) {
               aflag[k] = false;
             }
-            if (((this.sc[k] === bestcar) || (((bestcar === 18) && (((this.sc[k] === 21) || (this.sc[k] === 19)))))) || ((((bestcar === 19) && (this.sc[k] === 21)) && (i < 25)))) {
+            if (((this.sc[k] === bestcar) || (((bestcar === 18) && (((id(this.sc[k]) === 21) || (id(this.sc[k]) === 19)))))) || ((((bestcar === 19) && (id(this.sc[k]) === 21)) && (i < 25)))) {
               aflag[k] = false;
             }
-            if (this.sc[k] !== 21) {
+            if (id(this.sc[k]) !== 21) {
               continue;
             }
             aflag[k] = false;
@@ -12651,24 +12652,24 @@ export class xtGraphics extends Panel {
         }
         if (this.careermode) {
           if (i === 2) {
-            if (this.sc[0] !== 29) {
+            if (id(this.sc[0]) !== 29) {
               this.sc[9] = 29;
             } else {
               this.sc[9] = 25;
             }
-            if (this.sc[0] !== 6) {
+            if (id(this.sc[0]) !== 6) {
               this.sc[8] = 6;
             } else {
               this.sc[8] = 25;
             }
           }
           if (i === 3) {
-            if (this.sc[0] !== 24) {
+            if (id(this.sc[0]) !== 24) {
               this.sc[i32(this.nplayers - 2)] = 24;
             } else {
               this.sc[i32(this.nplayers - 2)] = 26;
             }
-            if (this.sc[0] !== 1) {
+            if (id(this.sc[0]) !== 1) {
               this.sc[i32(this.nplayers - 3)] = 1;
             } else {
               this.sc[i32(this.nplayers - 2)] = 26;
@@ -12739,10 +12740,10 @@ export class xtGraphics extends Panel {
             this.sc[4] = 26;
             this.sc[9] = 10;
             this.sc[2] = 31;
-            if ((((((((this.sc[0] >= 8) && (this.sc[0] <= 10))) || (this.sc[0] === 1)) || (this.sc[0] === 3)) || (((this.sc[0] >= 31) && (this.sc[0] <= 33)))) || (this.sc[0] === 24)) || (this.sc[0] === 26)) {
+            if ((((((((id(this.sc[0]) >= 8) && (id(this.sc[0]) <= 10))) || (id(this.sc[0]) === 1)) || (id(this.sc[0]) === 3)) || (((id(this.sc[0]) >= 31) && (id(this.sc[0]) <= 33)))) || (id(this.sc[0]) === 24)) || (id(this.sc[0]) === 26)) {
               this.sc[3] = 11;
             }
-            if ((this.sc[0] === 11) || (this.sc[0] === 34)) {
+            if ((id(this.sc[0]) === 11) || (id(this.sc[0]) === 34)) {
               this.sc[3] = 10;
             }
           }
@@ -12802,7 +12803,7 @@ export class xtGraphics extends Panel {
             this.sc[9] = 11;
             this.sc[8] = 10;
             for (let a = 3; a < 8; a = i32(a + 1)) {
-              if ((this.sc[a] < 10) || (this.sc[a] === 13)) {
+              if ((id(this.sc[a]) < 10) || (id(this.sc[a]) === 13)) {
                 if (this.m.random() > this.m.random()) {
                   this.sc[a] = 10;
                 } else {
@@ -12983,23 +12984,23 @@ export class xtGraphics extends Panel {
                 if (usercar >= 23) {
                   usercar = i32(this.sc[0] - 23);
                 }
-                if ((((bestunlocked === 18) && (((this.sc[k2] === 21) || (this.sc[k2] === 19))))) || ((((bestcar2 === 19) && (this.sc[k2] === 21)) && (this.unlocked[1] < 25)))) {
+                if ((((bestunlocked === 18) && (((id(this.sc[k2]) === 21) || (id(this.sc[k2]) === 19))))) || ((((bestcar2 === 19) && (id(this.sc[k2]) === 21)) && (this.unlocked[1] < 25)))) {
                   aflag[k2] = false;
                 }
-                if (this.sc[k2] === 21) {
+                if (id(this.sc[k2]) === 21) {
                   aflag[k2] = false;
                 }
                 let standardban = new Array(4).fill(false);
-                if (((((this.sc[k2] === 13) || (this.sc[k2] === 36))) && (this.averagelevel < this.maxlevel[5])) && (usercar < 13)) {
+                if (((((id(this.sc[k2]) === 13) || (id(this.sc[k2]) === 36))) && (this.averagelevel < this.maxlevel[5])) && (usercar < 13)) {
                   standardban[0] = true;
                 }
-                if (((((this.sc[k2] === 18) || (this.sc[k2] === 20))) && (this.averagelevel < this.maxlevel[10])) && (usercar < 18)) {
+                if (((((id(this.sc[k2]) === 18) || (id(this.sc[k2]) === 20))) && (this.averagelevel < this.maxlevel[10])) && (usercar < 18)) {
                   standardban[1] = true;
                 }
-                if (((((this.sc[k2] === 19) || (this.sc[k2] === 21))) && (this.averagelevel < this.maxlevel[17])) && (usercar < 18)) {
+                if (((((id(this.sc[k2]) === 19) || (id(this.sc[k2]) === 21))) && (this.averagelevel < this.maxlevel[17])) && (usercar < 18)) {
                   standardban[2] = true;
                 }
-                if ((this.sc[k2] === 22) && (this.averagelevel < this.maxlevel[24])) {
+                if ((id(this.sc[k2]) === 22) && (this.averagelevel < this.maxlevel[24])) {
                   standardban[3] = true;
                 }
                 let specialonly = false;
@@ -13012,11 +13013,11 @@ export class xtGraphics extends Panel {
                   if (usercar === 22) {
                     probability = 0.25;
                   }
-                  if ((((this.sc[k2] === 18) || (this.sc[k2] === 19))) && (this.chance >= probability)) {
+                  if ((((id(this.sc[k2]) === 18) || (id(this.sc[k2]) === 19))) && (this.chance >= probability)) {
                     specialonly = true;
                   }
                 }
-                if (!specialonly && ((((((standardban[0] && (this.sc[k2] === 13))) || ((standardban[1] && (((this.sc[k2] === 18) || (this.sc[k2] === 20)))))) || ((standardban[2] && (((this.sc[k2] === 19) || (this.sc[k2] === 21)))))) || ((standardban[3] && (this.sc[k2] === 22)))))) {
+                if (!specialonly && ((((((standardban[0] && (id(this.sc[k2]) === 13))) || ((standardban[1] && (((id(this.sc[k2]) === 18) || (id(this.sc[k2]) === 20)))))) || ((standardban[2] && (((id(this.sc[k2]) === 19) || (id(this.sc[k2]) === 21)))))) || ((standardban[3] && (id(this.sc[k2]) === 22)))))) {
                   aflag[k2] = false;
                 }
               }
@@ -13043,7 +13044,7 @@ export class xtGraphics extends Panel {
             if (random() < f) {
               aflag[k2] = false;
             }
-            if (((((((i !== 11) && (i !== 12)) && (k2 !== 1)) && (k2 !== 2)) && aflag[k2]) && (this.sc[k2] === 36)) && this.classicmode) {
+            if (((((((i !== 11) && (i !== 12)) && (k2 !== 1)) && (k2 !== 2)) && aflag[k2]) && (id(this.sc[k2]) === 36)) && this.classicmode) {
               aflag[k2] = false;
               if ((((random() <= (random() * 1.6)) || (i === 14))) && (((i !== 16) || (random() <= random())))) {
                 continue;
@@ -13061,7 +13062,7 @@ export class xtGraphics extends Panel {
         let flag6 = false;
         let l2 = 0;
         do {
-          if (this.sc[l2] === 34) {
+          if (id(this.sc[l2]) === 34) {
             flag6 = true;
           }
         } while (++l2 < (i32(this.nplayers - 1)));
@@ -13928,7 +13929,7 @@ export class xtGraphics extends Panel {
     this.invulnerable = false;
     this.bchover = false;
     this.nhover = false;
-    if (((this.sc[0] < 23) && (this.sc[0] !== 20)) && (this.sc[0] !== 21)) {
+    if (((id(this.sc[0]) < 23) && (id(this.sc[0]) !== 20)) && (id(this.sc[0]) !== 21)) {
       this.bclicked = false;
     } else {
       this.bclicked = true;
@@ -14388,7 +14389,7 @@ export class xtGraphics extends Panel {
       this.stimulateclick[a] = false;
     }
     this.loserace = false;
-    if (((this.sc[0] < 23) && (this.sc[0] !== 20)) && (this.sc[0] !== 21)) {
+    if (((id(this.sc[0]) < 23) && (id(this.sc[0]) !== 20)) && (id(this.sc[0]) !== 21)) {
       this.bclicked = false;
     } else {
       this.bclicked = true;
@@ -14583,7 +14584,7 @@ export class xtGraphics extends Panel {
         this.careermode = false;
         this.classicmode = true;
         this.justcs = -1;
-        if (this.lastcar < 23) {
+        if (id(this.lastcar) < 23) {
           this.lastcar = 38;
         }
         this.sc[0] = this.lastcar;
@@ -15252,18 +15253,18 @@ export class xtGraphics extends Panel {
     let noback = false;
     let nonext = false;
     if (this.classicmode) {
-      if (this.sc[0] === 23) {
+      if (id(this.sc[0]) === 23) {
         noback = true;
       }
-      if (this.sc[0] === 38) {
+      if (id(this.sc[0]) === 38) {
         nonext = true;
       }
     }
     if (this.careermode) {
-      if (((this.sc[0] === 0) || (this.sc[0] === 23)) || (this.shufflefase >= 6)) {
+      if (((id(this.sc[0]) === 0) || (id(this.sc[0]) === 23)) || (this.shufflefase >= 6)) {
         noback = true;
       }
-      if (((this.sc[0] === 21) || (this.sc[0] === 22)) || (this.shufflefase >= 6)) {
+      if (((id(this.sc[0]) === 21) || (id(this.sc[0]) === 22)) || (this.shufflefase >= 6)) {
         nonext = true;
       }
     }
@@ -15271,34 +15272,34 @@ export class xtGraphics extends Panel {
     let endgame = i32((Math.imul(((i32(this.sc[0] - 11))), 3)) + 2);
     if (this.careermode) {
       this.notunlocked = false;
-      if ((normalun >= this.unlocked[1]) && (this.sc[0] <= 17)) {
+      if ((normalun >= this.unlocked[1]) && (id(this.sc[0]) <= 17)) {
         this.notunlocked = true;
       }
-      if ((((this.sc[0] === 18) || (this.sc[0] === 19))) && (endgame >= this.unlocked[1])) {
+      if ((((id(this.sc[0]) === 18) || (id(this.sc[0]) === 19))) && (endgame >= this.unlocked[1])) {
         this.notunlocked = true;
       }
-      if ((this.sc[0] === 22) && (this.unlocked[1] <= 30)) {
+      if ((id(this.sc[0]) === 22) && (this.unlocked[1] <= 30)) {
         this.notunlocked = true;
       }
-      if ((this.boncomp[0] === 0) && ((((this.sc[0] === 31) || (this.sc[0] === 32)) || (this.sc[0] === 33)))) {
+      if ((this.boncomp[0] === 0) && ((((id(this.sc[0]) === 31) || (id(this.sc[0]) === 32)) || (id(this.sc[0]) === 33)))) {
         this.notunlocked = true;
       }
-      if ((this.boncomp[1] === 0) && ((((this.sc[0] === 34) || (this.sc[0] === 35)) || (this.sc[0] === 36)))) {
+      if ((this.boncomp[1] === 0) && ((((id(this.sc[0]) === 34) || (id(this.sc[0]) === 35)) || (id(this.sc[0]) === 36)))) {
         this.notunlocked = true;
       }
-      if ((this.boncomp[1] === 1) && (this.sc[0] === 36)) {
+      if ((this.boncomp[1] === 1) && (id(this.sc[0]) === 36)) {
         this.notunlocked = true;
       }
-      if ((this.boncomp[1] === 2) && (this.sc[0] === 35)) {
+      if ((this.boncomp[1] === 2) && (id(this.sc[0]) === 35)) {
         this.notunlocked = true;
       }
-      if ((this.boncomp[2] === 0) && (((this.sc[0] === 37) || (this.sc[0] === 38)))) {
+      if ((this.boncomp[2] === 0) && (((id(this.sc[0]) === 37) || (id(this.sc[0]) === 38)))) {
         this.notunlocked = true;
       }
-      if ((this.sc[0] === 20) && (this.boncomp[4] === 0)) {
+      if ((id(this.sc[0]) === 20) && (this.boncomp[4] === 0)) {
         this.notunlocked = true;
       }
-      if ((this.sc[0] === 21) && (this.boncomp[5] === 0)) {
+      if ((id(this.sc[0]) === 21) && (this.boncomp[5] === 0)) {
         this.notunlocked = true;
       }
     } else {
@@ -15336,55 +15337,55 @@ export class xtGraphics extends Panel {
       if (!this.classicmode) {
         this.rd.setFont(this.adventure.deriveFont(1, 15.0));
         this.ftm = this.rd.getFontMetrics();
-        if (this.sc[0] === 1) {
+        if (id(this.sc[0]) === 1) {
           this.drawcs(60, 'Created by Afterburn/ToaZuka', 246, 246, 246, 3);
         }
-        if (this.sc[0] === 11) {
+        if (id(this.sc[0]) === 11) {
           this.drawcs(60, 'Created by Phyrexian', 246, 246, 246, 3);
         }
-        if (this.sc[0] === 18) {
+        if (id(this.sc[0]) === 18) {
           this.drawcs(60, 'Created by aliff01/Phyrexian', 246, 246, 246, 3);
         }
-        if (this.sc[0] === 15) {
+        if (id(this.sc[0]) === 15) {
           this.drawcs(60, 'Created by Ultimato', 246, 246, 246, 3);
         }
-        if (this.sc[0] === 5) {
+        if (id(this.sc[0]) === 5) {
           this.drawcs(60, 'Created by Trelivision', 246, 246, 246, 3);
         }
-        if (this.sc[0] === 6) {
+        if (id(this.sc[0]) === 6) {
           this.drawcs(60, 'Created by GX', 246, 246, 246, 3);
         }
-        if ((this.sc[0] === 3) || (this.sc[0] === 16)) {
+        if ((id(this.sc[0]) === 3) || (id(this.sc[0]) === 16)) {
           this.drawcs(60, 'Created by Rulue', 246, 246, 246, 3);
         }
-        if (this.sc[0] === 7) {
+        if (id(this.sc[0]) === 7) {
           this.drawcs(60, 'Created by Chaotic', 246, 246, 246, 3);
         }
-        if (this.sc[0] === 8) {
+        if (id(this.sc[0]) === 8) {
           this.drawcs(60, 'Created by projectDUB', 246, 246, 246, 3);
         }
-        if (this.sc[0] === 0) {
+        if (id(this.sc[0]) === 0) {
           this.drawcs(60, 'Created by aliff01', 246, 246, 246, 3);
         }
-        if (this.sc[0] === 17) {
+        if (id(this.sc[0]) === 17) {
           this.drawcs(60, 'Created by RAD1', 246, 246, 246, 3);
         }
-        if ((((this.sc[0] === 14) || (this.sc[0] === 9)) || (this.sc[0] === 4)) || (this.sc[0] === 20)) {
+        if ((((id(this.sc[0]) === 14) || (id(this.sc[0]) === 9)) || (id(this.sc[0]) === 4)) || (id(this.sc[0]) === 20)) {
           this.drawcs(60, 'Created by Tunari', 246, 246, 246, 3);
         }
-        if (this.sc[0] === 19) {
+        if (id(this.sc[0]) === 19) {
           this.drawcs(60, 'Created by Vitalogy', 246, 246, 246, 3);
         }
-        if ((this.sc[0] === 2) || (this.sc[0] === 22)) {
+        if ((id(this.sc[0]) === 2) || (id(this.sc[0]) === 22)) {
           this.drawcs(60, 'Created by ACVoong', 246, 246, 246, 3);
         }
-        if ((this.sc[0] === 10) || (this.sc[0] === 21)) {
+        if ((id(this.sc[0]) === 10) || (id(this.sc[0]) === 21)) {
           this.drawcs(60, 'Created by DJ Miker', 246, 246, 246, 3);
         }
-        if (this.sc[0] === 12) {
+        if (id(this.sc[0]) === 12) {
           this.drawcs(60, 'Created by KingOfSpeed', 246, 246, 246, 3);
         }
-        if (this.sc[0] === 13) {
+        if (id(this.sc[0]) === 13) {
           this.drawcs(60, 'Created by Excalibur', 246, 246, 246, 3);
         }
         this.rd.setFont(new Font('Arial', 1, 11));
@@ -15412,43 +15413,43 @@ export class xtGraphics extends Panel {
       }
       if (this.notunlocked) {
         if ((this.flatrstart === 6) && this.careermode) {
-          if (this.sc[0] <= 17) {
+          if (id(this.sc[0]) <= 17) {
             this.drawcs(395, '[ Car Locked ]', 210, 210, 210, 3);
             this.drawcs(415, ('This car unlocks when stage ' + normalun) + ' is completed...', 181, 120, 40, 3);
           }
-          if ((this.sc[0] === 18) || (this.sc[0] === 19)) {
+          if ((id(this.sc[0]) === 18) || (id(this.sc[0]) === 19)) {
             this.drawcs(395, '[ Car Locked ]', 210, 210, 210, 3);
             this.drawcs(415, ('This car unlocks when stage ' + endgame) + ' is completed...', 181, 120, 40, 3);
           }
-          if (this.sc[0] === 22) {
+          if (id(this.sc[0]) === 22) {
             this.drawcs(395, '[ Car Locked ]', 210, 210, 210, 3);
             this.drawcs(415, 'This car unlocks when stage 30 is completed...', 181, 120, 40, 3);
           }
-          if (((((this.sc[0] === 31) || (this.sc[0] === 32)) || (this.sc[0] === 33))) && (this.boncomp[0] === 0)) {
+          if (((((id(this.sc[0]) === 31) || (id(this.sc[0]) === 32)) || (id(this.sc[0]) === 33))) && (this.boncomp[0] === 0)) {
             this.drawcs(395, '[ Car Locked ]', 210, 210, 210, 3);
             this.drawcs(415, 'This car unlocks when you complete the first bonus stage...', 181, 120, 40, 3);
           }
-          if ((this.sc[0] === 34) && (this.boncomp[1] === 0)) {
+          if ((id(this.sc[0]) === 34) && (this.boncomp[1] === 0)) {
             this.drawcs(395, '[ Car Locked ]', 210, 210, 210, 3);
             this.drawcs(415, 'This car unlocks when you complete the second bonus stage...', 181, 120, 40, 3);
           }
-          if ((this.sc[0] === 35) && (((this.boncomp[1] === 0) || (this.boncomp[1] === 2)))) {
+          if ((id(this.sc[0]) === 35) && (((this.boncomp[1] === 0) || (this.boncomp[1] === 2)))) {
             this.drawcs(395, '[ Car Locked ]', 210, 210, 210, 3);
             this.drawcs(415, 'This car unlocks when you complete the second bonus stage by racing...', 181, 120, 40, 3);
           }
-          if ((this.sc[0] === 36) && (((this.boncomp[1] === 0) || (this.boncomp[1] === 1)))) {
+          if ((id(this.sc[0]) === 36) && (((this.boncomp[1] === 0) || (this.boncomp[1] === 1)))) {
             this.drawcs(395, '[ Car Locked ]', 210, 210, 210, 3);
             this.drawcs(415, 'This car unlocks when you complete the second bonus stage by wasting...', 181, 120, 40, 3);
           }
-          if ((((this.sc[0] === 37) || (this.sc[0] === 38))) && (this.boncomp[2] === 0)) {
+          if ((((id(this.sc[0]) === 37) || (id(this.sc[0]) === 38))) && (this.boncomp[2] === 0)) {
             this.drawcs(395, '[ Car Locked ]', 210, 210, 210, 3);
             this.drawcs(415, 'This car unlocks when you complete the third bonus stage...', 181, 120, 40, 3);
           }
-          if ((this.sc[0] === 20) && (this.boncomp[4] === 0)) {
+          if ((id(this.sc[0]) === 20) && (this.boncomp[4] === 0)) {
             this.drawcs(395, '[ Car Locked ]', 210, 210, 210, 3);
             this.drawcs(415, 'This car unlocks when you complete the fifth bonus stage...', 181, 120, 40, 3);
           }
-          if ((this.sc[0] === 21) && (this.boncomp[5] === 0)) {
+          if ((id(this.sc[0]) === 21) && (this.boncomp[5] === 0)) {
             this.drawcs(395, '[ Car Locked ]', 210, 210, 210, 3);
             this.drawcs(415, 'This car unlocks when you complete the sixth bonus stage...', 181, 120, 40, 3);
           }
@@ -15479,57 +15480,57 @@ export class xtGraphics extends Panel {
             }
           }
         }
-        if ((this.sc[0] === 0) || (this.sc[0] === 23)) {
+        if ((id(this.sc[0]) === 0) || (id(this.sc[0]) === 23)) {
           this.rd.drawString('A random car gets reduced speed.', 20, 60);
-          if (this.sc[0] === 0) {
+          if (id(this.sc[0]) === 0) {
             this.rd.drawString(((('Strength/Defence boost: ' + trunc((50.0 * specialboost))) + '%/') + trunc((30.0 * specialboost))) + '%', 20, 75);
           } else {
             this.rd.drawString(((('Strength/Defence boost: ' + trunc((55.0 * specialboost))) + '%/') + trunc((30.0 * specialboost))) + '%', 20, 75);
           }
           this.lines = 2;
         }
-        if ((this.sc[0] === 1) || (this.sc[0] === 24)) {
+        if ((id(this.sc[0]) === 1) || (id(this.sc[0]) === 24)) {
           this.rd.drawString(trunc((15.0 * specialboost)) + '% speed boost.', 20, 60);
           this.rd.drawString('Swaps its strength with a random car.', 20, 75);
           this.rd.drawString('Unlimited power.', 20, 90);
           this.lines = 3;
         }
-        if ((this.sc[0] === 2) || (this.sc[0] === 25)) {
+        if ((id(this.sc[0]) === 2) || (id(this.sc[0]) === 25)) {
           this.rd.drawString('Unlimited power.', 20, 60);
           this.rd.drawString(((('Strength/Defence boost: ' + trunc((45.0 * specialboost))) + '%/') + trunc((30.0 * specialboost))) + '%', 20, 75);
           this.rd.drawString('Drains a random car\'s health.', 20, 90);
           this.lines = 3;
         }
-        if ((this.sc[0] === 3) || (this.sc[0] === 26)) {
+        if ((id(this.sc[0]) === 3) || (id(this.sc[0]) === 26)) {
           this.rd.drawString('Reduces the defence of the car in first.', 20, 60);
-          if (this.sc[0] === 3) {
+          if (id(this.sc[0]) === 3) {
             this.rd.drawString(((('Speed/Stunting boost: ' + trunc((30.0 * specialboost))) + '%/') + trunc((75.0 * specialboost))) + '%', 20, 75);
           } else {
             this.rd.drawString(((('Speed/Stunting boost: ' + trunc((35.0 * specialboost))) + '%/') + trunc((60.0 * specialboost))) + '%', 20, 75);
           }
           this.lines = 2;
         }
-        if ((this.sc[0] === 4) || (this.sc[0] === 27)) {
+        if ((id(this.sc[0]) === 4) || (id(this.sc[0]) === 27)) {
           this.rd.drawString(trunc((70.0 * specialboost)) + '% strength boost.', 20, 60);
           this.rd.drawString('Reduces a random car\'s defence.', 20, 75);
           this.lines = 2;
         }
-        if ((this.sc[0] === 5) || (this.sc[0] === 28)) {
+        if ((id(this.sc[0]) === 5) || (id(this.sc[0]) === 28)) {
           this.rd.drawString(((trunc((30.0 * specialboost)) + '% strength and ') + trunc((25.0 * specialboost))) + '% speed boost.', 20, 60);
           this.rd.drawString('These boosts double past 50% damage.', 20, 75);
           this.lines = 2;
         }
-        if ((this.sc[0] === 6) || (this.sc[0] === 29)) {
+        if ((id(this.sc[0]) === 6) || (id(this.sc[0]) === 29)) {
           this.rd.drawString(((('Strength/Speed boost: ' + trunc((50.0 * specialboost))) + '%/') + trunc((15.0 * specialboost))) + '%', 20, 60);
           this.rd.drawString('Drains a random car\'s health.', 20, 75);
           this.lines = 2;
         }
-        if ((this.sc[0] === 7) || (this.sc[0] === 30)) {
+        if ((id(this.sc[0]) === 7) || (id(this.sc[0]) === 30)) {
           this.rd.drawString(((('Strength/Defence boost: ' + trunc((60.0 * specialboost))) + '%/') + trunc((50.0 * specialboost))) + '%', 20, 60);
           this.lines = 1;
         }
-        if ((this.sc[0] === 8) || (this.sc[0] === 31)) {
-          if (this.sc[0] === 8) {
+        if ((id(this.sc[0]) === 8) || (id(this.sc[0]) === 31)) {
+          if (id(this.sc[0]) === 8) {
             this.rd.drawString(trunc((100.0 * specialboost)) + '% control boost.', 20, 60);
             this.rd.drawString(trunc((45.0 * specialboost)) + '% strength boost.', 20, 75);
             this.rd.drawString(trunc((30.0 * specialboost)) + '% speed boost.', 20, 90);
@@ -15540,9 +15541,9 @@ export class xtGraphics extends Panel {
           }
           this.lines = 3;
         }
-        if ((this.sc[0] === 9) || (this.sc[0] === 32)) {
+        if ((id(this.sc[0]) === 9) || (id(this.sc[0]) === 32)) {
           this.rd.drawString('A random car gets reduced speed.', 20, 60);
-          if (this.sc[0] === 9) {
+          if (id(this.sc[0]) === 9) {
             this.rd.drawString(((('Strength/Speed boost: ' + trunc((40.0 * specialboost))) + '%/') + trunc((10.0 * specialboost))) + '%', 20, 75);
           } else {
             this.rd.drawString(((('Strength/Speed boost: ' + trunc((35.0 * specialboost))) + '%/') + trunc((10.0 * specialboost))) + '%', 20, 75);
@@ -15550,8 +15551,8 @@ export class xtGraphics extends Panel {
           this.rd.drawString('You get unlimited power.', 20, 90);
           this.lines = 3;
         }
-        if ((this.sc[0] === 10) || (this.sc[0] === 33)) {
-          if (this.sc[0] === 10) {
+        if ((id(this.sc[0]) === 10) || (id(this.sc[0]) === 33)) {
+          if (id(this.sc[0]) === 10) {
             this.rd.drawString(trunc((30.0 * specialboost)) + '% speed boost.', 20, 60);
             this.rd.drawString(((('Strength/Defence boost: ' + trunc((35.0 * specialboost))) + '%/') + trunc((40.0 * specialboost))) + '%', 20, 75);
           } else {
@@ -15561,8 +15562,8 @@ export class xtGraphics extends Panel {
           this.rd.drawString('Reduces a random car\'s defence.', 20, 90);
           this.lines = 3;
         }
-        if ((this.sc[0] === 11) || (this.sc[0] === 34)) {
-          if (this.sc[0] === 11) {
+        if ((id(this.sc[0]) === 11) || (id(this.sc[0]) === 34)) {
+          if (id(this.sc[0]) === 11) {
             this.rd.drawString(((('Strength/Speed boost: ' + trunc((40.0 * specialboost))) + '%/') + trunc((30.0 * specialboost))) + '%.', 20, 60);
           } else {
             this.rd.drawString(((('Strength/Speed boost: ' + trunc((30.0 * specialboost))) + '%/') + trunc((20.0 * specialboost))) + '%.', 20, 60);
@@ -15570,8 +15571,8 @@ export class xtGraphics extends Panel {
           this.rd.drawString('Drains a random car\'s health.', 20, 75);
           this.lines = 2;
         }
-        if ((this.sc[0] === 12) || (this.sc[0] === 35)) {
-          if (this.sc[0] === 12) {
+        if ((id(this.sc[0]) === 12) || (id(this.sc[0]) === 35)) {
+          if (id(this.sc[0]) === 12) {
             this.rd.drawString(trunc((25.0 * specialboost)) + '% speed boost.', 20, 60);
           } else {
             this.rd.drawString(trunc((20.0 * specialboost)) + '% speed boost.', 20, 60);
@@ -15580,8 +15581,8 @@ export class xtGraphics extends Panel {
           this.rd.drawString('Reduces the defence of the car in first.', 20, 90);
           this.lines = 3;
         }
-        if ((this.sc[0] === 13) || (this.sc[0] === 36)) {
-          if (this.sc[0] === 13) {
+        if ((id(this.sc[0]) === 13) || (id(this.sc[0]) === 36)) {
+          if (id(this.sc[0]) === 13) {
             this.rd.drawString(trunc((40.0 * specialboost)) + '% strength/defence boost.', 20, 60);
           } else {
             this.rd.drawString(trunc((30.0 * specialboost)) + '% strength/defence boost.', 20, 60);
@@ -15589,8 +15590,8 @@ export class xtGraphics extends Panel {
           this.rd.drawString('Reduces a random car\'s defence.', 20, 75);
           this.lines = 2;
         }
-        if ((this.sc[0] === 14) || (this.sc[0] === 37)) {
-          if (this.sc[0] === 14) {
+        if ((id(this.sc[0]) === 14) || (id(this.sc[0]) === 37)) {
+          if (id(this.sc[0]) === 14) {
             this.rd.drawString(((('Speed/Stunting boost: ' + trunc((15.0 * specialboost))) + '%/') + trunc((100.0 * specialboost))) + '%.', 20, 60);
             this.rd.drawString(((('Strength/Defence boost: ' + trunc((40.0 * specialboost))) + '%/') + trunc((70.0 * specialboost))) + '%.', 20, 75);
           } else {
@@ -15600,46 +15601,46 @@ export class xtGraphics extends Panel {
           this.rd.drawString('A random car gets reduced speed.', 20, 90);
           this.lines = 3;
         }
-        if ((this.sc[0] === 15) || (this.sc[0] === 38)) {
-          if (this.sc[0] === 15) {
+        if ((id(this.sc[0]) === 15) || (id(this.sc[0]) === 38)) {
+          if (id(this.sc[0]) === 15) {
             this.rd.drawString(('Every stat increases by ' + trunc((30.0 * specialboost))) + '%.', 20, 60);
           } else {
             this.rd.drawString(('Every stat increases by ' + trunc((20.0 * specialboost))) + '%.', 20, 60);
           }
           this.lines = 1;
         }
-        if (this.sc[0] === 16) {
+        if (id(this.sc[0]) === 16) {
           this.rd.drawString('Unlimited power.', 20, 60);
           this.rd.drawString(((('Strength/Speed boost: ' + trunc((30.0 * specialboost))) + '%/') + trunc((15.0 * specialboost))) + '%.', 20, 75);
           this.rd.drawString(('Control boost: ' + trunc((50.0 * specialboost))) + '%', 20, 90);
           this.rd.drawString('Drains a random car\'s health.', 20, 105);
           this.lines = 4;
         }
-        if (this.sc[0] === 17) {
+        if (id(this.sc[0]) === 17) {
           this.rd.drawString('Unlimited power.', 20, 60);
           this.rd.drawString(trunc((50.0 * specialboost)) + '% defence boost.', 20, 75);
           this.rd.drawString(trunc((15.0 * specialboost)) + '% speed boost.', 20, 90);
           this.lines = 3;
         }
-        if (this.sc[0] === 18) {
+        if (id(this.sc[0]) === 18) {
           this.rd.drawString(trunc((20.0 * specialboost)) + '% speed boost.', 20, 60);
           this.rd.drawString(trunc((25.0 * specialboost)) + '% strength/defence boost.', 20, 75);
           this.rd.drawString('Reduces the defence of a random car.', 20, 90);
           this.lines = 3;
         }
-        if (this.sc[0] === 19) {
+        if (id(this.sc[0]) === 19) {
           this.rd.drawString(((('Strength/Speed boost: ' + trunc((20.0 * specialboost))) + '%/') + trunc((10.0 * specialboost))) + '%.', 20, 60);
           this.rd.drawString(trunc((30.0 * specialboost)) + '% defence boost.', 20, 75);
           this.rd.drawString('Reduces the speed of a random car.', 20, 90);
           this.lines = 3;
         }
-        if (this.sc[0] === 20) {
+        if (id(this.sc[0]) === 20) {
           this.rd.drawString(((('Strength/Defence boost: ' + trunc((60.0 * specialboost))) + '%/') + trunc((40.0 * specialboost))) + '%.', 20, 60);
           this.rd.drawString(trunc((10.0 * specialboost)) + '% speed cut.', 20, 75);
           this.rd.drawString('Reduces the defence of a random car.', 20, 90);
           this.lines = 3;
         }
-        if (this.sc[0] === 22) {
+        if (id(this.sc[0]) === 22) {
           this.rd.drawString(('Strength/Speed boost: ' + trunc((15.0 * specialboost))) + '%.', 20, 60);
           this.rd.drawString(('Defence boost: ' + trunc((30.0 * specialboost))) + '%.', 20, 75);
           this.rd.drawString(('Acceleration boost: ' + trunc((100.0 * specialboost))) + '%.', 20, 90);
@@ -15871,7 +15872,7 @@ export class xtGraphics extends Panel {
           this.rd.drawRect(174, 451, 165, 20);
           this.rd.drawRect(175, 452, 163, 18);
         } else {
-          if ((this.sc[0] >= 31) && (madness.aitssp[this.sc[0]] === 0)) {
+          if ((id(this.sc[0]) >= 31) && (madness.aitssp[this.sc[0]] === 0)) {
             this.resetstats(madness, this.sc[0]);
           }
           this.rd.setFont(this.fifa.deriveFont(1, 18.0));
@@ -16403,7 +16404,7 @@ export class xtGraphics extends Panel {
               }
               this.statpoints[this.sc[0]] = i32(this.spcalc(madness.level[this.sc[0]]) + this.extpoints[this.sc[0]]);
               let resetto = i32(madness.level[this.sc[0]] - 1);
-              if (this.sc[0] >= 31) {
+              if (id(this.sc[0]) >= 31) {
                 this.resetstats(madness, this.sc[0]);
               } else {
                 madness.aitssp[this.sc[0]] = resetto;
@@ -16565,7 +16566,7 @@ export class xtGraphics extends Panel {
               this.winscn[this.sc[0]] = this.winscn[this.transfercar[0]];
               this.extpoints[this.sc[0]] = bspoints;
               let resetto2 = i32(madness.level[this.transfercar[0]] - 1);
-              if (this.sc[0] >= 31) {
+              if (id(this.sc[0]) >= 31) {
                 this.resetstats(madness, this.sc[0]);
               } else {
                 madness.aitssp[this.sc[0]] = resetto2;
@@ -16695,10 +16696,10 @@ export class xtGraphics extends Panel {
           }
         }
         if (this.shufflefase <= 5) {
-          if (((this.bclicked && (this.sc[0] < 23)) && (this.sc[0] !== 20)) && (this.sc[0] !== 21)) {
+          if (((this.bclicked && (id(this.sc[0]) < 23)) && (id(this.sc[0]) !== 20)) && (id(this.sc[0]) !== 21)) {
             this.flipo = 20;
           }
-          if (this.oclicked && ((((this.sc[0] >= 23) || (this.sc[0] === 20)) || (this.sc[0] === 21)))) {
+          if (this.oclicked && ((((id(this.sc[0]) >= 23) || (id(this.sc[0]) === 20)) || (id(this.sc[0]) === 21)))) {
             this.flipo = 20;
           }
         }
@@ -16719,23 +16720,23 @@ export class xtGraphics extends Panel {
         }
       } else {
         if (this.flipo === 10) {
-          if ((!this.bclicked || ((((((this.sc[0] >= 23) || (this.sc[0] === 20)) || (this.sc[0] === 21))) && this.careermode))) || this.classicmode) {
+          if ((!this.bclicked || ((((((id(this.sc[0]) >= 23) || (id(this.sc[0]) === 20)) || (id(this.sc[0]) === 21))) && this.careermode))) || this.classicmode) {
             if (this.nextc) {
               if (!this.careermode) {
                 let sc = this.sc;
                 let n15 = 0;
                 ++sc[n15];
               } else {
-                if (this.sc[0] === 19) {
+                if (id(this.sc[0]) === 19) {
                   this.sc[0] = 22;
                 }
-                if (this.sc[0] === 20) {
+                if (id(this.sc[0]) === 20) {
                   this.sc[0] = 21;
                 }
-                if (this.sc[0] === 38) {
+                if (id(this.sc[0]) === 38) {
                   this.sc[0] = 20;
                 }
-                if ((this.sc[0] < 19) || (((this.sc[0] >= 23) && (this.sc[0] < 38)))) {
+                if ((id(this.sc[0]) < 19) || (((id(this.sc[0]) >= 23) && (id(this.sc[0]) < 38)))) {
                   let sc2 = this.sc;
                   let n16 = 0;
                   ++sc2[n16];
@@ -16747,26 +16748,26 @@ export class xtGraphics extends Panel {
               let n18 = 0;
               --sc3[n18];
             } else {
-              if ((this.sc[0] <= 19) || (((this.sc[0] > 23) && (this.sc[0] <= 38)))) {
+              if ((id(this.sc[0]) <= 19) || (((id(this.sc[0]) > 23) && (id(this.sc[0]) <= 38)))) {
                 let sc4 = this.sc;
                 let n19 = 0;
                 --sc4[n19];
               }
               let n20 = this.sc[0];
-              if (this.sc[0] === 22) {
+              if (id(this.sc[0]) === 22) {
                 this.sc[0] = 19;
               }
-              if (this.sc[0] === 20) {
+              if (id(this.sc[0]) === 20) {
                 this.sc[0] = 38;
               }
-              if (this.sc[0] === 21) {
+              if (id(this.sc[0]) === 21) {
                 this.sc[0] = 20;
               }
             }
           } else {
             this.sc[0] = 23;
           }
-          if (this.oclicked && ((((this.sc[0] >= 23) || (this.sc[0] === 20)) || (this.sc[0] === 21)))) {
+          if (this.oclicked && ((((id(this.sc[0]) >= 23) || (id(this.sc[0]) === 20)) || (id(this.sc[0]) === 21)))) {
             this.sc[0] = 0;
           }
           for (let a = 0; a < 7; a = i32(a + 1)) {
@@ -17338,7 +17339,7 @@ export class xtGraphics extends Panel {
             this.extpoints[this.sc[0]] = 0;
             this.xbsp[this.sc[0]] = 0.0;
             this.rebsp[this.sc[0]] = 1.0;
-            if (this.sc[0] < 31) {
+            if (id(this.sc[0]) < 31) {
               madness.aitssp[this.sc[0]] = 0;
               madness.aiaccsp[this.sc[0]] = 0;
               madness.aigripsp[this.sc[0]] = 0;

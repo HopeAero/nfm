@@ -3,6 +3,7 @@
 // fix the transpiler or the source and regenerate.
 
 import { fr, i32, idiv, intArray } from '../java.js';
+import { id } from './newcars.js';   // ext-ident (web/tools/ext-ident.mjs)
 
 export class Contva {
   constructor() {
@@ -208,7 +209,7 @@ export class Contva {
           range = 5000;
         }
         if (checkpoints.stage === 19) {
-          if ((madness.cn === 17) || madness.shadowcar) {
+          if ((id(madness.cn) === 17) || madness.shadowcar) {
             let extrarange = 0;
             if (madness.specialact) {
               extrarange = 1300;
@@ -241,7 +242,7 @@ export class Contva {
         }
       }
       if ((checkpoints.stage === 11) || (checkpoints.stage === 12)) {
-        if (madness.cn === 10) {
+        if (id(madness.cn) === 10) {
           this.spdexception[madness.im] = true;
         } else {
           this.spdexception[madness.im] = false;
@@ -249,13 +250,13 @@ export class Contva {
         this.slowdown[madness.im] = 180;
         this.slowrange[madness.im] = 4500;
       }
-      if ((checkpoints.stage === 13) && (madness.cn === 13)) {
+      if ((checkpoints.stage === 13) && (id(madness.cn) === 13)) {
         this.spdexception[madness.im] = true;
         this.slowdown[madness.im] = 200;
         this.slowrange[madness.im] = 4000;
       }
       if (checkpoints.stage === 14) {
-        if (madness.cn === 14) {
+        if (id(madness.cn) === 14) {
           if ((madness.power === 98.0) && (madness.pcleared === 321)) {
             this.opbackloops[madness.im] = true;
           } else {
