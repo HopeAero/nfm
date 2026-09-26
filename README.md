@@ -1,48 +1,78 @@
-# Need for Madness WebGL Port
+# Need for Madness en el navegador — NFM 2 y Extended Mode
 
 ![icon](data/icon.png)
 
-[Play here!](https://radicalarchive.github.io/nfm)
+Need for Madness 2 y **Need for Madness 2 Extended Mode (v2.8)** corriendo directo en el
+navegador, en JavaScript + WebGL, sin Java ni plugins. Los dos juegos salen del mismo
+launcher, comparten el motor de dibujo, el sonido, el Car Maker y el Stage Maker, y un auto
+hecho en el Car Maker se puede correr en los dos.
 
-This is a WIP unofficial port of NFM to the web.  Currently gameplay/physics are implemented, with full game GUI coming soon.  The original game JAR files were decompiled and Java transcribed line-by-line to JS with Claude Opus, using WebGL for rendering.  
+Qué cambió desde el punto de partida: [`CHANGELOG.md`](CHANGELOG.md).
 
-This repo also contains a patched version of the original game to run on modern Java (run `./start.sh`).
+## De dónde parte
 
-Both the Java and JS versions have a few enhancements to increase game resolution and FPS from the original hardcoded 800x450/19fps.
+Este proyecto parte del port de NFM a la web de
+**[radicalarchive/nfm](https://github.com/radicalarchive/nfm)**
+([jugar el original](https://radicalarchive.github.io/nfm)). Todo el crédito del port base es
+suyo: los JAR originales se descompilaron y el Java se transcribió línea por línea a JS,
+con WebGL para dibujar. Ese port ya traía:
 
+- NFM 2 jugable, con su física, HUD, sonido y menús
+- multijugador online privado
+- repetición instantánea (los últimos 300 ticks)
+- los controles clásicos de carrera (A: flechas de autos, S: radar/mapa, Esc: pausa)
+- el Car Maker y el Stage Maker
+- mejoras de resolución y fps sobre los 800x450 / 19 fps fijos del original
+- una versión parcheada del juego de Java para correr en Java moderno (`./start.sh`)
+- el código de Extended Mode descompilado y validado contra su jar, como referencia para un
+  port futuro (`decompilation/extended/`)
 
-## Architecture
+Sobre esa base, este fork:
 
-- **`web/`** — the JS/WebGL port. `main.html` is the game; the launcher at the
-  repo root points at it. Everything the browser loads lives here or in the
-  shared data directories.
-- **`java/`** — the original game: the patched `Game.jar` that `start.sh` runs,
-  the pristine `Game.jar.bak`, and the previous build for rollback. This is the
-  reference implementation the port is compared against, not a build input.
-- **`decompilation/`** — the decompiled Java (`java-src/`), the porting
-  contract (`PORT_SPEC.md`), and the records of the delegated transcription
-  jobs (`agy_tmp`, `agy_batch_tmp`). Read-only history and reference.
-- **`data/`, `stages/`, `mycars/`, `mystages/`, `music/`** — game assets, byte
-  identical to the original and **not to be modified**. They stay at the root
-  because both the jar and the port read them.
+- **porta Extended Mode al navegador**: Free Play, Modo Carrera con progreso guardado, sus
+  39 autos, sus pistas y también las de NFM 2 y el Stage Maker, a 60 fps y en español;
+- **agrega autos nuevos del Car Maker a Extended**, con una pestaña propia en el Car Maker;
+- **arregla y mejora el port base**: colores idénticos a Java, sonido sin silbidos ni
+  zumbidos en ningún navegador, pistas multijugador de NFM 2 en Free Play, entre otras cosas.
 
+El detalle, separado entre port base, Extended y Car Maker, está en
+[`CHANGELOG.md`](CHANGELOG.md).
 
-- `AGENTS.md` - how to run, deploy, measure and verify; the invariants
-- `WORK.md` - discoveries and gotchas, newest last — including several measurements that overturned earlier conclusions
-- `TASKS.md` - what is done, what is next, what is blocked
--`web/TRANSPILE_SPEC.md` - the Java→JS contract
-- `decompilation/PORT_SPEC.md` - the original plan, and the still-binding rules for delegating work
+## Cómo se hizo el port de Extended
 
-## Roadmap
-- [x] basic game rendering
-- [x] basic game playability and physics
-- [x] in-game HUD
-- [x] sound
-- [x] game menus
-- [x] private online multiplayer
-- [x] upgrade ints to floats :o
-- [x] instant replay (last 300 race ticks)
-- [ ] track editor
-- [x] classic in-race controls (A: cars arrow, S: radar/map, Esc: pause and leave)
-- [ ] remaining classic GUI elements
-- [ ] classic interface
+Igual que el port base: el Java descompilado de Extended se traduce a JS siguiendo un
+contrato estricto (`web/TRANSPILE_SPEC.md`: enteros de 32 bits, redondeo a float32,
+asignaciones compuestas), y cada parte se compara contra el jar original ejecutándolo en
+paralelo (`web/tools/`). Los modelos cargan idénticos, el dibujado coincide llamada por
+llamada, y la física y la carga de pistas se reproducen exactas sobre trazas capturadas del
+jar.
+
+## Correrlo
+
+```sh
+python3 web/tools/serve.py 8123     # desde la raíz del repo
+# y abrir http://localhost:8123/
+```
+
+Tests: `cd web && node --test`. Cómo medir, verificar y desplegar: `AGENTS.md`.
+
+## Estructura
+
+- **`index.html`** — el launcher (elegir juego, auto y pista; ajustes).
+- **`web/`** — el port. `main.html` es el juego; `web/ext/` es Extended Mode.
+- **`ext/`** — los datos de Extended (sus `.radq`, fuentes y sonidos), sin modificar.
+- **`java/`** — el juego original parcheado (`Game.jar`, lo corre `start.sh`) y el jar
+  intacto (`Game.jar.bak`). Es la referencia contra la que se compara el port, no se compila.
+- **`decompilation/`** — el Java descompilado de NFM 2 y de Extended, y el plan del port.
+  Solo lectura.
+- **`data/`, `stages/`, `mycars/`, `mystages/`, `music/`** — los archivos del juego,
+  idénticos byte a byte al original y **no se modifican**.
+
+## Documentos
+
+- `CHANGELOG.md` — todo lo que cambió desde el port de radicalarchive
+- `AGENTS.md` — cómo correr, desplegar, medir y verificar; las invariantes
+- `WORK.md` — descubrimientos y trampas, lo más nuevo al final
+- `TASKS.md` — qué está hecho, qué sigue, qué está bloqueado
+- `web/TRANSPILE_SPEC.md` — el contrato Java → JS
+- `decompilation/PORT_SPEC.md` — el plan original y las reglas para delegar trabajo
