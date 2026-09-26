@@ -851,7 +851,192 @@ git commit -m "Car Maker: the Extended tab (special, own stats, health and damag
 
 ---
 
-### Task 6: Verify, record, hand over
+### Task 6: Car select filter — all cars / the game's / mine
+
+Asked by the user at plan review (2026-09-26): in Free Play's car select, choose whether you browse your own cars or the game's. ▴ ▾ (unused by the jar's normal-mode car select) cycle **All cars / Game cars / My cars**, as ▴ ▾ cycle the stage groups on the stage select; a DOM `<select>` over the car select does the same by mouse. ◂ ▸ then step within the group only. The choice is remembered in the Free Play pick (`carGroup`). With no Car Maker cars the control is hidden and the group is All.
+
+**Files:**
+- Modify: `web/ext/newcars.js` (group state; `firstCar`, `lastCar`, `nextCar` honour it)
+- Modify: `web/ext/newcars.test.js`
+- Modify: `web/ext/menus.js` (`loadPick` → `carGroup`; `clampCarArrows`; the car select wrapper's ▴ ▾; a DOM select shown in fase 7)
+- Modify: `web/ext/menus-newcars.test.js`
+- Modify: `web/i18n.js` (Spanish: `'All cars'`, `'Game cars'`, `'My cars'` exists already in the Car Maker dictionary — check, `'Cars'`, the hint)
+
+**Interfaces:**
+- Produces (newcars.js): `CAR_GROUPS = ['all', 'game', 'mine']`, `setCarGroup(g)`, `carGroup() → 'all'|'game'|'mine'` (always `'all'` with no new cars), `firstCar()`, `lastCar()`, `inGroup(c) → boolean`, `nextCar(c, d)` within the group, `cycleCarGroup(c) → { group, car }` (next group; `car` = `c` if still in it, else the group's first car).
+- Produces (menus.js): the pick gains `carGroup`; `pickCar` unchanged.
+
+- [ ] **Step 1: Write the failing tests** — append to `web/ext/newcars.test.js` (import the new names):
+
+```js
+test('the car groups: game cars only, my cars only, all', () => {
+  setNewCars([{ name: 'A', donor: 30 }, { name: 'B', donor: 13 }]);
+  setCarGroup('game');
+  assert.deepStrictEqual([firstCar(), lastCar()], [0, 38]);
+  assert.strictEqual(nextCar(38, 1), 38);
+  assert.ok(inGroup(5) && !inGroup(NEW_BASE));
+  setCarGroup('mine');
+  assert.deepStrictEqual([firstCar(), lastCar()], [NEW_BASE, NEW_BASE + 1]);
+  assert.strictEqual(nextCar(NEW_BASE, -1), NEW_BASE);
+  assert.ok(!inGroup(38) && inGroup(NEW_BASE + 1));
+  setCarGroup('all');
+  assert.strictEqual(nextCar(38, 1), NEW_BASE);
+  assert.strictEqual(nextCar(NEW_BASE, -1), 38);
+});
+
+test('no Car Maker cars: the group is always all; nonsense is all', () => {
+  setNewCars([]);
+  setCarGroup('mine');
+  assert.strictEqual(carGroup(), 'all');
+  assert.deepStrictEqual([firstCar(), lastCar()], [0, 38]);
+  setNewCars([{ name: 'A', donor: 30 }]);
+  setCarGroup('bogus');
+  assert.strictEqual(carGroup(), 'all');
+});
+
+test('cycling the group keeps the car when it is still in it, else jumps to the first', () => {
+  setNewCars([{ name: 'A', donor: 30 }]);
+  setCarGroup('all');
+  assert.deepStrictEqual(cycleCarGroup(7), { group: 'game', car: 7 });
+  assert.deepStrictEqual(cycleCarGroup(7), { group: 'mine', car: NEW_BASE });
+  assert.deepStrictEqual(cycleCarGroup(NEW_BASE), { group: 'all', car: NEW_BASE });
+  setCarGroup('all');
+});
+```
+
+and to `web/ext/menus-newcars.test.js`:
+
+```js
+test('the pick remembers the car group; a car outside it opens the group that holds it', () => {
+  setNewCars([{ name: 'A', donor: 30 }]);
+  const store = {};
+  globalThis.localStorage = { getItem: (k) => store[k] ?? null, setItem: (k, v) => { store[k] = v; } };
+  try {
+    store['nfm.ext.free'] = JSON.stringify({ car: 7, carGroup: 'game' });
+    assert.strictEqual(loadPick(['nfm2', 'ext']).carGroup, 'game');
+    store['nfm.ext.free'] = JSON.stringify({ car: NEW_BASE, carName: 'A', carGroup: 'game' });   // Try in Extended from a 'game' filter
+    assert.strictEqual(loadPick(['nfm2', 'ext']).carGroup, 'all');
+    store['nfm.ext.free'] = '{}';
+    assert.strictEqual(loadPick(['nfm2', 'ext']).carGroup, 'all');
+  } finally { delete globalThis.localStorage; setCarGroup('all'); }
+});
+
+test('the car select arrows stop at the ends of the group', () => {
+  setNewCars([{ name: 'A', donor: 30 }]);
+  setCarGroup('mine');
+  const c = { left: true, right: true };
+  clampCarArrows(c, NEW_BASE);
+  assert.deepStrictEqual(c, { left: false, right: false });
+  setCarGroup('all');
+});
+```
+
+(import `loadPick`, `clampCarArrows` from `./menus.js` and `setCarGroup` from `./newcars.js`.)
+
+- [ ] **Step 2: Run to verify they fail**
+
+Run: `cd web && node --test ext/newcars.test.js ext/menus-newcars.test.js`
+Expected: FAIL — `setCarGroup is not a function` / `carGroup` undefined.
+
+- [ ] **Step 3: Implement `web/ext/newcars.js`** — replace `lastCar` and `nextCar` with:
+
+```js
+// Free Play's car select can browse all cars, the game's 39 or the Car Maker's (menus.js)
+export const CAR_GROUPS = ['all', 'game', 'mine'];
+let group = 'all';
+export function setCarGroup(g) { group = CAR_GROUPS.includes(g) ? g : 'all'; }
+export const carGroup = () => (cars.length ? group : 'all');
+export const firstCar = () => (carGroup() === 'mine' ? NEW_BASE : 0);
+export const lastCar = () => (carGroup() === 'game' || !cars.length ? STOCK - 1 : NEW_BASE + cars.length - 1);
+export const inGroup = (c) => c >= firstCar() && c <= lastCar() && (c < STOCK || c >= NEW_BASE);
+
+/** The Free Play car select's arrows: 0..38, then the new cars, within the group, no wrap. */
+export function nextCar(c, d) {
+  if (d > 0) return c === STOCK - 1 ? (lastCar() >= NEW_BASE ? NEW_BASE : c) : Math.min(c + 1, lastCar());
+  return c === NEW_BASE ? (firstCar() === 0 ? STOCK - 1 : c) : Math.max(c - 1, firstCar());
+}
+
+/** ▴ ▾ on the car select: the next group, and the car to show in it. */
+export function cycleCarGroup(c) {
+  setCarGroup(CAR_GROUPS[(CAR_GROUPS.indexOf(carGroup()) + 1) % CAR_GROUPS.length]);
+  return { group: carGroup(), car: inGroup(c) ? c : firstCar() };
+}
+```
+
+- [ ] **Step 4: Implement `web/ext/menus.js`**
+  - import `firstCar, setCarGroup, carGroup, cycleCarGroup, inGroup, CAR_GROUPS` from `./newcars.js`.
+  - `loadPick`: after computing `car`, `setCarGroup(p.carGroup); if (!inGroup(car)) setCarGroup('all');` and return `carGroup: carGroup()` in the object.
+  - `clampCarArrows`: `if (car <= firstCar()) control.left = false;`
+  - in `xt.carselect` wrapper, inside `if (!career) { … }` before `clampCarArrows`:
+
+```js
+      // ▴ ▾: all cars / the game's / mine (the jar's normal-mode car select does not use them)
+      if ((control_.up || control_.down) && newCars().length && this.flipo === 0) {
+        const { group, car } = cycleCarGroup(this.sc[0]);
+        pick.carGroup = group;
+        this.sc[0] = car;
+        savePick(pick);
+      }
+      control_.up = control_.down = false;
+```
+
+  - on Enter (`pick.car = this.sc[0];` block) also `pick.carGroup = carGroup();`.
+  - a DOM overlay for the car select, next to `statUi` (free play only, shown when `xt.fase === 7 && newCars().length`):
+
+```js
+  // ---- the car select's group (free play): all / the game's / mine ------------
+  const carUi = document.createElement('div');
+  carUi.style.cssText = 'position:absolute;left:0;right:0;top:8px;width:870px;z-index:4;display:none;'
+    + 'text-align:center;pointer-events:none;font:bold 12px Arial,sans-serif;color:#fff;text-shadow:0 0 4px #000';
+  const GROUP_NAMES = { all: 'All cars', game: 'Game cars', mine: 'My cars' };
+  carUi.innerHTML = `<select data-k="cars" style="${'pointer-events:auto;height:24px;background:#000;color:rgb(47,179,255);'
+    + 'border:1px solid rgb(47,179,255);font:bold 13px Arial,sans-serif;padding:0 2px;'}" aria-label="${tr('Cars')}">${
+    CAR_GROUPS.map((g) => `<option value="${g}">${tr(GROUP_NAMES[g])}</option>`).join('')}</select>
+    <div style="margin-top:2px;opacity:.85">${tr('▴ ▾ cars')}</div>`;
+  const carSel = carUi.querySelector('select');
+  carUi.addEventListener('mousedown', (e) => e.stopPropagation());
+  carSel.onchange = () => {
+    carSel.blur();
+    setCarGroup(carSel.value);
+    pick.carGroup = carGroup();
+    if (!inGroup(xt.sc[0])) xt.sc[0] = firstCar();
+    savePick(pick);
+  };
+  if (!career) host.append(carUi);
+  const paintCars = () => {
+    const show = !career && xt.fase === 7 && newCars().length > 0;
+    carUi.style.display = show ? '' : 'none';
+    if (show && carSel.value !== carGroup()) carSel.value = carGroup();
+  };
+```
+
+  Call `paintCars()` in `tick()` after `paintStat()`, and `carUi.remove()` in `finish`. (`sel` is declared later in the file, which is why the style string is inline here.)
+
+- [ ] **Step 5: Spanish** — in `web/i18n.js` next to `'◂ ▸ stage · ▴ ▾ stages · …'` add `'All cars': 'Todos los autos', 'Game cars': 'Autos del juego', 'Cars': 'Autos', '▴ ▾ cars': '▴ ▾ autos',` and `'My cars'` only if `grep -n "'My cars'" web/i18n*.js` finds none (the Car Maker has `'My cars': 'Mis autos'`, which covers it). Add to `web/i18n.test.js`:
+
+```js
+test('Free Play car select groups are translated', () => {
+  for (const s of ['All cars', 'Game cars', 'My cars', '▴ ▾ cars']) assert.notStrictEqual(es.tr(s), s, s);
+});
+```
+
+- [ ] **Step 6: Run the tests**
+
+Run: `cd web && node --test`
+Expected: `# fail 0`.
+
+- [ ] **Step 7: Browser check** — with a Car Maker car stored, open Extended Free Play (launcher → Extended Edition → Free Play). Expected: the group select at the top of the car select; ▾ → Game cars, ▸ at DR Monstaa stays; ▾ → My cars shows the Car Maker car, ◂ stays; the select by mouse does the same; a reload remembers the group. Screenshot to the scratchpad.
+
+- [ ] **Step 8: Commit**
+
+```bash
+git add web/ext/newcars.js web/ext/newcars.test.js web/ext/menus.js web/ext/menus-newcars.test.js web/i18n.js web/i18n.test.js
+git commit -m "Extended Free Play: the car select browses all cars, the game's or yours"
+```
+
+---
+
+### Task 7: Verify, record, hand over
 
 **Files:**
 - Modify: `TASKS.md` (the "Car Maker cars in Extended" entry and a new one), `WORK.md` (append)
