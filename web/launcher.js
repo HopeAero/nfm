@@ -35,12 +35,14 @@ const STAGE_COUNT = 32;
  * every slot above it and a remembered number would race a different car. */
 const STORE_KEY = 'nfm.launcher';
 const DEFAULTS = {
-  name: '', car: 'Formula 7', stage: 1, players: 7, opponents: 'stage',
+  name: '', car: 'Formula 7', stage: 1, players: 7, extplayers: 7, opponents: 'stage',
   sfxvol: 100, musicvol: 100, res: 2, interp: true, ghost: false, hud: 'auto', devmode: false, perf: 'fps',
   visibility: 'public', lang: 'en',
 };
 let S = { ...DEFAULTS };
 try { S = { ...S, ...JSON.parse(localStorage.getItem(STORE_KEY) || '{}') }; } catch { /* first run */ }
+S.players = Number.isInteger(S.players) ? Math.max(1, Math.min(8, S.players)) : DEFAULTS.players;
+S.extplayers = Number.isInteger(S.extplayers) ? Math.max(1, Math.min(19, S.extplayers)) : DEFAULTS.extplayers;
 const save = () => {
   try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch { /* private mode */ }
 };
@@ -66,10 +68,16 @@ const V = {
     text: () => { const s = STAGES[V.stage.get()]; return s ? `${s.n}. ${s.name}` : '…'; },
   },
   players: {
-    list: () => [2, 3, 4, 5, 6, 7, 8],
+    list: () => [1, 2, 3, 4, 5, 6, 7, 8],
     get: () => V.players.list().indexOf(S.players),
     set: (i) => { S.players = V.players.list()[i]; save(); onLobbyEdit(); },
-    text: () => `${S.players} cars`,
+    text: () => `${S.players} ${S.players === 1 ? 'car' : 'cars'}`,
+  },
+  extplayers: {
+    list: () => Array.from({ length: 19 }, (_, i) => i + 1),
+    get: () => V.extplayers.list().indexOf(S.extplayers),
+    set: (i) => { S.extplayers = V.extplayers.list()[i]; save(); },
+    text: () => `${S.extplayers} ${S.extplayers === 1 ? 'car' : 'cars'}`,
   },
   opponents: {
     list: () => ['stage', 'same'],
@@ -201,7 +209,8 @@ $('gm-rows').innerHTML = GM.map((t, i) =>
 // ?ext=classic.
 const EXT = [['free', 'Free Play'], ['career', 'Career Mode']];
 $('ext-rows').innerHTML = EXT.map(([k, t]) =>
-  `<li class="item" role="menuitem" data-act="ext:${k}"><span class="label">${t}</span></li>`).join('');
+  `<li class="item" role="menuitem" data-act="ext:${k}"><span class="label">${t}</span></li>`).join('')
+  + `<li class="item orow" data-row="extplayers"><span class="slabel">Free Play cars</span>${valueBits('extplayers')}</li>`;
 
 // Spanish, when chosen: everything above wrote the pages' English; this
 // translates it and whatever is written later.
@@ -225,7 +234,7 @@ const page = () => PAGES[pageName()];
 const HINTS = {
   menu:  '<kbd>↑</kbd><kbd>↓</kbd> move · <kbd>Enter</kbd> select',
   gm:    '<kbd>↑</kbd><kbd>↓</kbd> move · <kbd>Enter</kbd> select · <kbd>Esc</kbd> back',
-  ext:   '<kbd>↑</kbd><kbd>↓</kbd> move · <kbd>Enter</kbd> select · <kbd>Esc</kbd> back',
+  ext:   '<kbd>↑</kbd><kbd>↓</kbd> move · <kbd>←</kbd><kbd>→</kbd> change · <kbd>Enter</kbd> select · <kbd>Esc</kbd> back',
   sp:    '<kbd>↑</kbd><kbd>↓</kbd> move · <kbd>←</kbd><kbd>→</kbd> change · <kbd>Enter</kbd> open / start · <kbd>Esc</kbd> back',
   opts:  '<kbd>↑</kbd><kbd>↓</kbd> move · <kbd>←</kbd><kbd>→</kbd> change · <kbd>Esc</kbd> back',
   mp:    '<kbd>↑</kbd><kbd>↓</kbd> move · <kbd>Enter</kbd> join / host · <kbd>←</kbd><kbd>→</kbd> public–private · <kbd>Esc</kbd> back',
@@ -262,7 +271,25 @@ function move(d) {
   p.items[p.sel].scrollIntoView({ block: 'nearest' });
 }
 
+let extendedPreloaded = false;
+function preloadExtendedModules() {
+  if (extendedPreloaded) return;
+  extendedPreloaded = true;
+  performance.mark('nfm-ext-prewarm-start');
+  for (const href of ['./web/main.js', './web/ext/race.js']) {
+    const link = document.createElement('link');
+    link.rel = 'modulepreload';
+    link.href = href;
+    document.head.append(link);
+  }
+  // Fetch and decode the shared archives while the player chooses a mode.
+  // bootExtended awaits the same work if the player starts immediately.
+  void import('./ext/assets.js').then(({ preloadCoreArchives }) => preloadCoreArchives())
+    .catch((error) => console.warn('Extended archive prewarm failed', error));
+}
+
 function goPage(name) {
+  if (name === 'ext') preloadExtendedModules();
   const prev = pageName();
   if (prev === 'set' && name !== 'set') pendingLang = null;
   document.body.dataset.page = name;
@@ -327,7 +354,7 @@ function paintValues() {
   }
   $('nameval').textContent = S.name || '(unnamed)';
   $('setname').textContent = S.name || '(unnamed)';
-  $('optsum').textContent = `${S.players} cars · ${V.opponents.text()}`;
+  $('optsum').textContent = `${S.players} ${S.players === 1 ? 'car' : 'cars'} · ${V.opponents.text()}`;
   const car = CARS[V.car.get()];
   const meta = $('page-sp').querySelector('[data-meta="car"]');
   if (car && meta) {
@@ -877,7 +904,7 @@ function fire() {
       return goPage('set');
     case 'gm':    return void startCarSelect(+arg);
     // Extended's race in the same shell as the base race (web/ext/race.js).
-    case 'ext':   return void startRace(null, { ext: arg });
+    case 'ext':   return void startRace(null, { ext: arg, ...(arg === 'free' ? { players: S.extplayers } : {}) });
     case 'opts':  return goPage('opts');
     case 'lang':  return applyLang();
     case 'back':  return goPage(BACK[pageName()]);

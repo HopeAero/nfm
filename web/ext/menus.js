@@ -106,7 +106,7 @@ export const bonusAt = (stage) => [5, 11, 15, 18].indexOf(stage);
  * @param o.exit            back to the launcher
  * @param o.careerStore     a real career's { save, saves, reset } (race.js), or null
  */
-export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, nfm2Names = [], setBaseStage = () => {}, exit, careerStore = null }) {
+export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, nfm2Names = [], setBaseStage = () => {}, prepareStage = () => Promise.resolve(), exit, careerStore = null }) {
   const career = mode === 'career';
   const GROUPS = groups();
   const pick = loadPick(GROUPS);
@@ -431,6 +431,7 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
   const MENU_FASES = new Set([-9, 7, 4, 201, 202, 205, 1110]);
   return new Promise((resolve, reject) => {
     let acc = 0, last = performance.now(), raf = 0;
+    let preparedBotStage = null, pendingBotStage = null, botLoadError = null;
     const onKey = (e) => {
       // ▴ ▾ on the free play car select: the game's cars / yours. On keydown, not through the
       // jar's control flags: a quick tap releases before the next menu tick and was lost.
@@ -465,6 +466,24 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
       err ? reject(err) : resolve(pick);
     };
     const tick = () => {
+      if (botLoadError) throw botLoadError;
+      if (xt.careermode) {
+        const stage = cp.stage;
+        if (preparedBotStage !== stage) {
+          if (pendingBotStage?.stage !== stage) {
+            const pending = { stage };
+            pendingBotStage = pending;
+            Promise.resolve(prepareStage(true, stage)).then(() => {
+              if (pendingBotStage === pending) { preparedBotStage = stage; pendingBotStage = null; }
+            }, (error) => {
+              if (pendingBotStage === pending) { botLoadError = error; pendingBotStage = null; }
+            });
+          }
+          return;
+        }
+      } else {
+        preparedBotStage = pendingBotStage = null;
+      }
       const onMenu = MENU_FASES.has(xt.fase);
       gs.rd = xt.rd = onMenu ? menu : gl;
       if (!onMenu) gl.begin();

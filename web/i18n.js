@@ -53,6 +53,7 @@ const ES = {
   'off — win races to unlock': 'no — gana carreras para desbloquear',
   'Single Player': 'Un jugador', 'Multiplayer': 'Multijugador', 'Car Maker': 'Creador de autos', 'Stage Maker': 'Creador de pistas',
   'Extended Edition': 'Edición Extendida', 'Classic Race': 'Carrera clásica', 'Career Mode': 'Modo carrera',
+  'Free Play cars': 'Autos en juego libre',
   'Race': 'Correr', 'Stages': 'Pistas',
   'Back to the normal stage': 'Volver a la pista normal', 'BONUS STAGE!': '¡PISTA BONUS!', 'Scouting': 'Ver rivales', 'hard mode': 'modo difícil', 'scale levels': 'escalar niveles',
   'no levels': 'sin niveles', 'Change car': 'Cambiar auto', 'Menu': 'Menú',
@@ -158,8 +159,8 @@ const ES = {
 
 // Strings built around a name or a number. First match wins.
 const ES_PATTERNS = [
-  [/^(\d+) cars$/, '$1 autos'],
-  [/^(\d+) cars · (.*)$/, (m, n, rest) => `${n} autos · ${tr(rest)}`],
+  [/^(\d+) cars?$/, (m, n) => `${n} ${n === '1' ? 'auto' : 'autos'}`],
+  [/^(\d+) cars? · (.*)$/, (m, n, rest) => `${n} ${n === '1' ? 'auto' : 'autos'} · ${tr(rest)}`],
   [/^(\d+) laps · (\d+) checkpoints$/, '$1 vueltas · $2 puntos de control'],
   [/^(English|Español) — Enter to apply$/, '$1 — Enter para aplicar'],
   [/^Class (.*?)( · my car)?$/, (m, c, mine) => `Clase ${tr(c)}${mine ? ' · mi auto' : ''}`],

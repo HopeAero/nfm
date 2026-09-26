@@ -18,6 +18,31 @@ import { parseWav, resample } from './resample.js';
 
 // the loops sparkeng() and the airborne whoosh hold: resampled as one turn of a loop
 const LOOPED = /^(\d\d|air\d)$/;
+export const loopBackendFor = (userAgent = '') => /\bOPR\//.test(userAgent) ? 'media' : 'buffer';
+
+// The Opera GX recording showed a 375 Hz buzz (48 kHz / 128 frames) on held
+// effects. Route those loops through a longer, already-resampled WAV in the
+// media pipeline. Build it only for a loop that is actually requested.
+export function loopWav(buffer, seconds = 6) {
+  const samples = buffer.getChannelData(0);
+  const turns = Math.max(1, Math.ceil(seconds * buffer.sampleRate / samples.length));
+  const frames = turns * samples.length;
+  const wav = new ArrayBuffer(44 + frames * 2);
+  const view = new DataView(wav);
+  const tag = (at, value) => { for (let i = 0; i < 4; i++) view.setUint8(at + i, value.charCodeAt(i)); };
+  tag(0, 'RIFF'); view.setUint32(4, wav.byteLength - 8, true);
+  tag(8, 'WAVE'); tag(12, 'fmt '); view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true); view.setUint16(22, 1, true);
+  view.setUint32(24, buffer.sampleRate, true);
+  view.setUint32(28, buffer.sampleRate * 2, true);
+  view.setUint16(32, 2, true); view.setUint16(34, 16, true);
+  tag(36, 'data'); view.setUint32(40, frames * 2, true);
+  for (let i = 0; i < frames; i++) {
+    const sample = Math.max(-1, Math.min(1, samples[i % samples.length]));
+    view.setInt16(44 + i * 2, sample < 0 ? Math.round(sample * 32768) : Math.round(sample * 32767), true);
+  }
+  return wav;
+}
 
 /**
  * An AudioBuffer for a clip's bytes, already at the context's rate: a PCM WAV is resampled
@@ -59,11 +84,13 @@ const CLIPS = [
 ];
 
 export class Audio {
-  constructor() {
+  constructor({ loopBackend = loopBackendFor(globalThis.navigator?.userAgent || '') } = {}) {
     this.ctx = null;
     this.buffers = new Map();      // name -> AudioBuffer
     this.playing = new Map();      // name -> AudioBufferSourceNode, for stop()
     this.looping = new Map();      // name -> looping source, for stopLoop()
+    this.loopBackend = loopBackend;
+    this.loopUrls = new Map();     // lazily encoded WAVs for media-backed loops
     this.muted = false;
     this.volume = 1;
     this.ready = false;
@@ -77,8 +104,11 @@ export class Audio {
     if (this.ctx) return;
     const Ctx = globalThis.AudioContext || globalThis.webkitAudioContext;
     if (!Ctx) return;                      // no Web Audio: stay silent
-    this.ctx = new Ctx();
+    // Short engine samples loop continuously; favour a stable output buffer on
+    // browsers that offer a larger one for playback (Opera GX: 20 vs 10 ms).
+    this.ctx = new Ctx({ latencyHint: 'playback' });
     this.gain = this.ctx.createGain();
+    this.gain.gain.value = this.muted ? 0 : this.volume;
     this.gain.connect(this.ctx.destination);
 
     const zip = await readZip('data/sounds.zip');
@@ -107,11 +137,14 @@ export class Audio {
   /** Resume the context. Must be called from a user gesture. */
   unlock() {
     if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+    for (const source of this.looping.values()) {
+      if (source.media?.paused) source.media.play().catch(() => {});
+    }
   }
 
   /** AudioClip.play(): fire a one-shot. Unknown or undecoded clips no-op. */
   play(name) {
-    if (this.muted || !this.ctx || this.ctx.state !== 'running') return;
+    if (this.muted || this.volume === 0 || !this.ctx || this.ctx.state !== 'running') return;
     const buf = this.buffers.get(name);
     if (!buf) return;
     const src = this.ctx.createBufferSource();
@@ -144,10 +177,25 @@ export class Audio {
    * here too.
    */
   loop(name) {
-    if (this.muted || !this.ctx || this.ctx.state !== 'running') return;
+    if (this.muted || this.volume === 0 || !this.ctx || this.ctx.state !== 'running') return;
     if (this.looping.has(name)) return;
     const buf = this.buffers.get(name);
     if (!buf) return;
+    if (this.loopBackend === 'media' && LOOPED.test(name) && typeof globalThis.Audio === 'function') {
+      try {
+        let url = this.loopUrls.get(name);
+        if (!url) {
+          url = URL.createObjectURL(new Blob([loopWav(buf)], { type: 'audio/wav' }));
+          this.loopUrls.set(name, url);
+        }
+        const media = new globalThis.Audio(url);
+        media.loop = true;
+        media.volume = this.volume;
+        this.looping.set(name, { media });
+        media.play().catch(() => {});
+        return;
+      } catch (e) { console.warn('media engine loop unavailable; using Web Audio', e); }
+    }
     const src = this.ctx.createBufferSource();
     src.buffer = buf;
     src.loop = true;
@@ -160,6 +208,7 @@ export class Audio {
   stopLoop(name) {
     const src = this.looping.get(name);
     if (!src) return;
+    if (src.media) { src.media.pause(); this.looping.delete(name); return; }
     try { src.stop(); } catch { /* already ended */ }
     this.looping.delete(name);
   }
@@ -178,6 +227,11 @@ export class Audio {
   setVolume(v) {
     this.volume = Math.max(0, Math.min(1, v));
     if (this.gain) this.gain.gain.value = this.muted ? 0 : this.volume;
+    for (const src of this.looping.values()) if (src.media) src.media.volume = this.muted ? 0 : this.volume;
+    if (this.volume === 0) {
+      this.stopAllLoops();
+      for (const name of [...this.playing.keys()]) this.stop(name);
+    }
   }
 
   setMuted(on) {

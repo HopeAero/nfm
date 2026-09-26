@@ -68,6 +68,7 @@ export class ByteArrayInputStream {
 const FILES = new Map();   // codebase-relative path -> raw bytes
 const ZIPS = new Map();    // fingerprint of a plain ZIP's bytes -> [[name, bytes]]
 const IMAGES = new Map();  // fingerprint of an encoded image -> Image (decoded by preload)
+const LOADING = new Map(); // path -> in-flight fetch and decode
 
 /** FNV-1a over the bytes as unsigned: a ZIP as the game holds it (signed, unswapped). */
 function fingerprint(b) {
@@ -78,19 +79,28 @@ function fingerprint(b) {
 
 /** Fetch each path (under ext/, e.g. 'data/Files/tracks.radq') for the code below. */
 export async function preload(paths, read) {
-  for (const p of paths) {
-    if (FILES.has(p)) continue;
-    const bytes = await read(p);
-    FILES.set(p, bytes);
-    if (p.endsWith('.radq')) {
-      // keyed by the bytes ZipInputStream will be handed: plain, whichever form is on disk
-      const entries = [...await parseRadq(bytes)];
-      ZIPS.set(fingerprint(isPlainZip(bytes) ? bytes : unswap(bytes)), entries);
-      // Toolkit.createImage(bytes) is synchronous in Java; decode every image now
-      if (typeof createImageBitmap === 'function')
-        for (const [name, b] of entries) if (/\.(gif|png|jpe?g)$/i.test(name)) IMAGES.set(fingerprint(b), await decodeImage(b));
-    }
-  }
+  // The archives are independent. Fetch and unpack them together: waiting for
+  // each ZIP (and its image decoding) before requesting the next one makes
+  // Extended's loading screen accumulate every round trip.
+  await Promise.all(paths.map((p) => {
+    if (FILES.has(p)) return;
+    if (LOADING.has(p)) return LOADING.get(p);
+    const work = (async () => {
+      const bytes = await read(p);
+      if (p.endsWith('.radq')) {
+        // keyed by the bytes ZipInputStream will be handed: plain, whichever form is on disk
+        const entries = [...await parseRadq(bytes)];
+        ZIPS.set(fingerprint(isPlainZip(bytes) ? bytes : unswap(bytes)), entries);
+        // Toolkit.createImage(bytes) is synchronous in Java; decode every image now
+        if (typeof createImageBitmap === 'function')
+          for (const [name, b] of entries) if (/\.(gif|png|jpe?g)$/i.test(name)) IMAGES.set(fingerprint(b), await decodeImage(b));
+      }
+      FILES.set(p, bytes);
+    })();
+    LOADING.set(p, work);
+    void work.finally(() => LOADING.delete(p)).catch(() => {});
+    return work;
+  }));
 }
 
 const KNOWN = new Set();   // files the real game has but ext/ does not serve (its music)
@@ -495,12 +505,13 @@ export class OggClip {
       this.url = globalThis.URL.createObjectURL(new Blob([bytes], { type: "audio/ogg" }));   // globalThis: URL here is java.net.URL
       this.el.src = this.url;
       this.ready = true;
-      if (this.wanted) this.el.play().catch(() => {});
+      if (this.wanted && OggClip.volume > 0) this.el.play().catch(() => {});
     }, (e) => console.warn('music: no track', file, e));
   }
   static level() { return Math.max(0, Math.min(1, 0.6 * OggClip.volume)); }
   start(loop) {
     if (!this.el) return;
+    if (OggClip.volume <= 0) { this.pause(); return; }
     this.wanted = true;
     this.el.loop = loop;
     if (!this.ready) return;        // still downloading: it starts when it arrives
@@ -510,9 +521,9 @@ export class OggClip {
   play() { this.start(false); }
   loop() { this.start(true); }
   pause() { this.wanted = false; this.el?.pause(); }
-  resume() { this.wanted = true; if (this.ready && this.el?.paused) this.el.play().catch(() => {}); }
+  resume() { if (OggClip.volume <= 0) { this.pause(); return; } this.wanted = true; if (this.ready && this.el?.paused) this.el.play().catch(() => {}); }
   stop() { this.pause(); }
   close() { this.el?.pause(); if (this.el) this.el.src = ''; if (this.url) globalThis.URL.revokeObjectURL(this.url); OggClip.all.delete(this); this.el = null; }
   /** A key or click: start any clip asked to play before the page had a gesture. */
-  static unlock() { for (const c of OggClip.all) if (c.ready && c.el && c.el.paused && c.wanted) c.el.play().catch(() => {}); }
+  static unlock() { if (OggClip.volume <= 0) return; for (const c of OggClip.all) if (c.ready && c.el && c.el.paused && c.wanted) c.el.play().catch(() => {}); }
 }

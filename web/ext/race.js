@@ -18,8 +18,9 @@
 // ?ext=free|career: the launcher's Free Play / Career Mode, car and stage select first (menus.js)
 // ?ext=classic|career  [&stage=N] [&car=M]  [&tickms=53] [&res=2] [&textres=1] [&aa=0|1]
 
-import { detectFpath, readBytes, readText, readZip } from '../vfs.js';
-import { OggClip, Panel, System, ZipInputStream, knownFiles, preload } from './jawt.js';
+import { detectFpath, readText, readZip } from '../vfs.js';
+import { OggClip, Panel, System, ZipInputStream, knownFiles } from './jawt.js';
+import { preloadCoreArchives, preloadRaceBot } from './assets.js';
 import { MUSIC_FILES } from './musicfiles.js';
 import { JGraphics, JGraphics2D } from './jgraphics.js';
 import { GameSparker } from './GameSparker.js';
@@ -49,9 +50,6 @@ import { loadNewCars } from './newcars-stats.js';
 import { newCarModel } from './newcars-model.js';
 
 const W = 870, H = 480;   // Extended's game space (the base game's is 800x450)
-const BOTS = [5, 9, 10, 11, 13, 14, 18, 20, 21].map((n) => `data/Files/Bots/stage${n}.radq`);
-const ARCHIVES = ['data/models.radq', 'data/images.radq', 'data/Files/tracks.radq', 'data/Files/careertracks.radq',
-  'data/Files/classictracks.radq', 'data/Files/matchtracks.radq', ...BOTS];
 const FONTS = [['Adventure', 'Adventure.ttf'], ['fifawelcome1.3', 'fifawelcome1.3.ttf']];
 
 // Java 1.0 key codes, as GameSparker.keyDown expects them.
@@ -61,12 +59,16 @@ const KEYS = { ArrowUp: 1004, ArrowDown: 1005, ArrowLeft: 1006, ArrowRight: 1007
 const javaKey = (e) => KEYS[e.key] ?? (e.key.length === 1 ? e.key.charCodeAt(0) : 0);
 
 export async function bootExtended(params, log, onExit) {
+  performance.mark('nfm-ext-boot-start');
   const base = await detectFpath(params.get('path'));
   // the launcher reloads itself; main.html on its own goes back to the launcher
   const leave = onExit || (() => { location.href = `${base}index.html`; });
   let exit = () => { sound.stopAll(); tracker.stop(); for (const c of OggClip.all) c.pause(); leave(); };
   const mode = ['career', 'free'].includes(params.get('ext')) ? params.get('ext') : 'classic';
   const free = mode === 'free';
+  const playersParam = params.has('players') ? Number(params.get('players')) : NaN;
+  const freePlayPlayers = free && Number.isInteger(playersParam)
+    ? Math.max(1, Math.min(19, playersParam)) : null;
   // ?selftest= with ?stage= goes straight to the race, as before the menus: a hash that repeats
   const menus = (free || mode === 'career') && !(params.get('selftest') && params.has('stage'));
   // a real career is saved (career-save.js); developer mode races it with everything open, unsaved
@@ -99,8 +101,9 @@ export async function bootExtended(params, log, onExit) {
 
   // ---- assets: synchronous for the Java, so fetched first -------------------
   log(`assets at ${base} -- loading Extended's archives...`);
-  await preload(ARCHIVES, (p) => readBytes('ext/' + p));
+  await preloadCoreArchives(base);
   for (const [family, file] of FONTS) document.fonts.add(await new FontFace(family, `url(${base}ext/fonts/${file})`).load());
+  performance.mark('nfm-ext-fonts-ready');
   knownFiles(MUSIC_FILES);
   // ?nfm2stage=N / ?mystage=NAME: an NFM2 or Stage Maker stage, translated for
   // Extended (stagecompat.js); it stands in for the stage the jar loads
@@ -181,6 +184,35 @@ export async function bootExtended(params, log, onExit) {
   gs.readdata = function (x, madness, cp) {
     GameSparker.prototype.readdata.call(this, x, madness, cp);
     xt = x; checkpoints = cp;
+    if (freePlayPlayers !== null) {
+      // Let the game's stage setup run first, then replace its default 11-car
+      // free-play field with the launcher's chosen size before loadstage uses it.
+      const randomno = xt.randomno;
+      xt.nplayers = freePlayPlayers;
+      xt.randomno = function (...a) {
+        const result = randomno.apply(this, a);
+        this.nplayers = freePlayPlayers;
+        return result;
+      };
+      if (freePlayPlayers === 1) {
+        // Extended treats zero wasted opponents as an immediate wasting win.
+        // In a one-car time trial, skip that one check so the lap can finish.
+        const stat = xt.stat$m;
+        xt.stat$m = function (...a) {
+          let firstWastedRead = true;
+          a[1] = new Proxy(a[1], {
+            get(target, key, receiver) {
+              if (key === 'wasted' && firstWastedRead) {
+                firstWastedRead = false;
+                return Math.max(1, Reflect.get(target, key, receiver));
+              }
+              return Reflect.get(target, key, receiver);
+            },
+          });
+          return stat.apply(this, a);
+        };
+      }
+    }
     // The presenter's screen shows the race music's real download in place of the jar's
     // hand-written size per stage (sndsize, "N KB").
     const hipnoload = xt.hipnoload, drawcs = xt.drawcs;
@@ -317,6 +349,7 @@ export async function bootExtended(params, log, onExit) {
     window.xt = xt; window.checkpoints = checkpoints;   // for the console
     await runMenus({
       mode, gs, frame, xt, cp: checkpoints, gl: rd, menu: new JGraphics(menuCanvas, W, H), menuCanvas, host: stage,
+      prepareStage: (career, stage) => preloadRaceBot(career, stage),
       nfm2Names: nfm2?.names, exit: () => exit(),
       // the car select's Confirm / Undo and New career (menus.js): a real career only
       careerStore: realCareer ? { save: () => careerSave(), saves: () => careerSaves, reset: () => { clearCareer(); location.reload(); } } : null,
@@ -329,6 +362,8 @@ export async function bootExtended(params, log, onExit) {
     // again. Quitting from the pause menu still leaves for the launcher.
     if (realCareer) xt.maini = () => { xt.laststage = checkpoints.stage; careerSave(); location.reload(); };
   }
+  await preloadRaceBot(xt?.careermode ?? (mode === 'career'), xt ? checkpoints.stage : params.get('stage'));
+  performance.mark('nfm-ext-stage-assets-ready');
 
   // ---- to the presenter, unseen -----------------------------------------------
   // The stage preview (fase 1) waits for Enter and is pressed through; loading the
@@ -352,6 +387,7 @@ export async function bootExtended(params, log, onExit) {
     if (n % 20 === 19) await new Promise((r) => setTimeout(r, 0));   // let the page breathe
   }
   stage.style.visibility = '';
+  performance.mark('nfm-ext-presenter-ready');
   const { medium } = w;
   const race = new RaceTick(gs, w);
   sound.attach(xt, w.aconto2[0]);  // the player's sparks scrape
@@ -359,7 +395,10 @@ export async function bootExtended(params, log, onExit) {
   window.xt = xt; window.checkpoints = checkpoints;
   window.ext = { w, race };        // for the console
   // ?debug=1: the base's console handle (web/main.js), for tools that read it
-  if (params.get('debug') === '1') window.__nfm = { xt, checkPoints: checkpoints, gs, medium: w.medium, record: w.record, co: w.aconto2, w, race };
+  if (params.get('debug') === '1') window.__nfm = {
+    xt, checkPoints: checkpoints, gs, medium: w.medium, record: w.record, co: w.aconto2, w, race,
+    audio: { effects: sound.snd, requestedSfx: sfxvol, requestedMusic: musicvol, ogg: OggClip },
+  };
 
   // ---- the pause: the base port's race menu (web/race-ui.js) ------------------------
   // Esc, or Enter (stat() sets the jar's pause fase -6), opens it over the frozen frame
@@ -450,6 +489,7 @@ export async function bootExtended(params, log, onExit) {
   // Settings -> Show performance (perfline.js); 'all' is the full line with the sim/draw costs
   const PERF = perfLevel(params);
   const SHOW_STATS = params.get('stats') === '1' || PERF === 'all';
+  const AUDIO_PROBE = params.get('audioprobe') === '1' || PERF === 'all';
   const SPIKE_MS = parseFloat(params.get('spike') || '0');   // ?spike=MS logs slow frames
   window.spikes = [];
   // ?bench= ?prof=1 ?maxfps= (benchtools.js)
@@ -678,6 +718,13 @@ export async function bootExtended(params, log, onExit) {
           + `  worst ${worst.toFixed(1)}ms  over 16.7ms: ${over}/${frames}  [interp=${INTERPOLATE ? 1 : 0}]`;
       }
       if (!bench) line = perfLine(PERF, { fps: frames * 1000 / dt, tps: ticks * 1000 / dt, tickMs: simMs / Math.max(1, ticks), frameMs: drawMs / Math.max(1, frames) }) ?? line;
+      if (AUDIO_PROBE) {
+        const gain = sound.snd.gain?.gain.value;
+        const loops = [...sound.snd.looping.keys()].join(',') || '-';
+        const ogg = [...OggClip.all].filter((clip) => clip.wanted).map((clip) => clip.path.split('/').pop()).join(',') || '-';
+        line += `\n  audio: effects ${sfxvol}% gain=${gain === undefined ? '-' : gain.toFixed(2)} ${sound.snd.ctx?.state || 'off'}`
+          + ` loops=${loops}  music ${musicvol}% ogg=${ogg}`;
+      }
       log(line);
       frames = 0; ticks = 0; lastFpsAt = now; simMs = 0; drawMs = 0; worst = 0; over = 0;
     }
