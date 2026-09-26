@@ -1147,6 +1147,12 @@ Gameplay stays separate; Extended learns to read what the editors make.
       images.zip, Spanish redrawn); ▴ ▾ too. The Body tab edits the author
       (`carmaker(name)`), credited in the car select instead of the donor's creator
       (ext-patches `newcar-credit-*`). Plan: `docs/superpowers/plans/2026-09-26-ext-carmaker.md`.
+- [ ] **The web Car Maker cannot calibrate the crash** (`physics()` value 16, `actmag`): only
+      the applet's `careditor/tab2.js` computes it, and the new UI never calls it; the
+      Physics tab just says "not calibrated". `CarDefine.loadstat` blanks a car without it
+      (`if (b && b2)`, CarDefine.js:184/490), so a car built from the template races
+      neither in NFM 2 nor in Extended (Try in Extended now says so instead of racing car 38).
+      Port the calibration (tab2.js ~1259-1360) behind a button.
 - [ ] New cars in the career: `career-save.js` saves per index (`CARS = 39`), and a
       new car's index moves with the list -- save them by name; level-ups
       (`reqneed`, `resetstats` take the car number as a plain parameter: see WORK.md).
