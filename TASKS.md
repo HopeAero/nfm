@@ -1128,7 +1128,7 @@ Gameplay stays separate; Extended learns to read what the editors make.
       scenery and stagecompat's models) in the model array and the 70 per-car tables
       (`web/ext/newcars-grow.js`, grown by ext-patch after the constructors; a test
       compares its lists with every length-39 field), and its donor's number as its
-      IDENTITY: `web/tools/ext-ident.mjs` wraps the 1,110 `car <op> literal`
+      IDENTITY: `web/tools/ext-ident.mjs` wraps the 1,115 `car <op> literal`
       comparisons (+ healthcalc's `carid`) as `id(car)`, so the donor's special and
       quirks come with it. Physics: the base `CarDefine.loadstat` (NFM 2's formulas);
       Extended-only values from the donor. Model: ext-patches `newcar-isacar` and

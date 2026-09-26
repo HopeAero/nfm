@@ -9,7 +9,8 @@
 import fs from 'node:fs';
 import { pathToFileURL } from 'node:url';
 
-export const FILES = ['Madness.js', 'xtGraphics.js', 'Control.js', 'GameSparker.js', 'Contva.js'];
+export const FILES = ['Madness.js', 'xtGraphics.js', 'Control.js', 'GameSparker.js', 'Contva.js',
+  'racetick.js'];   // racetick.js: the hand-kept copy of run()'s race frame that race.js actually ticks
 const CAR = String.raw`(?:(?:this|madness|usermad|amadness\[[^\]]+\]|madness\[[^\]]+\])\.cn|(?:this|xtgraphics|this\.xt)\.sc\[[^\]]+\]|this\.lastcar)`;
 // a car expression not already inside id(...) and not the tail of a longer name
 // (`amadness[k].cn` must not also match as `madness[k].cn`), compared with an integer literal
