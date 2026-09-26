@@ -32,7 +32,7 @@ import { Graphics2D } from '../graphics.js';
 import { tr, translateDocument } from '../i18n.js';
 import * as ext from '../ext/extlines.js';
 import { carFromRad, defaultDonor } from '../ext/newcars-stats.js';
-import { specialLabel, specialText, tryPick, TRY_KEY, PICK_KEY } from './extended.js';
+import { specialLabel, specialText, tryPick, perText, TRY_KEY, PICK_KEY } from './extended.js';
 
 const $ = (id) => document.getElementById(id);
 const code = $('code'), pick = $('pick'), status = $('status'), err = $('err');
@@ -368,13 +368,12 @@ function buildPhysics() {
 // Extended's carFromRad and ignored by NFM 2. Values out of range are shown, marked
 // invalid, and left alone until the user moves the control.
 function buildExtended() {
-  const e = () => ext.readExt(source());
-  // carFromRad parses the model: once per source text, not once per row
-  let memo = [null, null];
-  const car = () => {
-    if (memo[0] !== source()) memo = [source(), carFromRad(current || 'car', source())];
-    return memo[1];
-  };
+  // Every slider on every tab re-syncs every row: parse the ext lines once per text, and
+  // build the car (carFromRad parses the whole model again) only while this tab is shown.
+  const readExt = perText(ext.readExt);
+  const e = () => readExt(source());
+  const build = perText((t) => carFromRad(current || 'car', t));
+  const car = () => ($('pane-extended').hidden ? null : build(source()));
 
   const sp = $('ext-special');
   sp.innerHTML = '';
@@ -692,6 +691,7 @@ pick.onchange = () => open(pick.value);   // the value carries the source too
       t.tabIndex = on ? 0 : -1;
       $('pane-' + t.dataset.pane).hidden = !on;
     }
+    if (tab.dataset.pane === 'extended') sync();   // its health / damage figures wait until it is shown
     if (focus) tab.focus();
   };
   tabs.forEach((t) => { t.onclick = () => select(t); });

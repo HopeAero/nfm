@@ -13,6 +13,15 @@ const NONE = 'No description in the game.';
 export const specialLabel = (k) => `${EXT_CARS[k]} — ${tr(SPECIALS[k][0] ?? NONE)}`;
 export const specialText = (k) => (SPECIALS[k].length ? SPECIALS[k].map(tr).join('\n') : tr(NONE));
 
+/** fn(text), computed again only when the text changes: every row of the tab reads it on each sync. */
+export function perText(fn) {
+  let last = null, value;
+  return (text) => {
+    if (text !== last) { last = text; value = fn(text); }
+    return value;
+  };
+}
+
 export function tryPick(prevJson, name) {
   let p = null;
   try { p = JSON.parse(prevJson); } catch { /* none */ }
