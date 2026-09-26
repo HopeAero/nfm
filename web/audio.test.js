@@ -1,12 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Audio, loopBackendFor, loopWav } from './audio.js';
-
-test('Opera OPR user agents use media elements for continuous loops', () => {
-  assert.equal(loopBackendFor('Mozilla/5.0 Chrome/140.0.0.0 Safari/537.36'), 'buffer');
-  assert.equal(loopBackendFor('Mozilla/5.0 Chrome/140.0.0.0 OPR/125.0.0.0'), 'media');
-  assert.equal(loopBackendFor(''), 'buffer');
-});
+import { Audio } from './audio.js';
+import { Mixer } from './mixer.js';
 
 test('zero effects volume does not start clips and stops a running engine loop', () => {
   const audio = new Audio();
@@ -36,43 +31,47 @@ test('zero effects volume does not start clips and stops a running engine loop',
   assert.equal(audio.looping.size, 0);
 });
 
-test('media-backed engine loops use resampled WAV and obey effects volume', () => {
-  const OriginalAudio = globalThis.Audio;
-  const played = [];
-  globalThis.Audio = class {
-    paused = true;
-    constructor(url) { this.url = url; }
-    play() { this.paused = false; played.push(this); return Promise.resolve(); }
-    pause() { this.paused = true; }
-  };
-  try {
-    const audio = new Audio({ loopBackend: 'media' });
-    audio.ctx = { state: 'running', createBufferSource() { throw new Error('used Web Audio'); } };
-    audio.gain = { gain: { value: 1 } };
-    audio.buffers.set('20', {
-      sampleRate: 48000,
-      getChannelData: () => Float32Array.of(-1, 0, 1, 0),
-    });
-    const wav = new DataView(loopWav(audio.buffers.get('20'), 0.001));
-    assert.equal(wav.getUint32(24, true), 48000);
-    assert.equal(wav.getInt16(44, true), -32768);
-    assert.equal(wav.getInt16(48, true), 32767);
-    assert.equal(wav.getInt16(52, true), -32768); // the source repeats exactly
+test('mixer loops wrap sample-exact across blocks and do not double', () => {
+  const m = new Mixer();
+  m.command({ op: 'add', name: '20', samples: Float32Array.of(1, 2, 3) });
+  m.command({ op: 'loop', name: '20' });
+  m.command({ op: 'loop', name: '20' });            // already looping: no second voice
+  const a = new Float32Array(4), b = new Float32Array(4);
+  m.render(a); m.render(b);
+  assert.deepEqual([...a, ...b], [1, 2, 3, 1, 2, 3, 1, 2]);
+  m.command({ op: 'stopLoop', name: '20' });
+  m.render(a);
+  assert.deepEqual([...a], [0, 0, 0, 0]);
+});
 
-    audio.setVolume(0.25);
-    audio.loop('20');
-    assert.equal(played.length, 1);
-    assert.equal(played[0].loop, true);
-    assert.equal(played[0].volume, 0.25);
-    audio.setVolume(0.5);
-    assert.equal(played[0].volume, 0.5);
-    audio.setVolume(0);
-    assert.equal(played[0].paused, true);
-    assert.equal(audio.looping.size, 0);
-    audio.loop('20');
-    assert.equal(played.length, 1);
-    for (const url of audio.loopUrls.values()) URL.revokeObjectURL(url);
-  } finally {
-    globalThis.Audio = OriginalAudio;
-  }
+test('mixer one-shots sum, end on their own, and stop cuts only the latest', () => {
+  const m = new Mixer();
+  m.command({ op: 'add', name: 'crash1', samples: Float32Array.of(1, 1, 1, 1, 1, 1) });
+  m.command({ op: 'play', name: 'crash1' });
+  const out = new Float32Array(2);
+  m.render(out);
+  m.command({ op: 'play', name: 'crash1' });        // overlaps the first
+  m.render(out);
+  assert.deepEqual([...out], [2, 2]);
+  m.command({ op: 'stop', name: 'crash1' });        // the second one
+  m.render(out);
+  assert.deepEqual([...out], [1, 1]);
+  m.render(out);
+  assert.equal(m.voices.length, 0);                 // the first ran out
+  m.command({ op: 'play', name: 'unknown' });
+  assert.equal(m.voices.length, 0);
+});
+
+test('with a mixer, audio.js posts commands instead of starting buffer sources', () => {
+  const audio = new Audio();
+  const sent = [];
+  audio.ctx = { state: 'running', createBufferSource() { throw new Error('used buffer sources'); } };
+  audio.gain = { gain: { value: 1 } };
+  audio.mixer = { port: { postMessage: (m) => sent.push(m) } };
+  audio.setClip('20', { getChannelData: () => Float32Array.of(0.5) });
+  audio.loop('20'); audio.loop('20'); audio.play('20'); audio.stop('20');
+  assert.equal(audio.isLooping('20'), true);
+  audio.setVolume(0);
+  assert.equal(audio.isLooping('20'), false);
+  assert.deepEqual(sent.map((m) => m.op), ['add', 'loop', 'play', 'stop', 'stopLoop']);
 });

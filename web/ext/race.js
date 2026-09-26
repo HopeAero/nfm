@@ -723,7 +723,7 @@ export async function bootExtended(params, log, onExit) {
         const loops = [...sound.snd.looping.keys()].join(',') || '-';
         const ogg = [...OggClip.all].filter((clip) => clip.wanted).map((clip) => clip.path.split('/').pop()).join(',') || '-';
         line += `\n  audio: effects ${sfxvol}% gain=${gain === undefined ? '-' : gain.toFixed(2)} ${sound.snd.ctx?.state || 'off'}`
-          + ` loops=${loops}  music ${musicvol}% ogg=${ogg}`;
+          + ` ${sound.snd.mixer ? 'worklet' : 'buffers'} loops=${loops}  music ${musicvol}% ogg=${ogg}`;
       }
       log(line);
       frames = 0; ticks = 0; lastFpsAt = now; simMs = 0; drawMs = 0; worst = 0; over = 0;
