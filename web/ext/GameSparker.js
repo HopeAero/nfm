@@ -5,6 +5,8 @@
 import { floatArray, fr, i32, idiv, intArray, jround, objArray, trunc } from '../java.js';
 import { Applet, BufferedReader, ByteArrayInputStream, Color, Cursor, DataInputStream, Date, File, FileInputStream, FileOutputStream, InputStreamReader, Integer, RenderingHints, StringBuilder, System, Thread, URL, ZipEntry, ZipInputStream, ZipOutputStream, charAt, jstr } from './jawt.js';
 import { Bots } from './Bots.js';
+// ext-patch newcar-import
+import { growMadness, growXt } from './newcars-grow.js';
 import { CheckPoints } from './CheckPoints.js';
 import { ContO } from './ContO.js';
 import { Control } from './Control.js';
@@ -1494,6 +1496,7 @@ export class GameSparker extends Applet {
     }
     let checkpoints = new CheckPoints();
     let xtgraphics = new xtGraphics(medium, this.rd, this.sg, this);
+    growXt(xtgraphics);   // ext-patch newcar-grow-xt
     xtgraphics.loaddata(k);
     let record = new Record(medium, xtgraphics.nplayers);
     let aconto = objArray(129);
@@ -1505,6 +1508,7 @@ export class GameSparker extends Applet {
     let l = 0;
     do {
       amadness[l] = new Madness(medium, record, xtgraphics, l);
+      growMadness(amadness[l]);   // ext-patch newcar-grow-mad
       this.u[l] = new Control(medium, contva);
     } while (++l < 101);
     this.readdata(xtgraphics, amadness[0], checkpoints);

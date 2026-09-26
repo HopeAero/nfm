@@ -232,10 +232,12 @@ export class ContO {
       this.sfactor = 6.0;
     }
     this.isacar = false;
-    if (((code < 39) || (((code >= 78) && (code < 117)))) || (code === 64)) {
+    // ext-patch newcar-isacar: a new car (NEW_BASE+, web/ext/newcars.js) is a car
+    if (((code < 39) || (((code >= 78) && (code < 117)))) || (code === 64) || (code >= 200)) {
       this.isacar = true;
     }
     let bool2 = false;
+    this.scl = [1.0, 1.0, 1.0];   // ext-patch newcar-scale-init
     try {
       let datainputstream = new DataInputStream(new ByteArrayInputStream(abyte0));
       let s2 = null;
@@ -278,9 +280,10 @@ export class ContO {
             bool2 = true;
           }
           if (s1.startsWith('p')) {
-            ai[i] = trunc((fr((fr(fr(this.getvalue('p', s1, 0)) * this.div)) * this.iwid)));
-            ai2[i] = trunc((fr(fr(this.getvalue('p', s1, 1)) * this.div)));
-            ai3[i] = trunc((fr(fr(this.getvalue('p', s1, 2)) * this.div)));
+            // ext-patch newcar-scale-p: x, y, z times ScaleX/Y/Z (1 but on a new car)
+            ai[i] = trunc(fr((fr((fr(fr(this.getvalue('p', s1, 0)) * this.div)) * this.iwid)) * this.scl[0]));
+            ai2[i] = trunc(fr((fr(fr(this.getvalue('p', s1, 1)) * this.div)) * this.scl[1]));
+            ai3[i] = trunc(fr((fr(fr(this.getvalue('p', s1, 2)) * this.div)) * this.scl[2]));
             let j2 = trunc(Math.sqrt(i32((i32((Math.imul(ai[i], ai[i])) + (Math.imul(ai2[i], ai2[i])))) + (Math.imul(ai3[i], ai3[i])))));
             if (j2 > this.maxR) {
               this.maxR = j2;
@@ -297,10 +300,11 @@ export class ContO {
           wheels.setrims(this.getvalue('rims', s1, 0), this.getvalue('rims', s1, 1), this.getvalue('rims', s1, 2), this.getvalue('rims', s1, 3), this.getvalue('rims', s1, 4));
         }
         if (s1.startsWith('w')) {
-          this.keyx[j] = trunc((fr(fr(this.getvalue('w', s1, 0)) * this.div)));
-          this.keyz[j] = trunc((fr(fr(this.getvalue('w', s1, 2)) * this.div)));
+          // ext-patch newcar-scale-w: the wheel's position times ScaleX/Y/Z; its size not (as the base)
+          this.keyx[j] = trunc(fr((fr(fr(this.getvalue('w', s1, 0)) * this.div)) * this.scl[0]));
+          this.keyz[j] = trunc(fr((fr(fr(this.getvalue('w', s1, 2)) * this.div)) * this.scl[2]));
           j = i32(j + 1);
-          wheels.make(this.m, this.t, this.p, this.npl, trunc((fr((fr(fr(this.getvalue('w', s1, 0)) * this.div)) * this.iwid))), trunc((fr(fr(this.getvalue('w', s1, 1)) * this.div))), trunc((fr(fr(this.getvalue('w', s1, 2)) * this.div))), this.getvalue('w', s1, 3), trunc((fr((fr(fr(this.getvalue('w', s1, 4)) * this.div)) * this.iwid))), trunc((fr(fr(this.getvalue('w', s1, 5)) * this.div))), i3);
+          wheels.make(this.m, this.t, this.p, this.npl, trunc(fr((fr((fr(fr(this.getvalue('w', s1, 0)) * this.div)) * this.iwid)) * this.scl[0])), trunc(fr((fr(fr(this.getvalue('w', s1, 1)) * this.div)) * this.scl[1])), trunc(fr((fr(fr(this.getvalue('w', s1, 2)) * this.div)) * this.scl[2])), this.getvalue('w', s1, 3), trunc((fr((fr(fr(this.getvalue('w', s1, 4)) * this.div)) * this.iwid))), trunc((fr(fr(this.getvalue('w', s1, 5)) * this.div))), i3);
           // base port's sparks: the base Wheels.make's sparkat, (int)(size / 10 * 24)
           this.sprkat = trunc(fr(fr(fr(trunc(fr(fr(this.getvalue('w', s1, 5)) * this.div))) / 10.0) * 24.0));
           this.npl = i32(this.npl + 15);
@@ -410,6 +414,11 @@ export class ContO {
         }
         if (s1.startsWith('idiv')) {
           this.div = fr(fr(this.getvalue('idiv', s1, 0)) / ((fr(this.sfactor * 10.0))));
+        }
+        // ext-patch newcar-scale-parse: the base ContO's ScaleX/Y/Z, new cars only
+        if (code >= 200 && s1.startsWith('Scale')) {
+          const ax = 'XYZ'.indexOf(s1[5]);
+          if (ax >= 0) this.scl[ax] = fr(fr(this.getvalue('Scale' + s1[5], s1, 0)) / 100.0);
         }
         if (s1.startsWith('iwid')) {
           this.iwid = fr(fr(this.getvalue('iwid', s1, 0)) / 100.0);

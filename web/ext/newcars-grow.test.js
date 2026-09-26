@@ -62,3 +62,24 @@ test('a donor column is a copy: changing the new car leaves the donor alone', ()
   x.specialstats[NEW_BASE][0][0] = 99;
   assert.notStrictEqual(x.specialstats[30][0][0], 99);
 });
+
+// ---- ext-patch newcar-isacar / newcar-scale-*: new models are cars and honour ScaleX/Y/Z ----
+import { ContO } from './ContO.js';
+import { Medium } from './Medium.js';
+import { Trackers } from './Trackers.js';
+
+// as web/ext/ContO.test.js builds its models: a real Medium and Trackers, no xtGraphics
+const bytes = (s) => Int8Array.from(s, (c) => c.charCodeAt(0));
+const box = (scale) => `${scale}\n<p>\nc(100,100,100)\np(-10,0,10)\np(10,0,10)\np(10,0,-10)\n</p>\n`;
+const model = (code, s) => new ContO(0, bytes(box(s)), new Medium(), new Trackers(), null, code);
+
+test('a new car code is a car; stock codes are unchanged', () => {
+  assert.strictEqual(model(NEW_BASE, '').isacar, true);
+  assert.strictEqual(model(39, '').isacar, false);
+  assert.strictEqual(model(5, '').isacar, true);
+});
+
+test('new car codes honour ScaleX/Y/Z; stock codes ignore Scale lines', () => {
+  assert.ok(model(NEW_BASE, 'ScaleX(200)\nScaleZ(200)').maxR > model(NEW_BASE, '').maxR * 1.9);
+  assert.strictEqual(model(5, 'ScaleX(200)\nScaleZ(200)').maxR, model(5, '').maxR);
+});

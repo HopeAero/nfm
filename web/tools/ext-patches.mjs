@@ -307,6 +307,57 @@ const RECORD_GHOSTS_REPLACE = `      // ext-patch record-ghosts: no snapshot whe
       if (this.ghosts !== false) this.car[5][i] = new ContO(1, conto, 0, 0, 0, 0);
 `;
 
+/**
+ * Extended new cars (web/ext/newcars*.js): the per-car tables grow right after the
+ * constructors fill them; a model at NEW_BASE (200)+ is a car; and such a model honours
+ * ScaleX/Y/Z as the base ContO does (Car Maker cars use them; the jar has no Scale
+ * directive, so stock codes keep ignoring the lines). Scale 1 leaves every
+ * coordinate as it was: fr(x * 1.0) === x for a float32 x.
+ */
+const NEWCAR_PATCHES = [
+  { name: 'newcar-import', file: 'GameSparker.js',
+    find: `import { Bots } from './Bots.js';\n`,
+    replace: `import { Bots } from './Bots.js';\n// ext-patch newcar-import\nimport { growMadness, growXt } from './newcars-grow.js';\n` },
+  { name: 'newcar-grow-xt', file: 'GameSparker.js',
+    find: `    let xtgraphics = new xtGraphics(medium, this.rd, this.sg, this);\n`,
+    replace: `    let xtgraphics = new xtGraphics(medium, this.rd, this.sg, this);\n    growXt(xtgraphics);   // ext-patch newcar-grow-xt\n` },
+  { name: 'newcar-grow-mad', file: 'GameSparker.js',
+    find: `      amadness[l] = new Madness(medium, record, xtgraphics, l);\n`,
+    replace: `      amadness[l] = new Madness(medium, record, xtgraphics, l);\n      growMadness(amadness[l]);   // ext-patch newcar-grow-mad\n` },
+  { name: 'newcar-isacar', file: 'ContO.js',
+    find: `    if (((code < 39) || (((code >= 78) && (code < 117)))) || (code === 64)) {\n`,
+    replace: `    // ext-patch newcar-isacar: a new car (NEW_BASE+, web/ext/newcars.js) is a car\n    if (((code < 39) || (((code >= 78) && (code < 117)))) || (code === 64) || (code >= 200)) {\n` },
+  { name: 'newcar-scale-init', file: 'ContO.js',
+    find: `    let bool2 = false;\n    try {\n      let datainputstream = new DataInputStream(new ByteArrayInputStream(abyte0));\n`,
+    replace: `    let bool2 = false;\n    this.scl = [1.0, 1.0, 1.0];   // ext-patch newcar-scale-init\n    try {\n      let datainputstream = new DataInputStream(new ByteArrayInputStream(abyte0));\n` },
+  { name: 'newcar-scale-parse', file: 'ContO.js',
+    find: `        if (s1.startsWith('iwid')) {\n`,
+    replace: `        // ext-patch newcar-scale-parse: the base ContO's ScaleX/Y/Z, new cars only\n` +
+      `        if (code >= 200 && s1.startsWith('Scale')) {\n` +
+      `          const ax = 'XYZ'.indexOf(s1[5]);\n` +
+      `          if (ax >= 0) this.scl[ax] = fr(fr(this.getvalue('Scale' + s1[5], s1, 0)) / 100.0);\n` +
+      `        }\n` +
+      `        if (s1.startsWith('iwid')) {\n` },
+  { name: 'newcar-scale-p', file: 'ContO.js',
+    find: `            ai[i] = trunc((fr((fr(fr(this.getvalue('p', s1, 0)) * this.div)) * this.iwid)));\n` +
+      `            ai2[i] = trunc((fr(fr(this.getvalue('p', s1, 1)) * this.div)));\n` +
+      `            ai3[i] = trunc((fr(fr(this.getvalue('p', s1, 2)) * this.div)));\n`,
+    replace: `            // ext-patch newcar-scale-p: x, y, z times ScaleX/Y/Z (1 but on a new car)\n` +
+      `            ai[i] = trunc(fr((fr((fr(fr(this.getvalue('p', s1, 0)) * this.div)) * this.iwid)) * this.scl[0]));\n` +
+      `            ai2[i] = trunc(fr((fr(fr(this.getvalue('p', s1, 1)) * this.div)) * this.scl[1]));\n` +
+      `            ai3[i] = trunc(fr((fr(fr(this.getvalue('p', s1, 2)) * this.div)) * this.scl[2]));\n` },
+  { name: 'newcar-scale-w', file: 'ContO.js',
+    find: `          this.keyx[j] = trunc((fr(fr(this.getvalue('w', s1, 0)) * this.div)));\n` +
+      `          this.keyz[j] = trunc((fr(fr(this.getvalue('w', s1, 2)) * this.div)));\n` +
+      `          j = i32(j + 1);\n` +
+      `          wheels.make(this.m, this.t, this.p, this.npl, trunc((fr((fr(fr(this.getvalue('w', s1, 0)) * this.div)) * this.iwid))), trunc((fr(fr(this.getvalue('w', s1, 1)) * this.div))), trunc((fr(fr(this.getvalue('w', s1, 2)) * this.div))), `,
+    replace: `          // ext-patch newcar-scale-w: the wheel's position times ScaleX/Y/Z; its size not (as the base)\n` +
+      `          this.keyx[j] = trunc(fr((fr(fr(this.getvalue('w', s1, 0)) * this.div)) * this.scl[0]));\n` +
+      `          this.keyz[j] = trunc(fr((fr(fr(this.getvalue('w', s1, 2)) * this.div)) * this.scl[2]));\n` +
+      `          j = i32(j + 1);\n` +
+      `          wheels.make(this.m, this.t, this.p, this.npl, trunc(fr((fr((fr(fr(this.getvalue('w', s1, 0)) * this.div)) * this.iwid)) * this.scl[0])), trunc(fr((fr(fr(this.getvalue('w', s1, 1)) * this.div)) * this.scl[1])), trunc(fr((fr(fr(this.getvalue('w', s1, 2)) * this.div)) * this.scl[2])), ` },
+];
+
 export const PATCHES = [
   { name: 'record-ghosts', file: 'Record.js', find: RECORD_GHOSTS_FIND, replace: RECORD_GHOSTS_REPLACE },
   { name: 'record-shift', file: 'Record.js', find: RECORD_SHIFT_FIND, replace: RECORD_SHIFT_REPLACE },
@@ -319,6 +370,7 @@ export const PATCHES = [
   ...SPARK_PATCHES,
   ...DUST_RATE,
   ...SWEEP_PATCHES,
+  ...NEWCAR_PATCHES,
 ];
 
 /** 'applied' | 'pending' | throws when neither form is there exactly once. */
