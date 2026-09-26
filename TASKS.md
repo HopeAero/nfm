@@ -1133,8 +1133,20 @@ Gameplay stays separate; Extended learns to read what the editors make.
       quirks come with it. Physics: the base `CarDefine.loadstat` (NFM 2's formulas);
       Extended-only values from the donor. Model: ext-patches `newcar-isacar` and
       `newcar-scale-*` (Extended's ContO ignored ScaleX/Y/Z). Launcher: Extended
-      Edition -> New cars (donor per car). Stock races unchanged (selftests base vs
+      ~~Edition -> New cars (donor per car).~~ (replaced below by the Car Maker's
+      Extended tab) Stock races unchanged (selftests base vs
       branch: classic 4/30 `271c3367`, 11/36 `79ff2d50`, 9/25 `38386f63`).
+- [x] **Car Maker's Extended tab (2026-09-26, branch `ext-carmaker`)**: one car, two games.
+      The tab writes inert `ext*` lines (`web/ext/extlines.js`): `extspecial(0-38)`,
+      `extstat`/`extphysics` (own stats and the 11 handling sliders; crash look, engine
+      and `actmag` stay shared), `exthealth(50-300)`, `extdamage(50-200)`; invalid = ignored.
+      Every Car Maker car is in Extended's Free Play (`listAll()` order); the launcher's
+      New cars page is gone. "Try in Extended" saves and opens Free Play on the car.
+      The car select shows the game's cars or yours, switched by NFM 2's own
+      "Car Maker Cars" / "< Game Cars" button and header (`web/ext/cargroup.js`, base
+      images.zip, Spanish redrawn); ▴ ▾ too. The Body tab edits the author
+      (`carmaker(name)`), credited in the car select instead of the donor's creator
+      (ext-patches `newcar-credit-*`). Plan: `docs/superpowers/plans/2026-09-26-ext-carmaker.md`.
 - [ ] New cars in the career: `career-save.js` saves per index (`CARS = 39`), and a
       new car's index moves with the list -- save them by name; level-ups
       (`reqneed`, `resetstats` take the car number as a plain parameter: see WORK.md).
