@@ -24,8 +24,6 @@ import { Lobby, MAX_PLAYERS } from './netlobby.js';
 import { Directory } from './netdirectory.js';
 import * as music from './music.js';
 import { translateDocument, setLang, tr } from './i18n.js';
-import { donorChoices, readNewCarStore, toggle, writeNewCarStore } from './ext/newcars-store.js';
-import { listAll } from './carstore.js';
 import { loadCareer, saveCareer, effectiveUnlocked } from './career.js';
 
 const $ = (id) => document.getElementById(id);
@@ -201,7 +199,7 @@ $('gm-rows').innerHTML = GM.map((t, i) =>
 // Play picks any of its 39 cars and an NFM 2 or Extended stage (freeplay.js);
 // career is its xtGraphics menu's RPG mode. The jar's Classic Mode stays at
 // ?ext=classic.
-const EXT = [['free', 'Free Play'], ['career', 'Career Mode'], ['cars', 'New cars']];
+const EXT = [['free', 'Free Play'], ['career', 'Career Mode']];
 $('ext-rows').innerHTML = EXT.map(([k, t]) =>
   `<li class="item" role="menuitem" data-act="ext:${k}"><span class="label">${t}</span></li>`).join('');
 
@@ -209,8 +207,8 @@ $('ext-rows').innerHTML = EXT.map(([k, t]) =>
 // translates it and whatever is written later.
 translateDocument();
 
-const PAGE_IDS = ['menu', 'gm', 'ext', 'extcars', 'sp', 'opts', 'mp', 'lobby', 'set'];
-const BACK = { gm: 'menu', ext: 'menu', extcars: 'ext', sp: 'menu', opts: 'sp', mp: 'menu', lobby: 'mp', set: 'menu' };
+const PAGE_IDS = ['menu', 'gm', 'ext', 'sp', 'opts', 'mp', 'lobby', 'set'];
+const BACK = { gm: 'menu', ext: 'menu', sp: 'menu', opts: 'sp', mp: 'menu', lobby: 'mp', set: 'menu' };
 const PAGES = {};
 for (const id of PAGE_IDS) refreshItems(id);
 
@@ -228,7 +226,6 @@ const HINTS = {
   menu:  '<kbd>↑</kbd><kbd>↓</kbd> move · <kbd>Enter</kbd> select',
   gm:    '<kbd>↑</kbd><kbd>↓</kbd> move · <kbd>Enter</kbd> select · <kbd>Esc</kbd> back',
   ext:   '<kbd>↑</kbd><kbd>↓</kbd> move · <kbd>Enter</kbd> select · <kbd>Esc</kbd> back',
-  extcars: '<kbd>↑</kbd><kbd>↓</kbd> move · <kbd>←</kbd><kbd>→</kbd> change · <kbd>Esc</kbd> back',
   sp:    '<kbd>↑</kbd><kbd>↓</kbd> move · <kbd>←</kbd><kbd>→</kbd> change · <kbd>Enter</kbd> open / start · <kbd>Esc</kbd> back',
   opts:  '<kbd>↑</kbd><kbd>↓</kbd> move · <kbd>←</kbd><kbd>→</kbd> change · <kbd>Esc</kbd> back',
   mp:    '<kbd>↑</kbd><kbd>↓</kbd> move · <kbd>Enter</kbd> join / host · <kbd>←</kbd><kbd>→</kbd> public–private · <kbd>Esc</kbd> back',
@@ -880,7 +877,7 @@ function fire() {
       return goPage('set');
     case 'gm':    return void startCarSelect(+arg);
     // Extended's race in the same shell as the base race (web/ext/race.js).
-    case 'ext':   return void (arg === 'cars' ? openNewCars() : startRace(null, { ext: arg }));
+    case 'ext':   return void startRace(null, { ext: arg });
     case 'opts':  return goPage('opts');
     case 'lang':  return applyLang();
     case 'back':  return goPage(BACK[pageName()]);
@@ -898,34 +895,6 @@ function fire() {
     default:
   }
 }
-
-/**
- * Extended Edition -> New cars: one row per Car Maker car; ◂ ▸ picks the stock car
- * whose special it borrows, or Off (not raced). Extended's Free Play reads the list
- * (web/ext/newcars-store.js) and adds the cars after its 39.
- */
-async function openNewCars() {
-  const names = await listAll();
-  const choices = donorChoices();
-  const rows = names.map((name, i) => {
-    const k = `nc${i}`;
-    V[k] = {
-      list: () => choices,
-      get: () => { const e = readNewCarStore().find((c) => c.name === name); return e ? e.donor + 1 : 0; },
-      set: (j) => writeNewCarStore(toggle(readNewCarStore(), name, choices[j].donor)),
-      text: () => { const d = choices[V[k].get()]; return d.donor < 0 ? tr('Off') : tr(`Special of ${d.name}`); },
-    };
-    return `<li class="item orow" data-row="${k}"><span class="slabel">${escapeHtml(name)}</span>${valueBits(k)}</li>`;
-  });
-  $('extcars-rows').innerHTML = (rows.length ? rows.join('')
-    : '<li class="item orow"><span class="slabel">No Car Maker cars yet</span></li>')
-    + '<li class="item orow" data-act="back" style="justify-content:center"><span class="label" style="flex:none">Done</span></li>';
-  refreshItems('extcars');
-  goPage('extcars');
-  paintValues();
-}
-
-const escapeHtml = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
 function sideways(d) {
   const p = page();

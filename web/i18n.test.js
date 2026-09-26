@@ -115,10 +115,6 @@ test('car maker: HTML text wrapped over several lines still matches', () => {
     CAREDITOR_ES['Every piece of the car stores its own colour, so changing one here repaints all the pieces that were the old colour. Pieces you painted some other shade are left alone.']);
 });
 
-test("the launcher's New cars page (Extended new cars)", () => {
-  assert.strictEqual(es.tr('New cars'), 'Autos nuevos');
-  assert.strictEqual(es.tr('Off'), 'No');   // as in Settings
-  assert.strictEqual(es.tr('Special of Stampede'), 'Especial de Stampede');
-  assert.strictEqual(es.tr('No Car Maker cars yet'), 'Todavía no hay autos del Car Maker');
-  assert.strictEqual(en.tr('Special of Stampede'), 'Special of Stampede');
+test("'Off' is still translated (Settings)", () => {
+  assert.strictEqual(es.tr('Off'), 'No');
 });

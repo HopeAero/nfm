@@ -43,11 +43,10 @@ import { createRaceMenu } from '../race-ui.js';
 import { spanishPauseBackground } from '../ui-sprites-es.js';
 import { lang } from '../i18n.js';
 import { random, setDrawPhase } from '../java.js';
-import { readCar } from '../carstore.js';
+import { listAll, readCar } from '../carstore.js';
 import { NEW_BASE, newCars, setNewCars } from './newcars.js';
 import { carFromRad } from './newcars-stats.js';
 import { newCarModel } from './newcars-model.js';
-import { readNewCarStore } from './newcars-store.js';
 
 const W = 870, H = 480;   // Extended's game space (the base game's is 800x450)
 const BOTS = [5, 9, 10, 11, 13, 14, 18, 20, 21].map((n) => `data/Files/Bots/stage${n}.radq`);
@@ -114,22 +113,23 @@ export async function bootExtended(params, log, onExit) {
     const names = texts.map((t, i) => /name\(([^)]*)\)/.exec(t)?.[1] || `Stage ${i + 1}`);
     nfm2 = { zip, texts, names };
   }
-  // ---- Extended new cars (newcars.js): Car Maker cars after the 39, not in the career ----
-  // The launcher's list (nfm.ext.newcars: [{ name, donor }]), or ?newcar=name:donor.
-  let newList = readNewCarStore();
-  if (params.has('newcar')) {
+  // ---- Extended new cars (newcars.js): Car Maker cars after the 39, Free Play only ----
+  // Every car the Car Maker lists (its storage + mycars/), in listing order; each .rad
+  // carries its Extended choices (extlines.js). ?newcar=name:donor races one, anywhere but the career.
+  let newList = [];
+  if (params.has('newcar') && mode !== 'career') {
     const [name, donor] = params.get('newcar').split(':');
-    newList = [{ name, donor: +donor }];
+    newList = [{ name, donor: donor === undefined ? undefined : +donor }];
+  } else if (free) {
+    newList = (await listAll()).map((name) => ({ name }));
   }
   const newcars = [];
-  if (mode !== 'career') {
-    for (const { name, donor } of newList) {
-      const text = await readCar(name);
-      const car = text && carFromRad(name, text);
-      // ?newcar=name:donor, a developer switch: the donor after ':' overrides the .rad's
-      if (car && Number.isInteger(donor) && donor >= 0 && donor < 39) car.donor = donor;
-      if (car) newcars.push(car); else console.log(`new car "${name}" skipped: not a car Extended can load`);
-    }
+  for (const { name, donor } of newList) {
+    const text = await readCar(name);
+    const car = text && carFromRad(name, text);
+    // ?newcar=name:donor, a developer switch: the donor after ':' overrides the .rad's
+    if (car && Number.isInteger(donor) && donor >= 0 && donor < 39) car.donor = donor;
+    if (car) newcars.push(car); else console.log(`new car "${name}" skipped: not a car Extended can load`);
   }
   setNewCars(newcars);
   System.live = true;

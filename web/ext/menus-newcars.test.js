@@ -29,3 +29,15 @@ test("the car select sets a new car's ground as it sets the 39's (its shadow und
   const src = fs.readFileSync(new URL('xtGraphics.js', import.meta.url), 'utf8');
   assert.match(src, /for \(let a = 0; a < 39; a = i32\(a \+ 1\)\) \{\n      aconto\[a\]\.groundlevel = -34;\n    \}\n    for \(let a = NEW_BASE; aconto\[a\]; a\+\+\) aconto\[a\]\.groundlevel = -34;/);
 });
+
+test('a new car named like a stock car does not steal the stock pick', () => {
+  setNewCars([{ name: 'Tornado Shark', donor: 23 }]);
+  assert.strictEqual(pickCar({ car: 23, carName: 'Tornado Shark' }), 23);          // stock: by index
+  assert.strictEqual(pickCar({ car: NEW_BASE, carName: 'Tornado Shark' }), NEW_BASE);   // new: by name
+});
+
+test("race.js takes Free Play's new cars from the Car Maker listing, not a launcher store", () => {
+  const src = fs.readFileSync(new URL('race.js', import.meta.url), 'utf8');
+  assert.match(src, /await listAll\(\)/);
+  assert.doesNotMatch(src, /newcars-store|readNewCarStore/);
+});

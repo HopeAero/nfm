@@ -35,7 +35,7 @@ const run = async (label, query, ok) => {
 try {
   tab = await attach(port, 'about:blank');
   await tab.send('Page.enable');
-  // the store populated, as the launcher leaves it: stock races must not notice
+  // a stale store from the removed launcher page: ignored, stock races must not notice
   await tab.send('Page.addScriptToEvaluateOnNewDocument', {
     source: `localStorage.setItem('nfm.ext.newcars', JSON.stringify([{ name: 'Simple Car', donor: 30 }]))` });
   await run('classic stock hash', 'ext=classic&stage=4&car=30&selftest=400', (r) => r.hash === BASELINE.classic);
