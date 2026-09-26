@@ -356,6 +356,23 @@ const NEWCAR_PATCHES = [
       `          this.keyz[j] = trunc(fr((fr(fr(this.getvalue('w', s1, 2)) * this.div)) * this.scl[2]));\n` +
       `          j = i32(j + 1);\n` +
       `          wheels.make(this.m, this.t, this.p, this.npl, trunc(fr((fr((fr(fr(this.getvalue('w', s1, 0)) * this.div)) * this.iwid)) * this.scl[0])), trunc(fr((fr(fr(this.getvalue('w', s1, 1)) * this.div)) * this.scl[1])), trunc(fr((fr(fr(this.getvalue('w', s1, 2)) * this.div)) * this.scl[2])), ` },
+  // The car select's normal mode (Free Play) steps sc[0] with ++/-- and moves
+  // aconto[sc[0]] in the same call: 38 -> 39 would move a road piece, 200 -> 199 a hole.
+  // nextCar hops 38 <-> NEW_BASE and stops at both ends. Anchored on the second import:
+  // ext-ident puts its own right after the first.
+  { name: 'newcar-carselect-import', file: 'xtGraphics.js',
+    find: `import { RadicalMidi } from './RadicalMidi.js';\n`,
+    replace: `import { RadicalMidi } from './RadicalMidi.js';\n// ext-patch newcar-carselect-import\nimport { NEW_BASE, nextCar } from './newcars.js';\n` },
+  // the car select puts the 39 on its floor (groundlevel -34: the shadow under the car)
+  { name: 'newcar-carselect-ground', file: 'xtGraphics.js',
+    find: `    for (let a = 0; a < 39; a = i32(a + 1)) {\n      aconto[a].groundlevel = -34;\n    }\n`,
+    replace: `    for (let a = 0; a < 39; a = i32(a + 1)) {\n      aconto[a].groundlevel = -34;\n    }\n    for (let a = NEW_BASE; aconto[a]; a++) aconto[a].groundlevel = -34;   // ext-patch newcar-carselect-ground\n` },
+  { name: 'newcar-carselect-next', file: 'xtGraphics.js',
+    find: `              if (!this.careermode) {\n                let sc = this.sc;\n                let n15 = 0;\n                ++sc[n15];\n`,
+    replace: `              if (!this.careermode) {\n                let sc = this.sc;\n                let n15 = 0;\n                sc[n15] = nextCar(sc[n15], 1);   // ext-patch newcar-carselect-next\n` },
+  { name: 'newcar-carselect-back', file: 'xtGraphics.js',
+    find: `            } else if (!this.careermode) {\n              let sc3 = this.sc;\n              let n18 = 0;\n              --sc3[n18];\n`,
+    replace: `            } else if (!this.careermode) {\n              let sc3 = this.sc;\n              let n18 = 0;\n              sc3[n18] = nextCar(sc3[n18], -1);   // ext-patch newcar-carselect-back\n` },
 ];
 
 export const PATCHES = [

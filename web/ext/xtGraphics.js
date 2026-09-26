@@ -6,6 +6,8 @@ import { floatArray, fr, i32, idiv, intArray, jround, objArray, random, trunc } 
 import { id } from './newcars.js';   // ext-ident (web/tools/ext-ident.mjs)
 import { Arrays, BigDecimal, BufferedWriter, Color, Cursor, DataInputStream, File, FileWriter, Font, MediaTracker, MemoryImageSource, Panel, PixelGrabber, Polygon, RenderingHints, StringBuilder, System, Thread, Toolkit, URL, ZipInputStream, jstr } from './jawt.js';
 import { RadicalMidi } from './RadicalMidi.js';
+// ext-patch newcar-carselect-import
+import { NEW_BASE, nextCar } from './newcars.js';
 import { RadicalMod } from './RadicalMod.js';
 
 export class xtGraphics extends Panel {
@@ -15313,6 +15315,7 @@ export class xtGraphics extends Panel {
     for (let a = 0; a < 39; a = i32(a + 1)) {
       aconto[a].groundlevel = -34;
     }
+    for (let a = NEW_BASE; aconto[a]; a++) aconto[a].groundlevel = -34;   // ext-patch newcar-carselect-ground
     if (this.flipo === 0) {
       this.rd.setFont(new Font('SansSerif', 1, 13));
       this.ftm = this.rd.getFontMetrics();
@@ -16725,7 +16728,7 @@ export class xtGraphics extends Panel {
               if (!this.careermode) {
                 let sc = this.sc;
                 let n15 = 0;
-                ++sc[n15];
+                sc[n15] = nextCar(sc[n15], 1);   // ext-patch newcar-carselect-next
               } else {
                 if (id(this.sc[0]) === 19) {
                   this.sc[0] = 22;
@@ -16746,7 +16749,7 @@ export class xtGraphics extends Panel {
             } else if (!this.careermode) {
               let sc3 = this.sc;
               let n18 = 0;
-              --sc3[n18];
+              sc3[n18] = nextCar(sc3[n18], -1);   // ext-patch newcar-carselect-back
             } else {
               if ((id(this.sc[0]) <= 19) || (((id(this.sc[0]) > 23) && (id(this.sc[0]) <= 38)))) {
                 let sc4 = this.sc;

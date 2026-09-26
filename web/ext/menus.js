@@ -27,6 +27,7 @@ import { CAREER_STAGES, EXT_CARS, EXT_STAGES, classicTwin } from './catalog.js';
 import { devMode } from '../devmode.js';
 import { tr } from '../i18n.js';
 import { restoreStats, statsOf } from './career-save.js';
+import { NEW_BASE, lastCar, newCars } from './newcars.js';
 
 const STORE_KEY = 'nfm.ext.free';
 // the career's stages only in developer mode (catalog.js)
@@ -39,7 +40,7 @@ export function loadPick(GROUPS = groups()) {
   let p = {};
   try { p = JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); } catch { /* none, or private mode */ }
   return {
-    car: Number.isInteger(p.car) && p.car >= 0 && p.car < EXT_CARS.length ? p.car : 38,
+    car: pickCar(p), carName: p.carName,
     group: GROUPS.includes(p.group) ? p.group : 'ext',
     stage: Number.isInteger(p.stage) ? p.stage : 1,
   };
@@ -59,10 +60,17 @@ export function step(list, n, d) {
   return list[j][0];
 }
 
-/** The car select's arrows, which the jar does not limit in its normal mode. */
+/** A remembered pick: stock cars by index, new cars by name (their index moves with the list). */
+export function pickCar(p) {
+  if (Number.isInteger(p.car) && p.car >= 0 && p.car < EXT_CARS.length) return p.car;
+  const k = newCars().findIndex((c) => c.name === p.carName);
+  return k >= 0 ? NEW_BASE + k : 38;
+}
+
+/** The car select's arrows, which the jar does not limit in its normal mode; past 38, the new cars. */
 export function clampCarArrows(control, car) {
   if (car <= 0) control.left = false;
-  if (car >= EXT_CARS.length - 1) control.right = false;
+  if (car >= lastCar()) control.right = false;
 }
 
 /** Where the jar races stage n of a group: its mode and checkpoints.stage. */
@@ -132,6 +140,7 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
     if (this.fase !== 6476) return;      // Enter: the car is chosen, on to the stage
     if (career) { this.lastcar = this.sc[0]; if (stat.pending) stat.confirm(); return; }
     pick.car = this.sc[0];
+    pick.carName = newCars()[this.sc[0] - NEW_BASE]?.name;   // a new car is found again by name
     savePick(pick);
     apply();
   };
