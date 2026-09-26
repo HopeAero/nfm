@@ -47,6 +47,7 @@ import { readCar } from '../carstore.js';
 import { NEW_BASE, newCars, setNewCars } from './newcars.js';
 import { carFromRad } from './newcars-stats.js';
 import { newCarModel } from './newcars-model.js';
+import { readNewCarStore } from './newcars-store.js';
 
 const W = 870, H = 480;   // Extended's game space (the base game's is 800x450)
 const BOTS = [5, 9, 10, 11, 13, 14, 18, 20, 21].map((n) => `data/Files/Bots/stage${n}.radq`);
@@ -115,8 +116,7 @@ export async function bootExtended(params, log, onExit) {
   }
   // ---- Extended new cars (newcars.js): Car Maker cars after the 39, not in the career ----
   // The launcher's list (nfm.ext.newcars: [{ name, donor }]), or ?newcar=name:donor.
-  let newList = [];
-  try { newList = JSON.parse(localStorage.getItem('nfm.ext.newcars') || '[]'); } catch { /* none */ }
+  let newList = readNewCarStore();
   if (params.has('newcar')) {
     const [name, donor] = params.get('newcar').split(':');
     newList = [{ name, donor: +donor }];

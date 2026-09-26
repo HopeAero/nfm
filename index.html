@@ -52,6 +52,7 @@ body {
 body[data-page="menu"]  #page-menu  { display: flex; }
 body[data-page="gm"]    #page-gm    { display: flex; }
 body[data-page="ext"]   #page-ext   { display: flex; }
+body[data-page="extcars"] #page-extcars { display: flex; }
 body[data-page="sp"]    #page-sp    { display: flex; }
 body[data-page="opts"]  #page-opts  { display: flex; }
 body[data-page="mp"]    #page-mp    { display: flex; }
@@ -273,6 +274,14 @@ body[data-page="race"] #log:empty { display: none; }
     <div><h1 class="title">Extended Edition</h1></div>
   </div>
   <ul class="menu" id="ext-rows" role="menu" aria-label="Extended Edition"></ul>
+</div>
+
+<!-- 1d : Extended Edition -> New cars: Car Maker cars for Free Play, each with the stock car lending its special -->
+<div class="page" id="page-extcars">
+  <div class="wrap" style="width:min(40rem,94vw)">
+    <div class="phead"><span>New cars</span><span>Esc — back</span></div>
+    <ul class="rows" id="extcars-rows"></ul>
+  </div>
 </div>
 
 <!-- 2 : single player -->
