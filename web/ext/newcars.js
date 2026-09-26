@@ -18,10 +18,24 @@ export function setNewCars(list) {
 export const newCars = () => cars;
 export const id = (c) => (c >= NEW_BASE ? donors[c - NEW_BASE] : c);
 export const isNew = (c) => c >= NEW_BASE;
-export const lastCar = () => (cars.length ? NEW_BASE + cars.length - 1 : STOCK - 1);
 
-/** The Free Play car select's arrows: 0..38, then the new cars, no wrap. */
-export function nextCar(c, d) {
-  if (d > 0) return c === STOCK - 1 ? (cars.length ? NEW_BASE : c) : Math.min(c + 1, lastCar());
-  return c === NEW_BASE ? STOCK - 1 : Math.max(c - 1, 0);
+// Free Play's car select browses the game's 39 ('game') or the Car Maker's ('mine'), never
+// both at once: your cars show only when you ask for them (menus.js).
+export const CAR_GROUPS = ['game', 'mine'];
+let group = 'game';
+export function setCarGroup(g) { group = CAR_GROUPS.includes(g) ? g : 'game'; }
+export const carGroup = () => (cars.length ? group : 'game');
+export const firstCar = () => (carGroup() === 'mine' ? NEW_BASE : 0);
+export const lastCar = () => (carGroup() === 'mine' ? NEW_BASE + cars.length - 1 : STOCK - 1);
+export const inGroup = (c) => c >= firstCar() && c <= lastCar();
+export const groupOf = (c) => (isNew(c) ? 'mine' : 'game');
+
+/** The Free Play car select's arrows: within the group, no wrap. */
+export const nextCar = (c, d) => (d > 0 ? Math.min(c + 1, lastCar()) : Math.max(c - 1, firstCar()));
+
+/** ▴ ▾ on the car select: the other group, and its first car. */
+export function cycleCarGroup(c) {
+  if (!cars.length) return { group: 'game', car: c };
+  setCarGroup(carGroup() === 'game' ? 'mine' : 'game');
+  return { group: carGroup(), car: firstCar() };
 }

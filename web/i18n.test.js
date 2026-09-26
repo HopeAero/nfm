@@ -125,3 +125,7 @@ test('car maker: HTML text wrapped over several lines still matches', () => {
 test("'Off' is still translated (Settings)", () => {
   assert.strictEqual(es.tr('Off'), 'No');
 });
+
+test('Free Play car select groups are translated', () => {
+  for (const s of ['Game cars', 'My cars', 'Cars', '▴ ▾ my cars / game cars']) assert.notStrictEqual(es.tr(s), s, s);
+});

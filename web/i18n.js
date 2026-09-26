@@ -63,6 +63,7 @@ const ES = {
   '◂ ▸ stage · Enter race · Esc change car': '◂ ▸ pista · Enter correr · Esc cambiar auto',
   '◂ ▸ stage · ▴ ▾ stages · Enter race · Esc change car':
     '◂ ▸ pista · ▴ ▾ grupo · Enter correr · Esc cambiar auto', 'Career': 'Carrera',
+  'Game cars': 'Autos del juego', 'Cars': 'Autos', '▴ ▾ my cars / game cars': '▴ ▾ mis autos / autos del juego',
   'Extended Edition is coming soon': 'La Edición Extendida llegará pronto',
   'Settings': 'Ajustes', 'Main menu': 'Menú principal',
   'press enter to race': 'presiona enter para correr', 'loading…': 'cargando…',

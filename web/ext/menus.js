@@ -27,7 +27,8 @@ import { CAREER_STAGES, EXT_CARS, EXT_STAGES, classicTwin } from './catalog.js';
 import { devMode } from '../devmode.js';
 import { tr } from '../i18n.js';
 import { restoreStats, statsOf } from './career-save.js';
-import { NEW_BASE, lastCar, newCars } from './newcars.js';
+import { NEW_BASE, lastCar, firstCar, newCars, setCarGroup, carGroup, cycleCarGroup, groupOf } from './newcars.js';
+import { groupSprites } from './cargroup.js';
 
 const STORE_KEY = 'nfm.ext.free';
 // the career's stages only in developer mode (catalog.js)
@@ -39,8 +40,11 @@ const MENU_TICK_MS = 40;   // the jar's menus: 10 frames per 400 ms
 export function loadPick(GROUPS = groups()) {
   let p = {};
   try { p = JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); } catch { /* none, or private mode */ }
+  const car = pickCar(p);
+  // the car select's group (the game's / mine): the one that holds the remembered car
+  setCarGroup(groupOf(car));
   return {
-    car: pickCar(p), carName: p.carName,
+    car, carName: p.carName, carGroup: carGroup(),
     group: GROUPS.includes(p.group) ? p.group : 'ext',
     stage: Number.isInteger(p.stage) ? p.stage : 1,
   };
@@ -69,7 +73,7 @@ export function pickCar(p) {
 
 /** The car select's arrows, which the jar does not limit in its normal mode; past 38, the new cars. */
 export function clampCarArrows(control, car) {
-  if (car <= 0) control.left = false;
+  if (car <= firstCar()) control.left = false;
   if (car >= lastCar()) control.right = false;
 }
 
@@ -128,6 +132,7 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
   xt.carselect = function (control_, ...rest) {
     if (!career) {
       this.careermode = this.classicmode = false;
+      control_.up = control_.down = false;   // ▴ ▾ switch the car group (onKey), nothing in the jar
       clampCarArrows(control_, this.sc[0]);
     }
     if (careerStore) {
@@ -141,6 +146,7 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
     if (career) { this.lastcar = this.sc[0]; if (stat.pending) stat.confirm(); return; }
     pick.car = this.sc[0];
     pick.carName = newCars()[this.sc[0] - NEW_BASE]?.name;   // a new car is found again by name
+    pick.carGroup = carGroup();
     savePick(pick);
     apply();
   };
@@ -323,6 +329,49 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
     for (let k = 0; k < 6; k++) $s(`minus${k}`).style.display = boxes && stat.spent(k) ? '' : 'none';
   };
 
+  // ---- the car select's group (free play): the game's cars or yours ----------
+  // Your Car Maker cars show only in their own view. NFM 2's switch (cargroup.js): its
+  // "Car Maker Cars" button among the game's cars, "< Game Cars" and the orange "Car Maker
+  // Cars" header among yours -- the base game's sprites. ▴ ▾ do the same (onKey).
+  const carUi = document.createElement('div');
+  carUi.style.cssText = 'position:absolute;left:0;top:0;width:870px;height:480px;z-index:4;display:none;pointer-events:none';
+  const carBtn = document.createElement('button');
+  carBtn.style.cssText = 'position:absolute;left:20px;top:128px;height:28px;border:0;padding:0;cursor:pointer;'
+    + 'pointer-events:auto;background:none no-repeat;image-rendering:pixelated';
+  carBtn.title = tr('▴ ▾ my cars / game cars');
+  const carHead = document.createElement('img');
+  carHead.alt = '';
+  carHead.style.cssText = 'position:absolute;left:0;right:0;margin:auto;top:86px;image-rendering:pixelated';
+  carUi.append(carBtn, carHead);
+  carUi.addEventListener('mousedown', (e) => e.stopPropagation());   // not a click on the jar's screen
+  let sprites = null, hover = false;
+  groupSprites().then((s) => { sprites = s; }, (e) => console.warn('car select: no Car Maker cars button', e));
+  function setGroup(car) {
+    xt.sc[0] = car;
+    pick.carGroup = carGroup();
+    savePick(pick);
+  }
+  carBtn.onclick = () => { carBtn.blur(); setGroup(cycleCarGroup(xt.sc[0]).car); };
+  carBtn.onmouseenter = () => { hover = true; };
+  carBtn.onmouseleave = () => { hover = false; };
+  if (!career) host.append(carUi);
+  let carPainted = '';
+  const paintCars = () => {
+    const show = !career && xt.fase === 7 && newCars().length > 0 && sprites !== null && xt.flipo === 0;
+    carUi.style.display = show ? '' : 'none';
+    const key = `${show}/${carGroup()}/${hover}`;
+    if (!show || key === carPainted) return;
+    carPainted = key;
+    const mine = carGroup() === 'mine';
+    const [up, over] = mine ? sprites.toGame : sprites.toMine;
+    carBtn.style.backgroundImage = `url(${hover ? over : up})`;
+    const w = new Image(); w.src = up;
+    w.decode().then(() => { carBtn.style.width = `${w.width}px`; }, () => {});
+    carBtn.setAttribute('aria-label', tr(mine ? 'Game cars' : 'My cars'));
+    carHead.style.display = mine ? '' : 'none';
+    if (mine && carHead.src !== sprites.header) carHead.src = sprites.header;
+  };
+
   // ---- the stage select's controls (DOM, over the rendered stage) -----------
   const ui = document.createElement('div');
   ui.style.cssText = 'position:absolute;left:0;top:0;width:870px;height:480px;z-index:4;pointer-events:none;'
@@ -383,6 +432,14 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
   return new Promise((resolve, reject) => {
     let acc = 0, last = performance.now(), raf = 0;
     const onKey = (e) => {
+      // ▴ ▾ on the free play car select: the game's cars / yours. On keydown, not through the
+      // jar's control flags: a quick tap releases before the next menu tick and was lost.
+      if ((e.key === 'ArrowUp' || e.key === 'ArrowDown') && !career && xt.fase === 7 && newCars().length) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        if (xt.flipo === 0 && !e.repeat) setGroup(cycleCarGroup(xt.sc[0]).car);
+        return;
+      }
       if (e.key !== 'Escape') return;
       if (xt.fase !== 7 && xt.fase !== 1) return;   // scouting: the jar takes Esc as Enter, back to the stage
       e.preventDefault();
@@ -397,6 +454,7 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
       removeEventListener('keydown', onKey, true);
       ui.remove();
       statUi.remove();
+      carUi.remove();
       stopHold();
       host.removeEventListener('mousedown', plusHeld);
       removeEventListener('mouseup', stopHold);
@@ -415,6 +473,7 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
       menuCanvas.style.display = MENU_FASES.has(xt.fase) ? '' : 'none';
       ui.style.display = xt.fase === 1 ? '' : 'none';
       paintStat();
+      paintCars();
     };
     const loop = (now) => {
       raf = requestAnimationFrame(loop);

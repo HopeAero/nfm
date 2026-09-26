@@ -6,8 +6,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
 import fs from 'node:fs';
-import { setNewCars, NEW_BASE } from './newcars.js';
-import { pickCar } from './menus.js';
+import { setNewCars, setCarGroup, NEW_BASE } from './newcars.js';
+import { pickCar, loadPick, clampCarArrows } from './menus.js';
 
 test("the car select's normal-mode steps go through nextCar", () => {
   const src = fs.readFileSync(new URL('xtGraphics.js', import.meta.url), 'utf8');
@@ -40,4 +40,32 @@ test("race.js takes Free Play's new cars from the Car Maker listing, not a launc
   const src = fs.readFileSync(new URL('race.js', import.meta.url), 'utf8');
   assert.match(src, /await listAll\(\)/);
   assert.doesNotMatch(src, /newcars-store|readNewCarStore/);
+});
+
+test('the pick opens the group that holds its car', () => {
+  setNewCars([{ name: 'A', donor: 30 }]);
+  const store = {};
+  globalThis.localStorage = { getItem: (k) => store[k] ?? null, setItem: (k, v) => { store[k] = v; } };
+  try {
+    store['nfm.ext.free'] = JSON.stringify({ car: 7 });
+    assert.strictEqual(loadPick(['nfm2', 'ext']).carGroup, 'game');
+    store['nfm.ext.free'] = JSON.stringify({ car: NEW_BASE, carName: 'A', carGroup: 'game' });   // Try in Extended
+    assert.strictEqual(loadPick(['nfm2', 'ext']).carGroup, 'mine');
+    store['nfm.ext.free'] = JSON.stringify({ car: NEW_BASE, carName: 'Gone', carGroup: 'mine' });   // deleted: car 38
+    assert.deepStrictEqual([loadPick(['nfm2', 'ext']).car, loadPick(['nfm2', 'ext']).carGroup], [38, 'game']);
+    store['nfm.ext.free'] = '{}';
+    assert.strictEqual(loadPick(['nfm2', 'ext']).carGroup, 'game');
+  } finally { delete globalThis.localStorage; setCarGroup('game'); }
+});
+
+test('the car select arrows stop at the ends of the group', () => {
+  setNewCars([{ name: 'A', donor: 30 }]);
+  setCarGroup('mine');
+  const c = { left: true, right: true };
+  clampCarArrows(c, NEW_BASE);
+  assert.deepStrictEqual(c, { left: false, right: false });
+  setCarGroup('game');
+  const d = { left: true, right: true };
+  clampCarArrows(d, 38);
+  assert.deepStrictEqual(d, { left: true, right: false });
 });
