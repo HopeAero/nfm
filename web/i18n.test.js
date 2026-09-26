@@ -110,6 +110,13 @@ test('car maker: the multi-line readiness list translates line by line', () => {
     'El auto aún no tiene estadísticas: defínelas en la pestaña Estadísticas.\nElige un primer y un segundo color en la pestaña Carrocería.');
 });
 
+test('car maker: the Extended tab is translated', async () => {
+  const { specialLabel } = await import('./careditor/extended.js');
+  for (const s of ['By class (automatic)', 'Same as NFM 2', 'Try in Extended', 'Health and damage in Extended',
+    'No description in the game.', 'invalid — ignored']) assert.notStrictEqual(es.tr(s), s, s);
+  assert.ok(specialLabel(13).startsWith('Stampede — '));
+});
+
 test('car maker: HTML text wrapped over several lines still matches', () => {
   assert.strictEqual(es.tr('\n    Every piece of the car stores its own colour, so changing one\n    here repaints all the pieces that were the old colour. Pieces you painted some other shade are left alone.\n  ').trim(),
     CAREDITOR_ES['Every piece of the car stores its own colour, so changing one here repaints all the pieces that were the old colour. Pieces you painted some other shade are left alone.']);

@@ -1022,7 +1022,11 @@ const booted = new Promise((r) => { bootedResolve = r; });
     await drawStagePreview();
     draw();
     bootedResolve();
-    if (!(await resumeCareer())) await resumeRoom();
+    // the Car Maker's "Try in Extended" (web/careditor/extended.js): straight into Extended's Free Play
+    let tryExt = false;
+    try { tryExt = sessionStorage.getItem('nfm.ext.try') === '1'; sessionStorage.removeItem('nfm.ext.try'); } catch { /* private mode */ }
+    if (tryExt) await startRace(null, { ext: 'free' });
+    else if (!(await resumeCareer())) await resumeRoom();
   } catch (e) {
     bootedResolve();
     $('brandsub').textContent = 'failed to load game data';

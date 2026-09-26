@@ -95,6 +95,17 @@ export const CAREDITOR_ES = {
   'One of the stats is outside the allowed range of 16 to 200.': 'Una de las estadísticas está fuera del rango permitido de 16 a 200.',
   'The car has no handling set yet — fill in the Physics tab.': 'El auto aún no tiene manejo definido: completa la pestaña Física.',
   'One of the Physics settings is outside the allowed range of 0 to 100.': 'Uno de los ajustes de Física está fuera del rango permitido de 0 a 100.',
+  // ---- the Extended tab (careditor/extended.js, web/ext/extlines.js) ----
+  'Extended': 'Extended', 'Special': 'Especial', 'By class (automatic)': 'Según la clase (automático)',
+  'Stats and physics in Extended': 'Estadísticas y física en Extended', 'Same as NFM 2': 'Igual que en NFM 2',
+  'Own': 'Propias', 'own': 'propias', 'invalid': 'inválido', 'invalid — ignored': 'inválido: se ignora',
+  'Health and damage in Extended': 'Vida y daño en Extended', 'Health': 'Vida', 'Damage taken': 'Daño recibido',
+  'Try in Extended': 'Probar en Extended', 'No description in the game.': 'El juego no lo describe.',
+  'What this car is like in NFM 2 Extended. NFM 2 ignores this tab; the same car races in both games.':
+    'Cómo es este auto en NFM 2 Extended. NFM 2 ignora esta pestaña: el mismo auto corre en los dos juegos.',
+  'Percent of what this car has in NFM 2. The number beside it is what Extended uses.':
+    'Porcentaje de lo que este auto tiene en NFM 2. El número de al lado es el que usa Extended.',
+  'The special in the file is not a stock car — ignored.': 'El especial del archivo no es un auto del juego: se ignora.',
 };
 
 export const CAREDITOR_ES_PATTERNS = [
