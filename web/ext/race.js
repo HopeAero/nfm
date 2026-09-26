@@ -43,6 +43,10 @@ import { createRaceMenu } from '../race-ui.js';
 import { spanishPauseBackground } from '../ui-sprites-es.js';
 import { lang } from '../i18n.js';
 import { random, setDrawPhase } from '../java.js';
+import { readCar } from '../carstore.js';
+import { NEW_BASE, newCars, setNewCars } from './newcars.js';
+import { carFromRad } from './newcars-stats.js';
+import { newCarModel } from './newcars-model.js';
 
 const W = 870, H = 480;   // Extended's game space (the base game's is 800x450)
 const BOTS = [5, 9, 10, 11, 13, 14, 18, 20, 21].map((n) => `data/Files/Bots/stage${n}.radq`);
@@ -109,6 +113,23 @@ export async function bootExtended(params, log, onExit) {
     const names = texts.map((t, i) => /name\(([^)]*)\)/.exec(t)?.[1] || `Stage ${i + 1}`);
     nfm2 = { zip, texts, names };
   }
+  // ---- Extended new cars (newcars.js): Car Maker cars after the 39, not in the career ----
+  // The launcher's list (nfm.ext.newcars: [{ name, donor }]), or ?newcar=name:donor.
+  let newList = [];
+  try { newList = JSON.parse(localStorage.getItem('nfm.ext.newcars') || '[]'); } catch { /* none */ }
+  if (params.has('newcar')) {
+    const [name, donor] = params.get('newcar').split(':');
+    newList = [{ name, donor: +donor }];
+  }
+  const newcars = [];
+  if (mode !== 'career') {
+    for (const { name, donor } of newList) {
+      const text = await readCar(name);
+      const car = text && carFromRad(name, text, Number.isInteger(donor) && donor >= 0 && donor < 39 ? donor : undefined);
+      if (car) newcars.push(car); else console.log(`new car "${name}" skipped: not a car Extended can load`);
+    }
+  }
+  setNewCars(newcars);
   System.live = true;
   Panel.graphicsFor = (c, w, h) => new JGraphics(c, w, h);
 
@@ -249,13 +270,13 @@ export async function bootExtended(params, log, onExit) {
       if (baseStage?.name) cp.name = baseStage.name;   // a Stage Maker stage is named by its file, as in the base
     }
   };
-  if (baseStage || free) {
-    gs.loadbase = function (aconto, medium, trackers, xtg) {
-      const r = GameSparker.prototype.loadbase.call(this, aconto, medium, trackers, xtg);
-      appendModels(aconto, (baseStage || nfm2).zip, medium, trackers, xtg);
-      return r;
-    };
-  }
+  gs.loadbase = function (aconto, medium, trackers, xtg) {
+    const r = GameSparker.prototype.loadbase.call(this, aconto, medium, trackers, xtg);
+    if (baseStage || free) appendModels(aconto, (baseStage || nfm2).zip, medium, trackers, xtg);
+    // new cars at NEW_BASE + i (newcars-model.js)
+    newCars().forEach((car, i) => { aconto[NEW_BASE + i] = newCarModel(car, medium, trackers, xtg, NEW_BASE + i); });
+    return r;
+  };
   // run()'s Bots, taken as it is made (its constructor's first `doneload` write). The first
   // drive() hands it over too, but only once the start countdown is over (starcnt 130 -> 0),
   // and waiting for that fast-forwarded the whole fly-in and 3-2-1 unseen: ~130 full frames,
