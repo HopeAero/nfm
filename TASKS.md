@@ -1121,16 +1121,29 @@ Gameplay stays separate; Extended learns to read what the editors make.
       Extended's 129 (Extended reshapes some, e.g. giant trees); checked on NFM2 stage 30
       (cacti, slider, launchpad) and the Stage Maker example stage.
 - [x] **Pick them from the launcher** for Extended: Free Play's NFM 2 group (Stage Maker stages not yet).
-- [ ] **Car Maker cars in Extended** (estimated 1-2 sessions): Extended has no
-      CarDefine -- its 39 cars' physics are literal tables in Madness (46 per-car
-      arrays) and xtGraphics (11 more, ~50 index-38 checks; Control ~28 `cn ===`
-      special cases). Plan: load the .rad geometry at index 39+; one hand-written
-      helper grows every 39-long table after construction (a test walks them all
-      and fails on a short one -- a missed table reads undefined -> NaN); physics
-      from the base port's `web/CarDefine.js` `loadstat`; Extended-only values
-      (level, special, nitro, damage cut) copied from a stock car of the same
-      class; mycars/ in the launcher for Extended. Stock cars must not change
-      (selftest, jar tests).
+- [x] **Car Maker cars in Extended, as NEW cars (2026-09-26, branch `ext-new-cars`)**:
+      added after the 39, none replaced; Free Play only; opponents never race them.
+      Plan and rulings: `docs/superpowers/plans/2026-09-26-ext-new-cars.md`.
+      A new car is index `NEW_BASE + i` (200+: 39-196 are track pieces, beast cars,
+      scenery and stagecompat's models) in the model array and the 70 per-car tables
+      (`web/ext/newcars-grow.js`, grown by ext-patch after the constructors; a test
+      compares its lists with every length-39 field), and its donor's number as its
+      IDENTITY: `web/tools/ext-ident.mjs` wraps the 1,110 `car <op> literal`
+      comparisons (+ healthcalc's `carid`) as `id(car)`, so the donor's special and
+      quirks come with it. Physics: the base `CarDefine.loadstat` (NFM 2's formulas);
+      Extended-only values from the donor. Model: ext-patches `newcar-isacar` and
+      `newcar-scale-*` (Extended's ContO ignored ScaleX/Y/Z). Launcher: Extended
+      Edition -> New cars (donor per car). Stock races unchanged (selftests base vs
+      branch: classic 4/30 `271c3367`, 11/36 `79ff2d50`, 9/25 `38386f63`).
+- [ ] New cars in the career: `career-save.js` saves per index (`CARS = 39`), and a
+      new car's index moves with the list -- save them by name; level-ups
+      (`reqneed`, `resetstats` take the car number as a plain parameter: see WORK.md).
+- [ ] New cars' balance: they drive with NFM 2's numbers; Extended retuned ~half of
+      the NFM 2 cars by hand (`dammult`, `maxmag`, `swits`, `grip`). A per-table
+      factor from the 16 pairs, as a knob, if they feel off.
+- [ ] The career selftest (`?ext=career&stage=3&car=5&selftest=600`, also `=50`)
+      blocks the main thread in headless Chrome on `extended-mode` itself
+      (2026-09-26); WORK.md recorded `353ea4bf` for it earlier. Find what changed.
 ### Base-port parity audit (2026-09-24)
 
 The base port is not just the Java transcribed: it carries port-level fixes and
