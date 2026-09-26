@@ -14,6 +14,24 @@
 //     played; the alternative is stalling the tick to wait for audio.
 
 import { readZip } from './vfs.js';
+import { parseWav, resample } from './resample.js';
+
+// the loops sparkeng() and the airborne whoosh hold: resampled as one turn of a loop
+const LOOPED = /^(\d\d|air\d)$/;
+
+/**
+ * An AudioBuffer for a clip's bytes, already at the context's rate: a PCM WAV is resampled
+ * here (resample.js -- a browser's own resampler may whistle); anything else is decoded by
+ * the browser as before. decodeAudioData detaches what it is given, hence the copy.
+ */
+export async function clipBuffer(ctx, name, bytes) {
+  const wav = parseWav(bytes);
+  if (!wav) return ctx.decodeAudioData(bytes.slice().buffer);
+  const samples = resample(wav.samples, wav.rate, ctx.sampleRate, { periodic: LOOPED.test(name) });
+  const buf = ctx.createBuffer(1, samples.length, ctx.sampleRate);
+  buf.copyToChannel(samples, 0);
+  return buf;
+}
 
 /**
  * Clips the race needs, by name in sounds.zip minus the extension.
@@ -70,11 +88,9 @@ export class Audio {
       const bytes = zip.get(`${name.replace(/b$/, '')}.wav`);
       if (!bytes) return;
       try {
-        // decodeAudioData detaches the buffer it is given, and the zip's
-        // entries are views into one shared ArrayBuffer -- slice first or
-        // decoding one clip invalidates the rest.
-        const copy = bytes.slice().buffer;
-        this.buffers.set(name, await this.ctx.decodeAudioData(copy));
+        // The zip's entries are views into one shared ArrayBuffer: clipBuffer
+        // copies before anything is decoded, so one clip cannot invalidate the rest.
+        this.buffers.set(name, await clipBuffer(this.ctx, name, bytes));
       } catch { /* a clip that will not decode is simply silent */ }
     }));
     this.ready = true;
@@ -84,7 +100,7 @@ export class Audio {
   async addClip(name, bytes) {
     if (!this.ctx) return;
     try {
-      this.buffers.set(name, await this.ctx.decodeAudioData(bytes.slice().buffer));
+      this.buffers.set(name, await clipBuffer(this.ctx, name, bytes));
     } catch { /* a clip that will not decode is simply silent */ }
   }
 
