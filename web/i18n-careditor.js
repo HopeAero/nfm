@@ -106,6 +106,8 @@ export const CAREDITOR_ES = {
   'Percent of what this car has in NFM 2. The number beside it is what Extended uses.':
     'Porcentaje de lo que este auto tiene en NFM 2. El número de al lado es el que usa Extended.',
   'The special in the file is not a stock car — ignored.': 'El especial del archivo no es un auto del juego: se ignora.',
+  'Author': 'Autor',
+  'Who made this car. The car select shows it as “Created by”.': 'Quién hizo este auto. La selección de autos lo muestra como “Creado por”.',
 };
 
 export const CAREDITOR_ES_PATTERNS = [

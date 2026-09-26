@@ -69,3 +69,9 @@ test('the car select arrows stop at the ends of the group', () => {
   clampCarArrows(d, 38);
   assert.deepStrictEqual(d, { left: true, right: false });
 });
+
+test("the car select credits a new car's own author, never its donor's", () => {
+  const src = fs.readFileSync(new URL('xtGraphics.js', import.meta.url), 'utf8');
+  assert.match(src, /if \(isNew\(this\.sc\[0\]\)\) \{\n\s+const by = newCars\(\)\[this\.sc\[0\] - NEW_BASE\]\?\.author;\n\s+if \(by\) this\.drawcs\(60, 'Created by ' \+ by, 246, 246, 246, 3\);\n\s+\} else \{/);
+  assert.match(src, /'Created by Excalibur', 246, 246, 246, 3\);\n        \}\n        \}   \/\/ ext-patch newcar-credit-close/);
+});

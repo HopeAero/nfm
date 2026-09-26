@@ -373,6 +373,23 @@ const NEWCAR_PATCHES = [
   { name: 'newcar-carselect-back', file: 'xtGraphics.js',
     find: `            } else if (!this.careermode) {\n              let sc3 = this.sc;\n              let n18 = 0;\n              --sc3[n18];\n`,
     replace: `            } else if (!this.careermode) {\n              let sc3 = this.sc;\n              let n18 = 0;\n              sc3[n18] = nextCar(sc3[n18], -1);   // ext-patch newcar-carselect-back\n` },
+  // The car select's "Created by ..." line: ext-ident made each credit ask id(car), so a new
+  // car showed its donor's creator. A new car is credited to its own carmaker() author (none:
+  // no line); the stock credits run only for stock cars. Anchored on text ext-ident leaves alone.
+  { name: 'newcar-credit-import', file: 'xtGraphics.js',
+    find: `import { NEW_BASE, nextCar } from './newcars.js';\n`,
+    replace: `import { NEW_BASE, nextCar } from './newcars.js';\nimport { isNew, newCars } from './newcars.js';   // ext-patch newcar-credit-import\n` },
+  { name: 'newcar-credit-open', file: 'xtGraphics.js',
+    find: `      if (!this.classicmode) {\n        this.rd.setFont(this.adventure.deriveFont(1, 15.0));\n        this.ftm = this.rd.getFontMetrics();\n`,
+    replace: `      if (!this.classicmode) {\n        this.rd.setFont(this.adventure.deriveFont(1, 15.0));\n        this.ftm = this.rd.getFontMetrics();\n` +
+      `        // ext-patch newcar-credit-open: a new car's own author, never its donor's creator\n` +
+      `        if (isNew(this.sc[0])) {\n` +
+      `          const by = newCars()[this.sc[0] - NEW_BASE]?.author;\n` +
+      `          if (by) this.drawcs(60, 'Created by ' + by, 246, 246, 246, 3);\n` +
+      `        } else {\n` },
+  { name: 'newcar-credit-close', file: 'xtGraphics.js',
+    find: `          this.drawcs(60, 'Created by Excalibur', 246, 246, 246, 3);\n        }\n`,
+    replace: `          this.drawcs(60, 'Created by Excalibur', 246, 246, 246, 3);\n        }\n        }   // ext-patch newcar-credit-close\n` },
 ];
 
 export const PATCHES = [

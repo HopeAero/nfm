@@ -115,6 +115,8 @@ test('car maker: the Extended tab is translated', async () => {
   for (const s of ['By class (automatic)', 'Same as NFM 2', 'Try in Extended', 'Health and damage in Extended',
     'No description in the game.', 'invalid — ignored']) assert.notStrictEqual(es.tr(s), s, s);
   assert.ok(specialLabel(13).startsWith('Stampede — '));
+  for (const s of ['Author', 'Who made this car. The car select shows it as “Created by”.']) assert.notStrictEqual(es.tr(s), s, s);
+  assert.strictEqual(es.tr('Created by Excalibur'), 'Creado por Excalibur');   // the car select's credit
 });
 
 test('car maker: HTML text wrapped over several lines still matches', () => {
@@ -127,5 +129,5 @@ test("'Off' is still translated (Settings)", () => {
 });
 
 test('Free Play car select groups are translated', () => {
-  for (const s of ['Game cars', 'My cars', 'Cars', '▴ ▾ my cars / game cars']) assert.notStrictEqual(es.tr(s), s, s);
+  for (const s of ['Game cars', 'My cars', '▴ ▾ my cars / game cars']) assert.notStrictEqual(es.tr(s), s, s);
 });

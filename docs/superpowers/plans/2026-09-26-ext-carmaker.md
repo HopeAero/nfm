@@ -1074,3 +1074,10 @@ git commit -m "Car Maker's Extended tab: TASKS and WORK"
 ```
 
 - [ ] **Step 5: Deploy** — `./deploy.sh` needs `rsync`, which this Windows machine lacks (TASKS.md "Deploy"). Try it; if it fails, say so in the report and do not work around it.
+
+---
+
+## Revisions during execution (user requests, 2026-09-26)
+
+- **Task 6, two groups, NFM 2's switch.** "Your cars only when I pick the My cars filter": the car select shows the game's 39 (`'game'`, default) or your Car Maker cars (`'mine'`), never both; the remembered car's group opens. The switch is the original game's (xtGraphics.carselect cfase 0/3): the `drawcarb` button (`bcl/bc/bcr`, hover `pbc*`) labelled `cmc.gif` "Car Maker Cars" / `gac.gif` "< Game Cars", and the orange `ycmc.gif` header in your view — the base game's `data/images.zip` (`web/ext/cargroup.js`), redrawn in Spanish by `ui-sprites-es.js` ("MIS AUTOS", "< AUTOS DEL JUEGO"). ▴ ▾ switch on keydown.
+- **Task 6b, the author.** The Car Maker's Body tab edits `carmaker(name)` (NFM 2's own line: `CarDefine` reads it as `createdby`; `rad.readAuthor`/`writeAuthor`, parens/commas/newlines stripped, 30 chars). `carFromRad` returns `author`; ext-patches `newcar-credit-import/open/close` make the car select credit a new car's own author ("Created by …", translated by the existing pattern) instead of its donor's creator, and none when it has no author.

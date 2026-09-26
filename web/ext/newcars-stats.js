@@ -4,6 +4,7 @@
 // The donor and Extended's own values come from the .rad's ext* lines (extlines.js).
 import { CarDefine } from '../CarDefine.js';
 import { readExt, forLoadstat } from './extlines.js';
+import { readAuthor } from '../careditor/rad.js';
 import { ContO as BaseContO } from '../ContO.js';
 import { floatArray, intArray } from '../java.js';
 
@@ -57,5 +58,5 @@ export function carFromRad(name, text) {
   if (ext.health !== null) stat.maxmag = Math.trunc(Math.fround(stat.maxmag * ext.health / 100));
   if (ext.damage !== null) stat.dammult = Math.fround(stat.dammult * ext.damage / 100);
   const cclass = cd.cclass[SLOT];
-  return { name, text, stat, cclass, donor: ext.special ?? defaultDonor(cclass) };
+  return { name, text, stat, cclass, donor: ext.special ?? defaultDonor(cclass), author: readAuthor(text) };
 }

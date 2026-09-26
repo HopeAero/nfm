@@ -65,3 +65,8 @@ test('the default donor is an NFM 2 car of the same class (Extended 23-38)', () 
     assert.ok(d >= 23 && d <= 38, `class ${k} -> ${d}`);
   }
 });
+
+test("a new car's author is its carmaker() line; none, none", () => {
+  assert.strictEqual(carFromRad('Simple Car', simple + '\ncarmaker(Excalibur)\n').author, 'Excalibur');
+  assert.strictEqual(carFromRad('Simple Car', simple.replace(/^carmaker\(.*$/m, '')).author, '');
+});

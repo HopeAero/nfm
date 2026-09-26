@@ -492,8 +492,18 @@ function buildScaleAndAlign() {
   $('align-hint').textContent = ALIGN_HELP;
 }
 
+// carmaker(name), NFM 2's own line for who made a custom car (rad.writeAuthor)
+function buildAuthor() {
+  const inp = $('author');
+  inp.maxLength = rad.AUTHOR_MAX;
+  inp.oninput = () => setSource(rad.writeAuthor(source(), inp.value));
+  // not while typing: the written line drops what it cannot hold, and the caret would jump
+  rows.push({ sync() { if (document.activeElement !== inp) inp.value = rad.readAuthor(source()); } });
+}
+
 function buildAll() {
   rows = [];
+  buildAuthor();
   buildWheels();
   buildColours();
   buildStats();

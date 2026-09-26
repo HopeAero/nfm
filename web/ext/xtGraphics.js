@@ -8,6 +8,7 @@ import { Arrays, BigDecimal, BufferedWriter, Color, Cursor, DataInputStream, Fil
 import { RadicalMidi } from './RadicalMidi.js';
 // ext-patch newcar-carselect-import
 import { NEW_BASE, nextCar } from './newcars.js';
+import { isNew, newCars } from './newcars.js';   // ext-patch newcar-credit-import
 import { RadicalMod } from './RadicalMod.js';
 
 export class xtGraphics extends Panel {
@@ -15340,6 +15341,11 @@ export class xtGraphics extends Panel {
       if (!this.classicmode) {
         this.rd.setFont(this.adventure.deriveFont(1, 15.0));
         this.ftm = this.rd.getFontMetrics();
+        // ext-patch newcar-credit-open: a new car's own author, never its donor's creator
+        if (isNew(this.sc[0])) {
+          const by = newCars()[this.sc[0] - NEW_BASE]?.author;
+          if (by) this.drawcs(60, 'Created by ' + by, 246, 246, 246, 3);
+        } else {
         if (id(this.sc[0]) === 1) {
           this.drawcs(60, 'Created by Afterburn/ToaZuka', 246, 246, 246, 3);
         }
@@ -15391,6 +15397,7 @@ export class xtGraphics extends Panel {
         if (id(this.sc[0]) === 13) {
           this.drawcs(60, 'Created by Excalibur', 246, 246, 246, 3);
         }
+        }   // ext-patch newcar-credit-close
         this.rd.setFont(new Font('Arial', 1, 11));
         this.ftm = this.rd.getFontMetrics();
       }
