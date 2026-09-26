@@ -50,6 +50,12 @@ rm -f "$STAGE"/web/careditor/*.test.js
 mkdir -p "$STAGE/web/stagemaker"
 cp "$SRC"/web/stagemaker/*.js "$STAGE/web/stagemaker/"
 rm -f "$STAGE"/web/stagemaker/*.test.js
+# web/ext/: the Extended Edition modules (extended-mode branch), same glob
+# problem; ext/data/ is its game data, the original .radq files unmodified.
+mkdir -p "$STAGE/web/ext"
+cp "$SRC"/web/ext/*.js "$SRC"/web/ext/*.html "$STAGE/web/ext/"
+rm -f "$STAGE"/web/ext/*.test.js
+cp -r "$SRC/ext" "$STAGE/"
 # music/ holds the tracker modules web/music.js fetches per stage (3.3 MB).
 # Not needed before the soundtrack was wired up; very much needed now.
 # mycars/ holds the four cars that ship with the game. The launcher lists them
@@ -72,9 +78,10 @@ cp -r "$SRC/mystages/mymusic" "$STAGE/mystages/"
 # imports. Asset fetches (data/, stages/) go through vfs.js and are
 # deliberately NOT stamped: they are the big files and they change far less
 # often.
-STAMP="$(cat "$STAGE"/web/*.js "$STAGE"/web/*.css "$STAGE"/web/vendor/*.js "$STAGE"/web/careditor/*.js "$STAGE"/web/stagemaker/*.js "$STAGE"/web/*.html "$STAGE"/index.html | md5sum | cut -c1-8)"
-for f in "$STAGE"/web/*.js "$STAGE"/web/careditor/*.js "$STAGE"/web/stagemaker/*.js "$STAGE"/web/*.html "$STAGE"/index.html; do
-  sed -i -E "s@(from '\./([A-Za-z0-9_.-]+/)?[A-Za-z0-9_.-]+\.js)'@\1?v=$STAMP'@g; \
+STAMP="$(cat "$STAGE"/web/*.js "$STAGE"/web/*.css "$STAGE"/web/vendor/*.js "$STAGE"/web/careditor/*.js "$STAGE"/web/stagemaker/*.js "$STAGE"/web/ext/*.js "$STAGE"/web/*.html "$STAGE"/index.html | md5sum | cut -c1-8)"
+for f in "$STAGE"/web/*.js "$STAGE"/web/careditor/*.js "$STAGE"/web/stagemaker/*.js "$STAGE"/web/ext/*.js "$STAGE"/web/*.html "$STAGE"/index.html; do
+  # \.\.?/ -- subdirectory modules import '../vfs.js'; those were never stamped
+  sed -i -E "s@(from '\.\.?/([A-Za-z0-9_.-]+/)?[A-Za-z0-9_.-]+\.js)'@\1?v=$STAMP'@g; \
              s@(src=\"\./([A-Za-z0-9_.-]+/)?[A-Za-z0-9_.-]+\.js)\"@\1?v=$STAMP\"@g; \
              s@(href=\"\./([A-Za-z0-9_.-]+/)?[A-Za-z0-9_.-]+\.css)\"@\1?v=$STAMP\"@g" "$f"
 done

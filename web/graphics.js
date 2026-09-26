@@ -95,6 +95,7 @@ export class Graphics2D {
     // `rgba` is the same colour pre-packed for the vertex buffer, recomputed
     // only when the colour changes rather than once per vertex.
     this.r = 0; this.g = 0; this.b = 0; this.a = 1;
+    this.ca = 1;   // the colour's own alpha (new Color(r, g, b, a)); multiplies the composite's
     this.rgba = 0xff000000;
     // Concave/self-intersecting fill strategy. Trapezoids by default;
     // ?fill=scan restores the per-pixel-row scanline fill for comparison.
@@ -202,10 +203,20 @@ export class Graphics2D {
 
   // --- state ---------------------------------------------------------------
 
-  /** setColor(new Color(r,g,b)). Accepts 0-255 ints, as the game passes. */
-  setColor(r, g, b) {
+  /**
+   * setColor(new Color(r,g,b)) or, with a fourth argument, new Color(r,g,b,a).
+   * Accepts 0-255 ints, as the game passes. In Java2D a translucent colour and
+   * an AlphaComposite multiply; the base game never passes `a` (Extended does).
+   */
+  setColor(r, g, b, a = 255) {
     this.r = r / 255; this.g = g / 255; this.b = b / 255;
+    this.ca = a / 255;
     this._pack();
+  }
+
+  /** setColor(someColor) for a Color object ({r, g, b, a}, web/ext/jawt.js). */
+  setColorOf(c) {
+    this.setColor(c.r, c.g, c.b, c.a);
   }
 
   /**
@@ -233,7 +244,7 @@ export class Graphics2D {
     const r = clampByte(this.r * 255);
     const g = clampByte(this.g * 255);
     const b = clampByte(this.b * 255);
-    const a = clampByte(this.a * 255);
+    const a = clampByte(this.a * this.ca * 255);
     this.rgba = ((a << 24) | (b << 16) | (g << 8) | r) >>> 0;
   }
 
@@ -529,10 +540,10 @@ export class Graphics2D {
   }
 
   clearRect(x, y, w, h) {
-    const [r, g, b, a] = [this.r, this.g, this.b, this.a];
-    this.r = this.g = this.b = 0; this.a = 1;
+    const [r, g, b, a, ca] = [this.r, this.g, this.b, this.a, this.ca];
+    this.r = this.g = this.b = 0; this.a = 1; this.ca = 1;
     this.fillRect(x, y, w, h);
-    this.r = r; this.g = g; this.b = b; this.a = a;
+    this.r = r; this.g = g; this.b = b; this.a = a; this.ca = ca;
   }
 
   // --- text / images (2D overlay) ------------------------------------------
@@ -543,7 +554,7 @@ export class Graphics2D {
   // tr(): the game's text is translated here, and in stringWidth below with
   // the same function, so drawcs() centres the string that is actually drawn.
   drawString(s, x, y) {
-    this.text.fillStyle = `rgba(${this.r * 255 | 0},${this.g * 255 | 0},${this.b * 255 | 0},${this.a})`;
+    this.text.fillStyle = `rgba(${this.r * 255 | 0},${this.g * 255 | 0},${this.b * 255 | 0},${this.a * this.ca})`;
     this.text.fillText(tr(s), x, y);
   }
 

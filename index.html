@@ -51,6 +51,7 @@ body {
 .page > * { flex: none; }
 body[data-page="menu"]  #page-menu  { display: flex; }
 body[data-page="gm"]    #page-gm    { display: flex; }
+body[data-page="ext"]   #page-ext   { display: flex; }
 body[data-page="sp"]    #page-sp    { display: flex; }
 body[data-page="opts"]  #page-opts  { display: flex; }
 body[data-page="mp"]    #page-mp    { display: flex; }
@@ -231,6 +232,8 @@ body[data-page="race"] #bg, body[data-page="race"] .hint { display: none; }
   display: none;
 }
 body[data-page="race"] #log { display: block; }
+/* Settings -> Show performance: No leaves the line empty */
+body[data-page="race"] #log:empty { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
   /* every selection stays READABLE; it just stops flashing */
@@ -262,6 +265,14 @@ body[data-page="race"] #log { display: block; }
     <div><h1 class="title">Single Player</h1></div>
   </div>
   <ul class="menu" id="gm-rows" role="menu" aria-label="Single Player"></ul>
+</div>
+
+<!-- 1c : Extended Edition (NFM2 Extended Mode v2.8): its two race modes -->
+<div class="page" id="page-ext">
+  <div class="brand">
+    <div><h1 class="title">Extended Edition</h1></div>
+  </div>
+  <ul class="menu" id="ext-rows" role="menu" aria-label="Extended Edition"></ul>
 </div>
 
 <!-- 2 : single player -->

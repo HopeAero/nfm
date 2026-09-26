@@ -190,3 +190,17 @@ test('an existing directive is still replaced where it stands', () => {
   const car = 'ScaleX(100)\n\n<p>\np(1,1,1)\n</p>\n';
   assert.equal(rad.writeScale(car, [150, 100, 100]).split('\n')[0], 'ScaleX(150)');
 });
+
+test("the author is the carmaker() line NFM 2's CarDefine reads", () => {
+  assert.equal(rad.readAuthor('stat(1,2,3,4,5)\n'), '');
+  const t = rad.writeAuthor('stat(1,2,3,4,5)\n', 'Excalibur');
+  assert.match(t, /^carmaker\(Excalibur\)$/m);
+  assert.equal(rad.readAuthor(t), 'Excalibur');
+  assert.equal(rad.readAuthor(rad.writeAuthor(t, 'Radical Dude')), 'Radical Dude');
+  assert.doesNotMatch(rad.writeAuthor(t, '  '), /carmaker\(/);          // empty: no line
+});
+
+test('an author cannot break the line: parens, commas and newlines go', () => {
+  assert.equal(rad.readAuthor(rad.writeAuthor('', 'a(b),c\nd')), 'abcd');
+  assert.equal(rad.readAuthor(rad.writeAuthor('', 'x'.repeat(50))).length, rad.AUTHOR_MAX);
+});

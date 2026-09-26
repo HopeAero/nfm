@@ -18,6 +18,7 @@
 // keyboard code below is on the preview canvas, which is not a form control.
 
 import * as rad from './rad.js';
+import { devMode } from '../devmode.js';
 import { crashOnce, roofCrash } from './damage.js';
 import { scrubber } from './scrub.js';
 import { physicsHelp, crashHelp, crashTestHelp, STAT_HELP, CLASS_HELP,
@@ -29,6 +30,9 @@ import { listAll, listStored, readCar, readBuiltin, writeCar, deleteCar,
 import { detectFpath } from '../vfs.js';
 import { Graphics2D } from '../graphics.js';
 import { tr, translateDocument } from '../i18n.js';
+import * as ext from '../ext/extlines.js';
+import { carFromRad, defaultDonor } from '../ext/newcars-stats.js';
+import { specialLabel, specialText, tryPick, perText, whyNotExtended, TRY_KEY, PICK_KEY } from './extended.js';
 
 const $ = (id) => document.getElementById(id);
 const code = $('code'), pick = $('pick'), status = $('status'), err = $('err');
@@ -360,6 +364,83 @@ function buildPhysics() {
   });
 }
 
+// The Extended tab: inert ext* lines in the same .rad (web/ext/extlines.js), read by
+// Extended's carFromRad and ignored by NFM 2. Values out of range are shown, marked
+// invalid, and left alone until the user moves the control.
+function buildExtended() {
+  // Every slider on every tab re-syncs every row: parse the ext lines once per text, and
+  // build the car (carFromRad parses the whole model again) only while this tab is shown.
+  const readExt = perText(ext.readExt);
+  const e = () => readExt(source());
+  const build = perText((t) => carFromRad(current || 'car', t));
+  const car = () => ($('pane-extended').hidden ? null : build(source()));
+
+  const sp = $('ext-special');
+  sp.innerHTML = '';
+  sp.add(new Option(tr('By class (automatic)'), -1));
+  for (let k = 0; k < 39; k++) sp.add(new Option(specialLabel(k), k));
+  sp.onchange = () => setSource(ext.writeSpecial(source(), Number(sp.value) < 0 ? null : Number(sp.value)));
+
+  $('ext-same').onchange = () => setSource(ext.setOwn(source(), false));
+  $('ext-own').onchange = () => setSource(ext.setOwn(source(), true));
+
+  const statHost = $('ext-stat-rows'), physHost = $('ext-phys-rows');
+  statHost.innerHTML = '';
+  physHost.innerHTML = '';
+  rad.STAT_NAMES.forEach((name, i) => {
+    rows.push(sliderRow(statHost, {
+      caption: name, help: STAT_HELP[name], min: rad.STAT_MIN, max: rad.STAT_MAX,
+      read: () => (e().stat || rad.DEFAULT_STATS)[i],
+      write: (v) => ext.writeOwnStats(source(), rad.setStat(e().stat || rad.DEFAULT_STATS, i, v)),
+    }));
+  });
+  for (const i of rad.PHYS_SLOTS) {
+    rows.push(sliderRow(physHost, {
+      caption: rad.PHYS_NAMES[i], help: physicsHelp(i), min: 0, max: 100,
+      read: () => (e().phys || rad.DEFAULT_PHYSICS.phys)[i],
+      write: (v) => {
+        const p = (e().phys || rad.DEFAULT_PHYSICS.phys).slice();
+        p[i] = v;
+        return ext.writeOwnPhys(source(), p);
+      },
+    }));
+  }
+
+  const hd = $('ext-hd-rows');
+  hd.innerHTML = '';
+  const percentRow = (name, caption, range, field) => sliderRow(hd, {
+    caption, min: range.min, max: range.max,
+    read: () => e()[field] ?? 100,
+    write: (v) => ext.writePercent(source(), name, v),
+    format: (v) => {
+      if (e().invalid.includes(name)) return tr('invalid — ignored');
+      const c = car();
+      return c ? `${v}% · ${field === 'health' ? c.stat.maxmag : c.stat.dammult.toFixed(3)}` : `${v}%`;
+    },
+  });
+  rows.push(percentRow('exthealth', 'Health', ext.HEALTH, 'health'));
+  rows.push(percentRow('extdamage', 'Damage taken', ext.DAMAGE, 'damage'));
+  for (const r of hd.children) r.classList.add('wide');
+  $('ext-hd-hint').textContent = 'Percent of what this car has in NFM 2. The number beside it is what Extended uses.';
+
+  rows.push({
+    sync() {
+      const x = e();
+      const own = !!(x.stat && x.phys);
+      const c = car();
+      sp.value = x.special ?? -1;
+      sp.options[0].text = tr('By class (automatic)') + (c ? ` — ${specialLabel(defaultDonor(c.cclass)).split(' — ')[0]}` : '');
+      const k = x.special ?? (c ? defaultDonor(c.cclass) : null);
+      $('ext-special-text').textContent = (k === null ? '' : specialText(k))
+        + (x.invalid.includes('extspecial') ? '\n' + tr('The special in the file is not a stock car — ignored.') : '');
+      $('ext-same').checked = !own;
+      $('ext-own').checked = own;
+      $('ext-own-rows').hidden = !own;
+      $('extended-sub').textContent = x.invalid.length ? tr('invalid') : own ? tr('own') : '';
+    },
+  });
+}
+
 /** The source's own selection, or undefined for "the whole car". */
 function selection() {
   const { selectionStart: a, selectionEnd: b } = code;
@@ -410,12 +491,23 @@ function buildScaleAndAlign() {
   $('align-hint').textContent = ALIGN_HELP;
 }
 
+// carmaker(name), NFM 2's own line for who made a custom car (rad.writeAuthor)
+function buildAuthor() {
+  const inp = $('author');
+  inp.maxLength = rad.AUTHOR_MAX;
+  inp.oninput = () => setSource(rad.writeAuthor(source(), inp.value));
+  // not while typing: the written line drops what it cannot hold, and the caret would jump
+  rows.push({ sync() { if (document.activeElement !== inp) inp.value = rad.readAuthor(source()); } });
+}
+
 function buildAll() {
   rows = [];
+  buildAuthor();
   buildWheels();
   buildColours();
   buildStats();
   buildPhysics();
+  buildExtended();
   buildScaleAndAlign();
 }
 
@@ -599,6 +691,7 @@ pick.onchange = () => open(pick.value);   // the value carries the source too
       t.tabIndex = on ? 0 : -1;
       $('pane-' + t.dataset.pane).hidden = !on;
     }
+    if (tab.dataset.pane === 'extended') sync();   // its health / damage figures wait until it is shown
     if (focus) tab.focus();
   };
   tabs.forEach((t) => { t.onclick = () => select(t); });
@@ -667,6 +760,21 @@ $('drive').onclick = async () => {
   if (!current) return;
   await save(current);
   location.href = `./main.html?mycar=${encodeURIComponent(current)}`;
+};
+
+// Save, leave Extended's Free Play pick on this car, and let the launcher start Free Play
+// (index.html reads TRY_KEY at the end of its boot: no developer mode needed, unlike ?ext=).
+$('tryext').onclick = async () => {
+  if (!current) return;
+  // a car Extended skips would open Free Play on car 38 instead: say why, and stay
+  const why = whyNotExtended(current, source());
+  if (why) { status.textContent = tr(why); return; }
+  await save(current);
+  try {
+    localStorage.setItem(PICK_KEY, JSON.stringify(tryPick(localStorage.getItem(PICK_KEY), current)));
+    sessionStorage.setItem(TRY_KEY, '1');
+  } catch { /* private mode: the launcher opens on its menu */ }
+  location.href = '../index.html';
 };
 
 // Damage is not in the file, so these do not touch the source: they beat up the
@@ -796,7 +904,7 @@ physics(50,50,50,50,0,0,0,0,0,50,50,50,50,50,0,0)
     overlay.width = 700; overlay.height = 550;
     rd = new Graphics2D($('view'), overlay, 700, 550);
 
-    if (new URLSearchParams(location.search).get('debug')) {
+    if (devMode() && new URLSearchParams(location.search).get('debug')) {
       window.editor = { cm, rad, view, source, setSource };
     }
 

@@ -9026,7 +9026,7 @@ public class xtGraphics extends Panel implements Runnable
             final double[] fullpownit = this.fullpownit;
             final int n20 = 0;
             fullpownit[n20] += lvmulti;
-            this.powxpadjust += lvmulti;  // cast: bytecode-verified
+            this.powxpadjust += (int)lvmulti;  // cast KEPT: javap shows d2i iadd (fix_compound had wrongly dropped it)
             int extraxp = (int)this.fullpownit[0] - this.powxpadjust;
             if (!this.noexp) {
                 final int[] exp = madness[0].exp;
@@ -9276,7 +9276,7 @@ public class xtGraphics extends Panel implements Runnable
                 if (!this.noexp) {
                     final int[] exp2 = madness[0].exp;
                     final int n30 = this.sc[0];
-                    exp2[n30] += (int)(this.spkamount * extramod * this.expmult);
+                    exp2[n30] += (this.spkamount * extramod * this.expmult);  // cast: bytecode-verified (javap: i2d dadd d2i, found by order_check)
                 }
             }
             this.ktch = true;

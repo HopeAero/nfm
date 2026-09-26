@@ -45,6 +45,11 @@ Plain `python3 -m http.server` works but sends no `Cache-Control`, so the
 browser caches modules heuristically and a reload can pair a new module with a
 stale import ("does not provide an export named ..."). That shipped once.
 
+URL test switches (`?stage=`, `?selftest=`, `?stats=`, `?ext=`, ...) count only
+in developer mode (launcher Settings -> Developer mode, `web/devmode.js`) or
+when `serve.py` serves the page (its `nfm-devserver` cookie). Under another
+server, a fresh profile ignores them and races the defaults.
+
 ### Deploying
 ```sh
 ./deploy.sh                        # -> cop:/www/nfm/ (a flat tree)

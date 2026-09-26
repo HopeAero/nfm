@@ -90,6 +90,13 @@ reproduces while jar-vs-jar stays clean.
 # from a fresh COPY of the game directory; B = verify.py's <work>/out
 java --add-exports java.base/jdk.internal.org.objectweb.asm=ALL-UNNAMED      --add-exports java.base/jdk.internal.org.objectweb.asm.commons=ALL-UNNAMED      -Ddiffrun.every=10 -Ddiffrun.shots=1500 -cp <diffrun-classes> DiffRun <work>/jar <work>/out <work>/jar 1900      "300:click:435:380,420:1005,440:1005,460:10,560:10,660:10,720:1006,820:1006,950:10,1100:10,1120:click:435:322,1250:1004:600,1450:1007:60,1600:1006:40"
 ```
+Add `-Ddiffrun.debug=true` for the test setup every Extended test should use:
+all stages unlocked in both modes (`unlocked` = {27, 30}), no "END OF BETA"
+wall (`betalimit` = 100), and 999 career stat and car points, refilled each
+frame. Applied to both copies at the same frame; jar-vs-jar stays clean with
+it. Career rules keyed on the frontier stage (`stage == unlocked[1]`: the
+stage-23 boss, the hard 8/9/12/13, the level cap) then only fire on stage 30.
+
 (that script: start, Classic Mode, car, stage 15 -> 13 (14+ are "END OF BETA",
 `betalimit`), START, race.) `order_check.py` is the third tool: the sequence of
 type conversions per method, for compensating mistakes a bag cannot see.

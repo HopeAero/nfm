@@ -5,7 +5,7 @@
 // checks used here: the last car picked in each mode (xtGraphics.scm) and how
 // far each career has got (xtGraphics.unlocked, 1..11 and 1..17).
 //
-// "Unlock everything" is the port's, not the Java's. It never touches the
+// "Unlock everything" (now: developer mode) is the port's, not the Java's. It never touches the
 // saved progress: it only changes what the screens are told, so switching it
 // off puts the real career back.
 

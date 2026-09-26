@@ -104,6 +104,7 @@ main { position: relative; z-index: 2;
 .row { display: grid; grid-template-columns: 9.5rem 3.4rem 1fr; align-items: center;
        gap: .5rem; margin-bottom: .3rem; }
 .row.narrow { grid-template-columns: 5.5rem 1fr; }
+.row.wide { grid-template-columns: 9.5rem 8rem 1fr; }   /* "200% · 7764": percent and the value Extended uses */
 .row > .cap { font: 500 12px/1.2 var(--mono); opacity: .7; }
 .row > .cap.help { cursor: help; border-bottom: 1px dotted currentColor; width: max-content; }
 .row > .val { font: 600 12px/1 var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
@@ -226,9 +227,16 @@ textarea { width: 100%; height: 40vh; min-height: 14rem; resize: vertical;
           Stats <span class="sub" id="stats-sub"></span></button>
         <button role="tab" data-pane="physics" aria-selected="false" aria-controls="pane-physics">
           Physics <span class="sub" id="physics-sub"></span></button>
+        <button role="tab" data-pane="extended" aria-selected="false" aria-controls="pane-extended">
+          Extended <span class="sub" id="extended-sub"></span></button>
       </div>
 
       <div class="pane" id="pane-body" role="tabpanel">
+        <div class="group">
+          <h3>Author</h3>
+          <div class="bar"><label class="field">Author <input type="text" id="author" maxlength="30" spellcheck="false"></label></div>
+          <p class="hint">Who made this car. The car select shows it as “Created by”.</p>
+        </div>
         <div class="group">
           <h3>Colours</h3>
           <div class="bar">
@@ -284,6 +292,31 @@ textarea { width: 100%; height: 40vh; min-height: 14rem; resize: vertical;
           <p class="hint" id="crash-hint"></p>
         </div>
       </div>
+
+      <div class="pane" id="pane-extended" role="tabpanel" hidden>
+        <p class="hint">What this car is like in NFM 2 Extended. NFM 2 ignores this tab; the same car races in both games.</p>
+        <div class="group">
+          <h3>Special</h3>
+          <div class="bar"><label class="field">Special <select id="ext-special"></select></label></div>
+          <p class="hint" id="ext-special-text" style="white-space:pre-line"></p>
+        </div>
+        <div class="group">
+          <h3>Stats and physics in Extended</h3>
+          <div class="bar" role="radiogroup" aria-label="Stats and physics in Extended">
+            <label class="field"><input type="radio" name="ext-own" id="ext-same" value="same"> Same as NFM 2</label>
+            <label class="field"><input type="radio" name="ext-own" id="ext-own" value="own"> Own</label>
+          </div>
+          <div id="ext-own-rows" hidden>
+            <div id="ext-stat-rows"></div>
+            <div id="ext-phys-rows" style="margin-top:.5rem"></div>
+          </div>
+        </div>
+        <div class="group">
+          <h3>Health and damage in Extended</h3>
+          <div id="ext-hd-rows"></div>
+          <p class="hint" id="ext-hd-hint"></p>
+        </div>
+      </div>
     </section>
 
     <section class="card">
@@ -327,6 +360,7 @@ textarea { width: 100%; height: 40vh; min-height: 14rem; resize: vertical;
       <div class="err" id="err"></div>
       <div class="bar">
         <button id="drive" type="button" class="primary">Test drive</button>
+        <button id="tryext" type="button">Try in Extended</button>
         <button id="crash" type="button">Crash</button>
         <button id="roof" type="button">Roof crash</button>
         <button id="fix" type="button">Fix</button>

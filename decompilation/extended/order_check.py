@@ -30,6 +30,11 @@ def methods(path):
         m = INSN.match(l)
         if m and CONV.match(m.group(2)):
             cur['ops'].append((int(m.group(1)), m.group(2)))
+        if m:
+            fr = re.search(r'// Field (\S+)', l)
+            if fr: cur.setdefault('fields', []).append((int(m.group(1)), fr.group(1)))
+            sp = re.search(r'// Method (\w+\$split\d+)', l)
+            if sp: cur.setdefault('splits', []).append((int(m.group(1)), sp.group(1)))
         lm = LINE.match(l)
         if lm:
             cur['lines'].append((int(lm.group(2)), int(lm.group(1))))
@@ -54,11 +59,22 @@ def main():
         if not os.path.exists(os.path.join(rec, f)):
             continue
         o, r = methods(os.path.join(jar, f)), methods(os.path.join(rec, f))
-        # a split method's helpers run in call order at the split point; good
-        # enough to append them for Control.preform, whose blocks are in order
-        for name in [n for n in r if '$split' in n]:
-            parent = next(n for n in r if '$split' not in n and ' ' + name.split('$split')[0].split()[-1] + '(' in ' ' + n)
-            r[parent]['ops'] += r[name]['ops']
+        # A split method's helpers (Control.preform, see fix_compound.split_preform)
+        # are spliced back in at the pc of their call, so the parent's order is real.
+        helpers = {n.split('(')[0].split()[-1]: n for n in r if '$split' in n}
+        for pname, pm in r.items():
+            if '$split' in pname or not pm.get('splits'):
+                continue
+            ops = []
+            calls = sorted(pm['splits'])
+            k = 0
+            for pc, t in pm['ops']:
+                while k < len(calls) and calls[k][0] < pc:
+                    ops += r[helpers[calls[k][1]]]['ops']; k += 1
+                ops.append((pc, t))
+            for _, h in calls[k:]:
+                ops += r[helpers[h]]['ops']
+            pm['ops'] = ops
         for name, om in o.items():
             rm = r.get(name)
             if not rm:
@@ -73,7 +89,12 @@ def main():
                     continue
                 lines = sorted({line_at(rm['lines'], rm['ops'][j][0]) for j in range(j1, j2)} - {None})
                 total += 1
-                print(f'{f[:-6]}.{name.split("(")[0].split()[-1]}  {tag:7} jar {a[i1:i2]}  recompiled {b[j1:j2]}  lines {lines}')
+                near = ''
+                if i2 > i1:   # jar-only conversions: name the fields around them (the jar has no usable line table)
+                    pc = om['ops'][i1][0]
+                    fs = [n for p, n in om.get('fields', []) if abs(p - pc) < 24]
+                    near = f'  jar pc {pc}, fields near: {" ".join(dict.fromkeys(fs))}'
+                print(f'{f[:-6]}.{name.split("(")[0].split()[-1]}  {tag:7} jar {a[i1:i2]}  recompiled {b[j1:j2]}  lines {lines}{near}')
     print(f'{total} out-of-order stretches')
 
 

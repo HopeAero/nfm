@@ -23,6 +23,10 @@ const TITLES = {
   'yourwasted.gif': ['¡TE DESTRUYERON!', 'ink', 23],
   'youwastedem.gif': ['¡LOS DESTRUISTE!', 'ink', 23],
   '0c.gif': ['¡YA!', 'ink', 35],
+  // the car select's Car Maker cars switch (web/ext/cargroup.js); [label, style, size, width]
+  'cmc.gif': ['MIS AUTOS', 'cyan', 12],
+  'gac.gif': ['< AUTOS DEL JUEGO', 'cyan', 12, 132],
+  'ycmc.gif': ['MIS AUTOS', 'orange', 12],
 };
 
 const newCanvas = (source, width = source.width) => {
@@ -73,6 +77,15 @@ function drawTitle(ctx, label, style, size, width, height) {
     ctx.fillText(label, x, y);
     return;
   }
+  if (style === 'cyan') {
+    // cmc.gif / gac.gif: black letters edged in the button's sky blue
+    ctx.strokeStyle = '#1eb4ff';
+    ctx.lineWidth = 2;
+    ctx.strokeText(label, x, y);
+    ctx.fillStyle = '#050505';
+    ctx.fillText(label, x, y);
+    return;
+  }
   ctx.shadowColor = '#080808';
   ctx.shadowBlur = 0;
   ctx.shadowOffsetX = 1;
@@ -103,7 +116,7 @@ export function spanishSprite(name, source) {
   const rank = /^[1-8]\.gif$/.test(name);
   const arrow = name === 'back.gif' || name === 'next.gif';
   if (!hud && !title && name !== 'continue.gif' && !rank && !arrow) return source;
-  const { canvas, ctx } = newCanvas(source, hud?.width);
+  const { canvas, ctx } = newCanvas(source, hud?.width ?? title?.[3]);
 
   if (rank) {
     ctx.fillStyle = 'rgb(192,192,192)';

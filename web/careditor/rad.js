@@ -323,6 +323,24 @@ export function writeWheels(text, w) {
   return ls.join('\n');
 }
 
+// ---- author -----------------------------------------------------------------
+
+// carmaker(name): who made the car. NFM 2's CarDefine reads it as the custom car's
+// createdby (getSvalue: the text between the parens); Extended's car select credits it.
+export const AUTHOR_MAX = 30;
+
+export function readAuthor(text) {
+  const l = findLine(text, 'carmaker');
+  return l ? l.line.slice(l.line.indexOf('(') + 1, l.line.lastIndexOf(')')).trim() : '';
+}
+
+/** Parens, commas and line breaks would end the directive early, so they go; empty removes it. */
+export function writeAuthor(text, name) {
+  const clean = String(name).replace(/[(),\r\n]/g, '').trim().slice(0, AUTHOR_MAX);
+  if (clean) return setLine(text, 'carmaker', `carmaker(${clean})`);
+  return text.split('\n').filter((l) => !l.trim().startsWith('carmaker(')).join('\n');
+}
+
 // ---- scale and alignment ----------------------------------------------------
 
 export const SCALE_AXES = ['ScaleX', 'ScaleY', 'ScaleZ'];

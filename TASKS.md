@@ -1002,12 +1002,294 @@ there is no backend of ours anywhere in this design.
         fields are authoritative per car, and how the receive side folds them
         back into `Mad`/`ContO`, is real game logic.
 
-## Future: Extended Mode v2.8 (after the original port)
+## Extended Mode v2.8 (branch `extended-mode`, `web/ext/`)
+
+Classes are transpiled from Extended's own repaired source by
+`decompilation/extended/j2js/J2JS.java` (not patched from `web/*.js`: see
+`web/ext/README.md` for why). Verified against `madness.jar` by captured-call
+replay (`web/tools/ext-trace.mjs`, DiffRun `-Ddiffrun.trace=Class.method`).
+
+- [x] **Step 1, archives:** `radq.js`, every entry's CRC in all 15 archives.
+- [x] **Step 2, models and drawing:** `ContO`/`Plane` bit for bit on 129 models;
+      `ContO.d`/`Plane.d` call for call (170k pose calls, ~3M effect calls).
+- [x] **Step 3, physics:** `Madness.drive` identical on 21 captured race calls,
+      `Control.preform` (AI) on 12. `trace-drive`/`trace-preform` fixtures.
+- [~] **Step 3, AI coverage:** the 12 preform calls run ~4% of its 9,520 lines
+      (most calls take the `stcnt <= statusque` short path). Capture calls where
+      the AI re-decides (`stcnt > statusque`) to cover the rest.
+- [ ] **Step 3, rest:** `Madness.colide`, `CheckPoints.checkstat` replays.
+- [x] **Step 4, stage loading:** `GameSparker.loadstage` identical on the menu's
+      stage 16 and the race's stage 9 (`game-L`). Fixture is 4.2 MB, kept in
+      `D:\platica\.nfm-ext-work\` rather than the repo.
+- [ ] **Step 4, backdrop:** `Medium.d` (sky, ground, clouds, mountains) is drawn
+      but not verified call for call; do it on real stages like `draw.test.js`.
+- [x] **A race in the browser (2026-09-24):** `web/ext/main.html?mode=classic|career&stage=N&car=M`
+      runs the jar's own `GameSparker.run()` loop (a generator, see WORK.md),
+      skipping Extended's menus: it sets the stage, car and mode where
+      `readdata` hands over `xtGraphics`/`CheckPoints`, then `fase = 6476` as
+      stage select's START does. The launcher's Extended Edition -> Classic
+      Race / Career Mode opens it. 7-car race on stage 1 with the full HUD.
+- [x] **Car select (2026-09-24):** the launcher's Extended entries open
+      Extended's own car select (`fase -9` -> `inishcarselect`, `fase 7`), as
+      the base port opens the game's; Enter -> stage preview -> START -> race.
+      Career shows levels, stat points, Change Stats and Bonus Cars. Esc on it
+      returns to the launcher (the jar's car select has no way out). The stage
+      preview's CHANGE CAR and RETURN TO MENU work (car select / launcher).
+- [x] **Fixed after the first hands-on run (2026-09-24):** night stages (10, 14)
+      froze on `Arrays`; black smoke/silhouettes from `PixelGrabber` on the
+      offscreen frame; BACK past the first classic car crashed (the page chose
+      a car outside classic's 23-38). See WORK.md.
+- [ ] Watch: once, in career, a run ended on the stage preview (stage 4, after
+      8 and 11) with no Enter sent; not reproduced in three repeats.
+- [x] **Free Play for Extended (2026-09-24):** launcher -> Extended Edition ->
+      Free Play (`?ext=free`, `web/ext/freeplay.js`): Extended's own car select
+      with all 39 cars (run in the jar's normal mode; 0/38 limits added), then a
+      stage select that renders the stage (the jar's fase 1 fly-around, no title
+      card, no kB loading screen) under the port's DOM controls, in Spanish:
+      NFM 2 (the base's 32, classic mode, NFM2 models) / Extended (tracks.radq's
+      27, normal mode); arrows, Up/Down switch group, Enter races, Esc changes
+      car. The pick is remembered (`nfm.ext.free`). Classic stays at `?ext=classic`.
+- [x] Free Play fixes (2026-09-24): NFM 2 stages lost their ground tint (Extended
+      has no texture(); now polys()), and 24 Extended stages were on an old model
+      list (ids +4; renumbered). See WORK.md.
+- [x] Free Play, developer mode only: a Career group (careertracks.radq 1-31,
+      raced in career mode: its HUD levels, bots, per-stage AI). Hidden from
+      players so the career stays a surprise (the user, 2026-09-24).
+- [ ] Free Play: the Premier Tournament (Extended stage 26, matchtracks.radq's
+      five rounds) is not listed.
+- [ ] Free Play: the car select still draws BACK at car 0 and NEXT at 38 (the
+      jar hides them only in classic/career); they do nothing there.
+- [ ] Free Play: NFM 2 stages 1-10 and 28-32 have no classic twin, so they race
+      with classic stage 1's per-stage AI (Control has ~260 stage checks).
+- [x] **Sound and music (2026-09-25):** effects are the base port's (web/audio.js over
+      data/sounds.zip) behind getAudioClip by file name (web/ext/sound.js), plus caught/redflash
+      from Extended and the base's scrape sounds on the player's sparks; tracker music (.radq
+      .mod) through the base's BassoonTracker (web/ext/radmusic.js, `radmod-lazy` patch,
+      music.loadBytes); career .ogg through an <audio> OggClip. Assets in ext/data/Files
+      (77 MB, untouched copies). Needs a listen: the user checks by ear.
+- [x] **Saving (2026-09-25):** a real career saves to localStorage `nfm.ext.career` (web/ext/career-save.js, the savedata.radq fields); developer mode keeps the debug unlocks and saves nothing.
+- [x] **The race in the base shell (2026-09-24):** `web/main.html?ext=classic|career`
+      (and the launcher's Extended Edition entries, through the same `boot()`)
+      runs Extended's race on the base race's page, WebGL surface (`?res=`,
+      `?textres=`, `?aa=`), fixed-tick rAF loop and stats line. `web/ext/race.js`
+      steps the generated `GameSparker.run()` one frame per tick and fast-forwards
+      the jar's pre-race screens unseen (see WORK.md). `web/ext/main.html` stays as
+      the dev page with Extended's own car select until the launcher has one.
+- [x] **Interpolation for Extended, the base port's way (2026-09-24):** ContO/Plane/
+      Medium carry the base's `interpolating` guards and random replay at the
+      same sites (hand-maintained from here); `web/ext/racetick.js` is the race
+      frame split like the base harness (rebuildNewCars + simulate per tick,
+      draw once per frame, authoritative when a tick ran); `web/ext/race.js` runs
+      main.js's frameBody logic. The first attempt (`interp.js`, save/restore
+      around a redraw plus a tick-picture shortcut) is gone: it juddered in
+      turns and cost double on tick frames. `?selftest=N` hashes cars AND
+      effect state; interp=0 and 1 must agree (stage 4, car 30, 400 ticks:
+      `8215cdd7`). 60 fps, worst frame 6-14 ms, 0 over budget on stage 4.
+- [x] **Shaking in turns fixed (2026-09-24):** Medium.d's `i32(xz +/- 360)` dropped
+      the fraction of the blended camera heading on every redraw; now `xz += 360`
+      as the base port's Medium.d. See WORK.md.
+- [ ] **The base shell's race features** for Extended: pause menu, finish
+      screen, highlights, Spanish HUD sprites. Today the jar's own finish runs.
+- [ ] **Deploy:** `deploy.sh` needs `rsync`, which this Windows machine lacks.
+### Priorities (the user, 2026-09-24)
+
+In this order of importance; content creation (below) waits behind them.
+
+- [x] **Car select** for Extended: Free Play and Career run the jar's own car select (web/ext/menus.js).
+- [x] **Career mode** through the menus (2026-09-25): the jar's car select, a rendered stage select with
+      the career extras as Spanish DOM buttons (bonus stage, hard/scale/no levels, xp, scouting, change car,
+      menu), progress saved, no beta wall (all 31). Still to see by hand: a whole career run, level-ups,
+      bonus stages 1-4, the stage 23 boss music switch.
+- [x] **Music on every stage** (modules through BassoonTracker, career `.ogg`), 2026-09-25.
+- [x] **Stage select** working (rendered stage, DOM controls; free play and career).
+- [ ] **The base port's UI on Extended, keeping Extended's own pieces:** the
+      special bar, the car list, health/special on car select, Extended's
+      speedometer; the base's screen effects on pause and race end.
+- [x] **Extended's own cars in Extended's free mode:** Free Play lists all 39 and
+      Extended's own stages (2026-09-24).
+- [ ] **Spanish** (HUD sprites, strings).
+
+### Content from the base game's editors
+
+Gameplay stays separate; Extended learns to read what the editors make.
+
+- [x] **NFM2 / Stage Maker stages in Extended (2026-09-24):**
+      `web/main.html?ext=classic&nfm2stage=N` (the base game's stages/N.txt) or
+      `&mystage=NAME` (Stage Maker store / mystages/) races it with Extended's
+      gameplay (`web/ext/stagecompat.js`, hooked in race.js). Ids translated by
+      the base models: all 68 appended from the base `data/models.zip` after
+      Extended's 129 (Extended reshapes some, e.g. giant trees); checked on NFM2 stage 30
+      (cacti, slider, launchpad) and the Stage Maker example stage.
+- [x] **Pick them from the launcher** for Extended: Free Play's NFM 2 group (Stage Maker stages not yet).
+- [x] **Car Maker cars in Extended, as NEW cars (2026-09-26, branch `ext-new-cars`)**:
+      added after the 39, none replaced; Free Play only; opponents never race them.
+      Plan and rulings: `docs/superpowers/plans/2026-09-26-ext-new-cars.md`.
+      A new car is index `NEW_BASE + i` (200+: 39-196 are track pieces, beast cars,
+      scenery and stagecompat's models) in the model array and the 70 per-car tables
+      (`web/ext/newcars-grow.js`, grown by ext-patch after the constructors; a test
+      compares its lists with every length-39 field), and its donor's number as its
+      IDENTITY: `web/tools/ext-ident.mjs` wraps the 1,115 `car <op> literal`
+      comparisons (+ healthcalc's `carid`) as `id(car)`, so the donor's special and
+      quirks come with it. Physics: the base `CarDefine.loadstat` (NFM 2's formulas);
+      Extended-only values from the donor. Model: ext-patches `newcar-isacar` and
+      `newcar-scale-*` (Extended's ContO ignored ScaleX/Y/Z). Launcher: Extended
+      ~~Edition -> New cars (donor per car).~~ (replaced below by the Car Maker's
+      Extended tab) Stock races unchanged (selftests base vs
+      branch: classic 4/30 `271c3367`, 11/36 `79ff2d50`, 9/25 `38386f63`).
+- [x] **Car Maker's Extended tab (2026-09-26, branch `ext-carmaker`)**: one car, two games.
+      The tab writes inert `ext*` lines (`web/ext/extlines.js`): `extspecial(0-38)`,
+      `extstat`/`extphysics` (own stats and the 11 handling sliders; crash look, engine
+      and `actmag` stay shared), `exthealth(50-300)`, `extdamage(50-200)`; invalid = ignored.
+      Every Car Maker car is in Extended's Free Play (`listAll()` order); the launcher's
+      New cars page is gone. "Try in Extended" saves and opens Free Play on the car.
+      The car select shows the game's cars or yours, switched by NFM 2's own
+      "Car Maker Cars" / "< Game Cars" button and header (`web/ext/cargroup.js`, base
+      images.zip, Spanish redrawn); ▴ ▾ too. The Body tab edits the author
+      (`carmaker(name)`), credited in the car select instead of the donor's creator
+      (ext-patches `newcar-credit-*`). Plan: `docs/superpowers/plans/2026-09-26-ext-carmaker.md`.
+- [ ] **The web Car Maker cannot calibrate the crash** (`physics()` value 16, `actmag`): only
+      the applet's `careditor/tab2.js` computes it, and the new UI never calls it; the
+      Physics tab just says "not calibrated". `CarDefine.loadstat` blanks a car without it
+      (`if (b && b2)`, CarDefine.js:184/490), so a car built from the template races
+      neither in NFM 2 nor in Extended (Try in Extended now says so instead of racing car 38).
+      Port the calibration (tab2.js ~1259-1360) behind a button.
+- [ ] New cars in the career: `career-save.js` saves per index (`CARS = 39`), and a
+      new car's index moves with the list -- save them by name; level-ups
+      (`reqneed`, `resetstats` take the car number as a plain parameter: see WORK.md).
+- [ ] New cars' balance: they drive with NFM 2's numbers; Extended retuned ~half of
+      the NFM 2 cars by hand (`dammult`, `maxmag`, `swits`, `grip`). A per-table
+      factor from the 16 pairs, as a knob, if they feel off.
+- [ ] The career selftest (`?ext=career&stage=3&car=5&selftest=600`, also `=50`)
+      blocks the main thread in headless Chrome on `extended-mode` itself
+      (2026-09-26); WORK.md recorded `353ea4bf` for it earlier. Find what changed.
+### Base-port parity audit (2026-09-24)
+
+The base port is not just the Java transcribed: it carries port-level fixes and
+features no Java has. Extended was transpiled from its own source and checked
+against the jar, so it did NOT inherit them, and several were being
+rediscovered one bug at a time. This list is every base-port item (from
+WORK.md, TASKS.md and the code of web/ContO/Plane/Medium/graphics/main/
+XtGraphics/Mad), sorted against Extended. Engine comparison, for scale:
+Plane shares 8/10 methods and all fields with the base; Medium 30/32 (+39
+fields); ContO 13/19 (+40 fields, 6 new effects); Mad->Madness +120 fields;
+Control 4x the code; xtGraphics twice. The render core is the base's; physics,
+AI and UI are the mod.
+
+**Covered already** (shared code, or redone for Extended):
+- graphics.js as a whole: WebGL batch in submission order, even-odd trapezoid
+  fill, packed colour, modulo-free isConvex, textres/AA defaults, per-colour
+  alpha, setFont(Font), drawString/stringWidth through tr(). java.js: float
+  RGBtoHSB/HSBtoRGB, idiv(x,0) = 0, the draw random bank.
+- Fixed tick 53 ms, MAX_CATCHUP 3, display-rate interpolation with the camera
+  blended between its tick states, HUD vector replay, overlay kept
+  (web/ext/interp.js); one scene draw per frame (the tick's own picture is t=0).
+- Fractional sin/cos (during redraws); draw-time mutations kept out of the sim
+  (save/restore instead of `interpolating` hooks, checked by interp.test.js).
+- Procyon `*= (int)literal` artifacts (sky 0.991, etc.): Extended's repaired
+  source is bytecode-verified; field/method name clashes (trackbg$m, stat$m);
+  pacing without catch-up bursts on menu screens (carselect.js fix is shared).
+- Canvas2D edge stroke on fills (offscreen images use canvas-graphics.js),
+  race in the same page via boot(), onExit back to the launcher, stats line.
+
+**Applies -- to do, by impact:**
+- [x] Perf: ContO.d face order by stable `Array#sort` on `av` instead of the
+      O(npl^2) rank count, and cos/sin hoisted out of ContO/Plane/Medium.rot:
+      named patches over J2JS output (`web/tools/ext-patches.mjs`, checked by
+      `ext/patches.test.js`; draw.test.js still matches the jar call for call).
+      Tick 13.9 -> 10.8 ms and redraw 9.6 -> 7.7 ms on a 16.5k-vertex scene;
+      22-40% off race frames.
+- [x] ~~Perf: Record's per-cycle ContO copies~~ -- measured, not the cause (6 cars; overturned below):
+      `?spike=18` logged 5 frames over 18 ms in 20 s, none following a Record
+      cycle (cntf 4..43), heap +3.4 MB/s of short-lived draw arrays. The copy
+      constructor also consumes randoms (gr == -15 planes) and writes the
+      source and the Trackers, so skipping copies would change the race.
+- [x] Perf (2026-09-25): with 19 cars Record's copies ARE the cause -- ~20k Planes per
+      shift reach the old generation; the major GCs were the 53-61 ms hitches. ext-patch
+      `record-shift` moves the older five snapshots and copies only the newest. The
+      objection above does not hold for cars: none of the 39 has a gr -15 face or a
+      track (checked in the browser), so the copy consumes no randoms and adds no
+      trackers; it writes `n = 16` on master faces, already 16 on a snapshot.
+      Selftest `271c3367` unchanged. Also `tracker-rows`, Medium ogpx/ogpz by stage.
+- [x] Perf: trackgrid.js -- ContO.d's shadow test, lowshadow, Plane.s and the base dust
+      scan only the trackers in the point's cell (conservative grid, same order, tested
+      against the full sweep). The start grid of NFM 2 stage 13 had 54-136 ms frames.
+- [x] Perf (2026-09-25): career stage 3's start (19 cars bunched). Madness.drive swept every
+      tracker twice per car per tick (road type; 4 wheels x every tracker) -- ext-patches
+      `road-cell` / `wheel-sweep` over trackgrid.js (the wheel sweep falls back to every tracker
+      after the last one visited once a pushed wheel leaves the safe box; tested against the
+      full sweep and on the captured drive() calls). Plane.d/sortpieces/s per-call arrays from
+      a pool; ContO.d's face order kept per object; Extended groundpolys' per-cell arrays
+      reused; each Plane's nine arrays are views of one buffer. `?bench=10&warmup=0` from the
+      start, grid vs `?grid=0`: sim 8.86 -> 3.75 ms/tick, draw 15.0 -> 11.1 ms/frame, 866 ->
+      595 ns/vert, 47.5 -> 54.6 fps, long tasks in 10 s 9 -> 2. Heap nodes 3.11M -> 1.86M.
+      Selftests unchanged: classic 4 `271c3367`, career 3 (19 cars, 600 ticks) `353ea4bf`.
+- [ ] Perf: Plane.d's own body (~2.3 us/face) is now most of the start's draw -- the
+      J2JS float/int wrappers; and the replay's 6 x 19 car snapshots (~20k Planes) that could
+      keep only the vertex arrays.
+- [x] Visual (2026-09-25): an NFM 2 stage in Extended looks and costs as in the base:
+      density 2n+1, disline x2, the base Plane culls (basecull), the base's ground
+      patches (web/Medium.js newpolys/groundpolys on Extended's Medium, seed approx.),
+      the base pile shading, nochekflk but on 1 and 11 (stagecompat.js baseLook /
+      baseGround). Stage 13: 19.2k verts submitted vs the base's 18.9k.
+- [ ] Visual: replay the tick draw's random sequence on redraws (the base's
+      Medium random log), so sparks, dust and bolts keep their shape between
+      ticks instead of re-rolling at 60 Hz.
+- [x] Visual: wheel dust is the base's (web/ext/basedust.js: the 20-slot ring, a puff
+      per wheel per tick, translucent road-tinted octagons); Extended's own 4 slots
+      keep their state for Record but are not drawn. At the user's request.
+- [x] Visual: sparks (the jar has none): base ContO.sprk/dsprk, Madness calls via
+      `sparks-*` patches (scrape capsized, walls, slopes, car-to-car).
+- [ ] Replays: Record replays Extended's dust slots, not the base ring -- feed the
+      ring from Record's puff events when instant replay/highlights are wired.
+- [ ] Visual: loadsnap's corner-pixel reference when the corner is transparent
+      (base fix for the missing "TH" on rank badges); the probable cause of the
+      black shapes on Extended's loading/stage images.
+- [ ] Visual: `?hud=auto` contrast-adapted HUD ink on dark skies, `outline`,
+      `boxes` (images.js readable/halo).
+- [ ] Screens: Esc opens the base's DOM pause menu (race-ui.js: Resume /
+      Instant Replay / Instructions / Quit), pause drops accumulated time;
+      Enter mid-race (the jar's fase -6/-7) routed to it instead of Extended's
+      pause screen.
+- [ ] Screens: race end -> the base's finish screen, automatic highlights and
+      Instant Replay (Record.playh on cloned cars), then back to the launcher.
+- [ ] Screens: launcher car and stage pickers for Extended (base carselect.js /
+      stage select with the NFM1/NFM2 lists and 3D preview).
+- [ ] Audio: SFX through web/audio.js (the base's AudioClip stand-ins for
+      getAudioClip), unlocked on key/pointer, volumes from Settings.
+- [ ] Audio: music -- the .radq stage modules through BassoonTracker
+      (music.js), career .ogg pairs through an <audio> element; ship the files.
+- [ ] i18n: Spanish HUD sprites and layout (ui-sprites-es.js), Extended's
+      strings in the i18n dictionary.
+- [ ] Input: touch joystick and two-finger trick; check Extended's own key map
+      (A/S toggles, Shift lookback) against the base's.
+- [x] Career (2026-09-25): the jar's own stage select (base-port look + Extended's buttons, its
+      locked-stage screen), translated; a - per stat and held +/- in the car select.
+- [x] Career (2026-09-25): the real career in developer mode too (`?extdebug=1` for the debug
+      setup); Confirm / Undo for the car select's stat points; New career; a finished race
+      returns to the career's car select with the progress saved. Checked in the browser: a
+      forced win on stage 1 then 2 -> unlocked [1,2] -> [1,3], the next stage selected.
+- [x] Tooling (2026-09-25): `?bench=S` (window from the end of the countdown, `?warmup=`,
+      R reruns; the base's report plus Extended's slices), `?prof=1` (Plane.d, Plane.s,
+      Medium.d, Madness.drive/colide), `?maxfps=`, `?debug=1` (window.__nfm), `?spike=`
+      (with prof slices) -- web/ext/benchtools.js. Unlike the base, ?stats=1 does not imply ?bench.
+
+**Does not apply now** (decide when Extended gets multiplayer):
+- Netplay determinism fixes that deliberately depart from the Java: sound and
+  announcer randoms on the draw bank, stepFix / tickMissedCp moved out of
+  drawing, repair never branching on ContO.dist, `human(i)` / `Control.remote`
+  / `xt.im`, trig tables baked as constants. Extended stays jar-faithful here;
+  they matter once two clients must agree.
+- Base deviations flagged as possibly unintended (Medium.ys clamp at 50, dsprk
+  truncation): not to be copied.
+- Base-only screens (car maker, stage maker, lobby) and ?mystage / ?mycar /
+  ?cars=same / ?players.
+
+- [ ] **Extended's own menus, last** (as in the base port, the launcher stands
+      in for them). They already run from the transpiled `xtGraphics`; images
+      decode, but the menu backdrop draws black.
 
 - [x] **Validated and repaired (2026-09-23):** procyon's raw output was wrong in 129 places (126 compound casts, 3 infinite loops); `java-src/` is the repaired copy. 1,924/1,950 methods equivalent by operations, the other 26 read and benign; a side-by-side run (`decompilation/extended/diffrun/`) matches the jar bit for bit through menus and ~650 frames of a 6-car race. Modes not yet run side by side: career/RPG, tourney, specials. See `decompilation/extended/README.md`.
 - [x] **Decompiled (2026-09-23):** `decompilation/extended/java-src/`, 26 classes, 97.6% opcode match on recompile (base game 98.7% by the same measure); `Control.preform` is too large to recompile. `research/extended-mode/radq.py` unpacks all 78 `.radq`. See `decompilation/extended/README.md`.
-- [ ] Complete and verify the original Java-to-browser port first. Keep Extended Mode changes out of the active `web/` work until that baseline is ready.
-- [ ] Then assess and port Extended Mode gameplay, cars, tracks, and UI incrementally. The source location, verified differences, archive encoding, and limitations of the Java runtime check are documented in [`research/extended-mode/README.md`](research/extended-mode/README.md).
 
 ## Known gaps / risks
 

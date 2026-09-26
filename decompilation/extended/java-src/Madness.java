@@ -1875,7 +1875,7 @@ public class Madness
                 else {
                     this.fxz = (int)((float)conto.wxz / i3);
                 }
-                conto.xz += ((float)conto.wxz / i3);  // cast: bytecode-verified
+                conto.xz += (int)((float)conto.wxz / i3);  // cast KEPT: javap shows d2f fdiv f2i iadd (fix_compound had wrongly dropped it; see README)
             }
             this.wtouch = false;
             this.gtouch = false;
@@ -3265,7 +3265,7 @@ public class Madness
             else {
                 this.tilt = 0.0f;
             }
-            conto.xy += (int)this.tilt;
+            conto.xy += this.tilt;  // cast: bytecode-verified (javap: i2f fadd f2i -- the float sum, found by trace replay)
             if (this.gtouch) {
                 conto.y -= (this.tilt / 1.5);  // cast: bytecode-verified
             }

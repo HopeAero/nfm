@@ -176,20 +176,24 @@ export function RGBtoHSB(r, g, b, out) {
   let cmin = r < g ? r : g;
   if (b < cmin) cmin = b;
 
-  brightness = cmax / 255.0;
-  saturation = cmax !== 0 ? (cmax - cmin) / cmax : 0.0;
+  // All float in the JDK -- (float) cmax / 255.0f, etc. -- so every step
+  // rounds to float32. This once ran in double and came out an ulp off the
+  // jar's hue for some colours (found by web/ext/ContO.test.js).
+  const f = Math.fround;
+  brightness = f(cmax / 255.0);
+  saturation = cmax !== 0 ? f((cmax - cmin) / cmax) : 0.0;
 
   if (saturation === 0) {
     hue = 0;
   } else {
-    const redc = (cmax - r) / (cmax - cmin);
-    const greenc = (cmax - g) / (cmax - cmin);
-    const bluec = (cmax - b) / (cmax - cmin);
-    if (r === cmax) hue = bluec - greenc;
-    else if (g === cmax) hue = 2.0 + redc - bluec;
-    else hue = 4.0 + greenc - redc;
-    hue = hue / 6.0;
-    if (hue < 0) hue = hue + 1.0;
+    const redc = f((cmax - r) / (cmax - cmin));
+    const greenc = f((cmax - g) / (cmax - cmin));
+    const bluec = f((cmax - b) / (cmax - cmin));
+    if (r === cmax) hue = f(bluec - greenc);
+    else if (g === cmax) hue = f(f(2.0 + redc) - bluec);
+    else hue = f(f(4.0 + greenc) - redc);
+    hue = f(hue / 6.0);
+    if (hue < 0) hue = f(hue + 1.0);
   }
 
   out[0] = hue;
@@ -203,22 +207,26 @@ export function RGBtoHSB(r, g, b, out) {
  * the JDK's return value is dropped; no call site here reads it).
  */
 export function HSBtoRGB(hue, saturation, brightness) {
+  // Float throughout, as in the JDK (brightness * 255.0f + 0.5f, ...). It ran
+  // in double once and came out one unit off in some channels -- see RGBtoHSB.
+  const f32 = Math.fround;
+  const c = (v) => Math.trunc(f32(f32(v * 255.0) + 0.5));
   let r = 0, g = 0, b = 0;
   if (saturation === 0) {
-    r = g = b = (brightness * 255.0 + 0.5) | 0;
+    r = g = b = c(brightness);
   } else {
-    const h = (hue - Math.floor(hue)) * 6.0;
-    const f = h - Math.floor(h);
-    const p = brightness * (1.0 - saturation);
-    const q = brightness * (1.0 - saturation * f);
-    const t = brightness * (1.0 - saturation * (1.0 - f));
-    switch (h | 0) {
-      case 0: r = (brightness * 255.0 + 0.5) | 0; g = (t * 255.0 + 0.5) | 0; b = (p * 255.0 + 0.5) | 0; break;
-      case 1: r = (q * 255.0 + 0.5) | 0; g = (brightness * 255.0 + 0.5) | 0; b = (p * 255.0 + 0.5) | 0; break;
-      case 2: r = (p * 255.0 + 0.5) | 0; g = (brightness * 255.0 + 0.5) | 0; b = (t * 255.0 + 0.5) | 0; break;
-      case 3: r = (p * 255.0 + 0.5) | 0; g = (q * 255.0 + 0.5) | 0; b = (brightness * 255.0 + 0.5) | 0; break;
-      case 4: r = (t * 255.0 + 0.5) | 0; g = (p * 255.0 + 0.5) | 0; b = (brightness * 255.0 + 0.5) | 0; break;
-      case 5: r = (brightness * 255.0 + 0.5) | 0; g = (p * 255.0 + 0.5) | 0; b = (q * 255.0 + 0.5) | 0; break;
+    const h = f32(f32(hue - f32(Math.floor(hue))) * 6.0);
+    const f = f32(h - f32(Math.floor(h)));
+    const p = f32(brightness * f32(1.0 - saturation));
+    const q = f32(brightness * f32(1.0 - f32(saturation * f)));
+    const t = f32(brightness * f32(1.0 - f32(saturation * f32(1.0 - f))));
+    switch (Math.trunc(h)) {
+      case 0: r = c(brightness); g = c(t); b = c(p); break;
+      case 1: r = c(q); g = c(brightness); b = c(p); break;
+      case 2: r = c(p); g = c(brightness); b = c(t); break;
+      case 3: r = c(p); g = c(q); b = c(brightness); break;
+      case 4: r = c(t); g = c(p); b = c(brightness); break;
+      case 5: r = c(brightness); g = c(p); b = c(q); break;
     }
   }
   return (r << 16) | (g << 8) | b;

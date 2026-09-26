@@ -7,6 +7,7 @@
 // vsync pacing instead, so the whole adaptive block goes away.
 
 import { Graphics2D } from './graphics.js';
+import { pageParams } from './devmode.js';
 import { Medium } from './Medium.js';
 import { Trackers } from './Trackers.js';
 import { CheckPoints } from './CheckPoints.js';
@@ -34,6 +35,7 @@ import { Lobby } from './netlobby.js';
 import { createRaceMenu } from './race-ui.js';
 import { highlightTitle, shouldPlayHighlight } from './highlight.js';
 import { saveCareer } from './career.js';
+import { perfLevel, perfLine } from './perfline.js';
 
 const log = (msg) => {
   console.log(msg);
@@ -114,7 +116,12 @@ async function negotiate(mode, params, cfg, keep) {
 export async function boot(opts = {}) {
   // Launched from the launcher, its observer already covers this page.
   if (!opts.params) translateDocument();
-  const params = opts.params || new URLSearchParams(location.search);
+  // A query string's test switches need developer mode (devmode.js); the
+  // editors' Test Drive links always work.
+  const params = opts.params || pageParams(log);
+  // ?ext=classic|career: Extended Mode's race, in this same page and render
+  // surface; its classes and frame are its own (web/ext/race.js).
+  if (params.get('ext')) return (await import('./ext/race.js')).bootExtended(params, log, opts.onExit);
   const base = await detectFpath(params.get('path'));
 
   // ---- netplay handshake --------------------------------------------------
@@ -324,7 +331,7 @@ export async function boot(opts = {}) {
   // A career race (?gmode=1|2, from the launcher's NFM 1 / NFM 2): the
   // finish screen's unlocks and sortcars() read gmode and unlocked, and
   // loadstage races NFM 1 with five cars. `unlocked` is what the launcher's
-  // screens saw -- the saved career, or everything under "Unlock everything".
+  // screens saw -- the saved career, or everything under developer mode.
   const g = parseInt(params.get('gmode') || '0', 10);
   const gmode = !sync && (g === 1 || g === 2) ? g : 0;
   if (gmode) {
@@ -974,7 +981,9 @@ export async function boot(opts = {}) {
   // whole degrees, and is fixed. ?interp=0 restores tick-rate rendering.
   const INTERPOLATE = params.get('interp') !== '0';
   const MAX_FPS = parseFloat(params.get('maxfps') || '0');   // 0 = uncapped
-  const SHOW_STATS = params.get('stats') === '1';
+  // Settings -> Show performance (perfline.js); 'all' is the full line with the sim/draw costs
+  const PERF = perfLevel(params);
+  const SHOW_STATS = params.get('stats') === '1' || PERF === 'all';
 
   // ---- benchmark mode -----------------------------------------------------
   // A rolling 60-frame readout is useless for comparing two builds: whichever
@@ -984,7 +993,7 @@ export async function boot(opts = {}) {
   //
   // The first WARMUP_MS are discarded: shader compile, the first texture-free
   // draw, and JIT warmup all land there and are not representative.
-  const BENCH_S = parseFloat(params.get('bench') || (SHOW_STATS ? '3' : '0'));
+  const BENCH_S = parseFloat(params.get('bench') || (params.get('stats') === '1' ? '3' : '0'));
   const WARMUP_MS = parseFloat(params.get('warmup') || '3000');
   const BENCH_MS = BENCH_S * 1000;
   let benchStart = 0;          // set on the first frame past warmup
@@ -1751,6 +1760,7 @@ export async function boot(opts = {}) {
         line += `\n  gaps ${hist.join('/')}  spikes=${spikeCount}`
           + `  offcpu=${(outMsTotal / Math.max(1, gapMsTotal) * 100).toFixed(0)}%`;
       }
+      if (!BENCH_MS) line = perfLine(PERF, { fps, tps, tickMs: simMs / Math.max(1, ticks), frameMs: drawMs / Math.max(1, frames) }) ?? line;
       log(line);
       frames = 0;
       ticks = 0;

@@ -1,0 +1,1514 @@
+// Transpiled by decompilation/extended/j2js/J2JS.java from
+// decompilation/extended/java-src/Plane.java, then maintained by hand like the
+// base port's web/Plane.js, whose `interpolating` guards it carries at the same
+// sites (damage embossing, chip shards). The Java's own behaviour is checked
+// against madness.jar by ContO.test.js and draw.test.js; run them after edits.
+
+import { floatArray, fr, i32, idiv, intArray, random, trunc } from '../java.js';
+import { Color } from './jawt.js';
+import { nearTrackers } from './trackgrid.js';
+
+// port: the per-call arrays of d(), sortpieces() and s() come from a pool, one
+// array per call site and length, zeroed as a new one is -- fillPolygon and
+// drawPolygon consume them at once and nothing keeps them. Allocating them was
+// ~16% of Plane.d's time with 19 cars on screen. Calls do not nest per site.
+const POOL = [];
+const scratch = (slot, n) => {
+  const bySize = POOL[slot] || (POOL[slot] = []);
+  const a = bySize[n] || (bySize[n] = new Int32Array(n));
+  a.fill(0);
+  return a;
+};
+
+export class Plane {
+  constructor(medium, trackers, ai, ai1, ai2, i, ai3, shad, j, k, l, i1, j1, k1, l1, flag1, i2, bool2) {
+    this.m = null;
+    this.t = null;
+    this.ox = null;
+    this.oy = null;
+    this.oz = null;
+    this.n = 0;
+    this.c = null;
+    this.oc = null;
+    this.hsb = null;
+    this.glass = 0;
+    this.gr = 0;
+    this.fs = 0;
+    this.disline = 0;
+    this.road = false;
+    this.light = 0;
+    this.master = 0;
+    this.wx = 0;
+    this.wz = 0;
+    this.wy = 0;
+    this.deltaf = 0;
+    this.projf = 0;
+    this.av = 0;
+    this.bfase = 0;
+    this.nocol = false;
+    this.chip = 0;
+    this.ctmag = 0;
+    this.cxz = 0;
+    this.cxy = 0;
+    this.czy = 0;
+    this.cox = null;
+    this.coz = null;
+    this.coy = null;
+    this.dx = 0;
+    this.dy = 0;
+    this.dz = 0;
+    this.vx = 0;
+    this.vy = 0;
+    this.vz = 0;
+    this.embos = 0;
+    this.typ = 0;
+    this.pa = 0;
+    this.pb = 0;
+    this.flx = 0;
+    this.solo = false;
+    this.glass = 0;
+    this.gr = 0;
+    this.fs = 0;
+    this.disline = 7;
+    this.road = false;
+    this.light = 0;
+    this.master = 0;
+    this.wx = 0;
+    this.wz = 0;
+    this.wy = 0;
+    this.deltaf = 1.0;
+    this.projf = 1.0;
+    this.av = 0;
+    this.bfase = 0;
+    this.nocol = false;
+    this.chip = 0;
+    this.ctmag = 0.0;
+    this.cxz = 0;
+    this.cxy = 0;
+    this.czy = 0;
+    this.dx = 0;
+    this.dy = 0;
+    this.dz = 0;
+    this.vx = 0;
+    this.vy = 0;
+    this.vz = 0;
+    this.embos = 0;
+    this.typ = 0;
+    this.pa = 0;
+    this.pb = 0;
+    this.flx = 0;
+    this.m = medium;
+    this.t = trackers;
+    this.n = i;
+    // port: the face's nine arrays are views of one buffer -- one ArrayBuffer and backing
+    // store per face, not nine each (57k faces with 19 cars: ~1M fewer heap nodes to mark)
+    const buf = new ArrayBuffer((3 * this.n + 18) * 4), o = this.n * 12;
+    this.ox = new Int32Array(buf, 0, this.n);
+    this.oz = new Int32Array(buf, this.n * 4, this.n);
+    this.oy = new Int32Array(buf, this.n * 8, this.n);
+    this.c = new Int32Array(buf, o, 3);
+    this.oc = new Int32Array(buf, o + 12, 3);
+    this.hsb = new Float32Array(buf, o + 24, 3);
+    this.cox = new Int32Array(buf, o + 36, 3);
+    this.coz = new Int32Array(buf, o + 48, 3);
+    this.coy = new Int32Array(buf, o + 60, 3);
+    this.solo = bool2;
+    this.basecull = false;   // port: see the base culls in d()
+    for (let j2 = 0; j2 < this.n; j2 = i32(j2 + 1)) {
+      this.ox[j2] = ai[j2];
+      this.oy[j2] = ai2[j2];
+      this.oz[j2] = ai1[j2];
+    }
+    let k2 = (Math.abs(i32(this.ox[2] - this.ox[1])) | 0);
+    let l2 = (Math.abs(i32(this.oy[2] - this.oy[1])) | 0);
+    let i3 = (Math.abs(i32(this.oz[2] - this.oz[1])) | 0);
+    if ((l2 <= k2) && (l2 <= i3)) {
+      this.typ = 2;
+    }
+    if ((k2 <= l2) && (k2 <= i3)) {
+      this.typ = 1;
+    }
+    if ((i3 <= k2) && (i3 <= l2)) {
+      this.typ = 3;
+    }
+    let j3 = 0;
+    do {
+      this.oc[j3] = ai3[j3];
+    } while (++j3 < 3);
+    if (j === -15) {
+      j3 = trunc((185.0 + (random() * 30.0)));
+      ai3[0] = idiv(((i32(217 + j3))), 2);
+      ai3[1] = idiv(((i32(189 + j3))), 2);
+      ai3[2] = idiv(((i32(132 + j3))), 2);
+      for (let k3 = 0; k3 < this.n; k3 = i32(k3 + 1)) {
+        if (random() > random()) {
+          let ox = this.ox;
+          let n = k3;
+          ox[n] = i32(ox[n] + trunc(((8.0 * random()) - 4.0)));
+        }
+        if (random() > random()) {
+          let oy = this.oy;
+          let n2 = k3;
+          oy[n2] = i32(oy[n2] + trunc(((8.0 * random()) - 4.0)));
+        }
+        if (random() > random()) {
+          let oz = this.oz;
+          let n3 = k3;
+          oz[n3] = i32(oz[n3] + trunc(((8.0 * random()) - 4.0)));
+        }
+      }
+    }
+    if ((ai3[0] === ai3[1]) && (ai3[1] === ai3[2])) {
+      this.nocol = true;
+    }
+    if (shad === 0) {
+      j3 = 0;
+      do {
+        this.c[j3] = trunc((fr(fr(ai3[j3]) + (fr(fr(ai3[j3]) * ((fr(fr(this.m.snap[j3]) / 100.0))))))));
+        if (this.c[j3] > 255) {
+          this.c[j3] = 255;
+        }
+        if (this.c[j3] < 0) {
+          this.c[j3] = 0;
+        }
+      } while (++j3 < 3);
+    }
+    if (shad === 1) {
+      j3 = 0;
+      do {
+        this.c[j3] = idiv(((i32((Math.imul((Math.imul(this.m.csky[j3], this.m.fade[0])), 2)) + (Math.imul(this.m.cfade[j3], 3000))))), (i32((Math.imul(this.m.fade[0], 2)) + 3000)));
+      } while (++j3 < 3);
+    }
+    if (shad === 2) {
+      j3 = 0;
+      do {
+        this.c[j3] = trunc((this.m.cgrnd[j3] * 0.925));
+      } while (++j3 < 3);
+    }
+    if (shad === 3) {
+      for (let ig = 0; ig < 3; ig = i32(ig + 1)) {
+        this.c[ig] = ai3[ig];
+      }
+    }
+    this.disline = k1;
+    this.bfase = l1;
+    this.glass = shad;
+    Color.RGBtoHSB(this.c[0], this.c[1], this.c[2], this.hsb);
+    if (!this.nocol && (this.glass === 0)) {
+      if ((this.bfase > 20) && (this.hsb[1] > 0.25)) {
+        this.hsb[1] = 0.25;
+      }
+      if ((this.bfase > 25) && (this.hsb[2] > 0.7)) {
+        this.hsb[2] = 0.699999988079071;
+      }
+      if ((this.bfase > 30) && (this.hsb[1] > 0.15)) {
+        this.hsb[1] = 0.15000000596046448;
+      }
+      if ((this.bfase > 35) && (this.hsb[2] > 0.6)) {
+        this.hsb[2] = 0.6000000238418579;
+      }
+      if (this.bfase > 40) {
+        this.hsb[0] = 0.07500000298023224;
+      }
+      if ((this.bfase > 50) && (this.hsb[2] > 0.5)) {
+        this.hsb[2] = 0.5;
+      }
+      if (this.bfase > 60) {
+        this.hsb[0] = 0.05000000074505806;
+      }
+    }
+    this.road = flag1;
+    this.light = i2;
+    this.gr = j;
+    this.fs = k;
+    this.wx = l;
+    this.wy = i1;
+    this.wz = j1;
+    j3 = 0;
+    do {
+      let l3 = 0;
+      do {
+        if (l3 !== j3) {
+          this.deltaf = fr(this.deltaf * fr((Math.sqrt(i32((i32((Math.imul(((i32(this.ox[l3] - this.ox[j3]))), (i32(this.ox[l3] - this.ox[j3])))) + (Math.imul(((i32(this.oy[l3] - this.oy[j3]))), (i32(this.oy[l3] - this.oy[j3])))))) + (Math.imul(((i32(this.oz[l3] - this.oz[j3]))), (i32(this.oz[l3] - this.oz[j3])))))) / 100.0)));
+        }
+      } while (++l3 < 3);
+    } while (++j3 < 3);
+    this.deltaf = fr(this.deltaf / 3.0);
+  }
+
+  loadprojf() {
+    this.projf = 1.0;
+    let i = 0;
+    do {
+      let j = 0;
+      do {
+        if (j !== i) {
+          this.projf = fr(this.projf * fr((Math.sqrt(i32((Math.imul(((i32(this.ox[i] - this.ox[j]))), (i32(this.ox[i] - this.ox[j])))) + (Math.imul(((i32(this.oz[i] - this.oz[j]))), (i32(this.oz[i] - this.oz[j])))))) / 100.0)));
+        }
+      } while (++j < 3);
+    } while (++i < 3);
+    this.projf = fr(this.projf / 3.0);
+  }
+
+  ys(i, j) {
+    if (j < this.m.cz) {
+      j = this.m.cz;
+    }
+    return i32((idiv((Math.imul(((i32(j - this.m.focus_point))), (i32(this.m.cy - i)))), j)) + i);
+  }
+
+  recolour() {
+    if (this.glass === 0) {
+      for (let a = 0; a < 3; a = i32(a + 1)) {
+        this.c[a] = trunc((fr(fr(this.oc[a]) + (fr(fr(this.oc[a]) * ((fr(fr(this.m.snap[a]) / 100.0))))))));
+        if (this.c[a] > 255) {
+          this.c[a] = 255;
+        }
+        if (this.c[a] < 0) {
+          this.c[a] = 0;
+        }
+      }
+    }
+    if (this.glass === 1) {
+      for (let a = 0; a < 3; a = i32(a + 1)) {
+        this.c[a] = idiv(((i32((Math.imul((Math.imul(this.m.csky[a], this.m.fade[0])), 2)) + (Math.imul(this.m.cfade[a], 3000))))), (i32((Math.imul(this.m.fade[0], 2)) + 3000)));
+      }
+    }
+    if (this.glass === 2) {
+      for (let a = 0; a < 3; a = i32(a + 1)) {
+        this.c[a] = trunc((this.m.cgrnd[a] * 0.925));
+      }
+    }
+    if (this.glass === 3) {
+      for (let a = 0; a < 3; a = i32(a + 1)) {
+        this.c[a] = idiv(((i32(this.m.cgrnd[a] + this.m.cpol[a]))), 2);
+      }
+    }
+    if ((this.oc[0] === this.oc[1]) && (this.oc[1] === this.oc[2])) {
+      this.nocol = true;
+    }
+    Color.RGBtoHSB(this.c[0], this.c[1], this.c[2], this.hsb);
+    if (!this.nocol && (this.glass === 0)) {
+      if ((this.bfase > 20) && (this.hsb[1] > 0.25)) {
+        this.hsb[1] = 0.25;
+      }
+      if ((this.bfase > 25) && (this.hsb[2] > 0.7)) {
+        this.hsb[2] = 0.699999988079071;
+      }
+      if ((this.bfase > 30) && (this.hsb[1] > 0.15)) {
+        this.hsb[1] = 0.15000000596046448;
+      }
+      if ((this.bfase > 35) && (this.hsb[2] > 0.6)) {
+        this.hsb[2] = 0.6000000238418579;
+      }
+      if (this.bfase > 40) {
+        this.hsb[0] = 0.07500000298023224;
+      }
+      if ((this.bfase > 50) && (this.hsb[2] > 0.5)) {
+        this.hsb[2] = 0.5;
+      }
+      if (this.bfase > 60) {
+        this.hsb[0] = 0.05000000074505806;
+      }
+    }
+  }
+
+  d(g, i, j, k, l, i1, j1, k1, l1, flag, i2, weakstage, shadowcar, greenflame, flameheight, invisiblepiece, glowlines, glowcolour, spatk, freeze, weaken, leech, strswap, sred, sgreen, sblue, groundlevel, playerglow, teleported, telefade, floorguardian, dmgcolours, isacar, lightup, outoftrack) {
+    if (this.master !== 0) {
+      if (this.av > 1500) {
+        this.n = 8;
+      } else {
+        this.n = 16;
+      }
+    }
+    let ai = scratch(0, this.n);
+    let ai2 = scratch(1, this.n);
+    let ai3 = scratch(2, this.n);
+    if (this.embos === 0) {
+      for (let j2 = 0; j2 < this.n; j2 = i32(j2 + 1)) {
+        ai[j2] = i32(this.ox[j2] + i);
+        ai3[j2] = i32(this.oy[j2] + j);
+        ai2[j2] = i32(this.oz[j2] + k);
+      }
+      if ((((this.gr === -11) || (this.gr === -13))) && (this.m.lastmaf === 1)) {
+        for (let k2 = 0; k2 < this.n; k2 = i32(k2 + 1)) {
+          ai[k2] = i32(i32(-this.ox[k2]) + i);
+          ai3[k2] = i32(this.oy[k2] + j);
+          ai2[k2] = i32(i32(-this.oz[k2]) + k);
+        }
+      }
+    } else {
+      if (((this.embos <= 11) && (this.m.random() > 0.5)) && (this.glass === 0)) {
+        for (let l2 = 0; l2 < this.n; l2 = i32(l2 + 1)) {
+          ai[l2] = trunc((fr(fr((i32(this.ox[l2] + i))) + ((fr(15.0 - (fr(this.m.random() * 30.0))))))));
+          ai3[l2] = trunc((fr(fr((i32(this.oy[l2] + j))) + ((fr(15.0 - (fr(this.m.random() * 30.0))))))));
+          ai2[l2] = trunc((fr(fr((i32(this.oz[l2] + k))) + ((fr(15.0 - (fr(this.m.random() * 30.0))))))));
+        }
+        this.rot(ai, ai3, i, j, i1, this.n);
+        this.rot(ai3, ai2, j, k, j1, this.n);
+        this.rot(ai, ai2, i, k, l, this.n);
+        this.rot(ai, ai2, this.m.cx, this.m.cz, this.m.xz, this.n);
+        this.rot(ai3, ai2, this.m.cy, this.m.cz, this.m.zy, this.n);
+        let ai4 = scratch(3, this.n);
+        let ai5 = scratch(4, this.n);
+        for (let i3 = 0; i3 < this.n; i3 = i32(i3 + 1)) {
+          ai4[i3] = this.xs(ai[i3], ai2[i3]);
+          ai5[i3] = this.ys(ai3[i3], ai2[i3]);
+        }
+        g.setColor(230, 230, 230);
+        g.fillPolygon(ai4, ai5, this.n);
+      }
+      let f = 1.0;
+      if (this.embos <= 4) {
+        f = fr(1.0 + (fr(this.m.random() / 5.0)));
+      }
+      if ((this.embos > 4) && (this.embos <= 7)) {
+        f = fr(1.0 + (fr(this.m.random() / 4.0)));
+      }
+      if ((this.embos > 7) && (this.embos <= 9)) {
+        f = fr(1.0 + (fr(this.m.random() / 3.0)));
+        if (this.hsb[2] > 0.7) {
+          this.hsb[2] = 0.699999988079071;
+        }
+      }
+      if ((this.embos > 9) && (this.embos <= 10)) {
+        f = fr(1.0 + (fr(this.m.random() / 2.0)));
+        if (this.hsb[2] > 0.6) {
+          this.hsb[2] = 0.6000000238418579;
+        }
+      }
+      if ((this.embos > 10) && (this.embos <= 12)) {
+        f = fr(1.0 + (fr(this.m.random() / 1.0)));
+        if (this.hsb[2] > 0.5) {
+          this.hsb[2] = 0.5;
+        }
+      }
+      if (this.embos === 12) {
+        this.chip = 1;
+        this.ctmag = 2.0;
+        this.bfase = -7;
+      }
+      if (this.embos === 13) {
+        this.hsb[1] = 0.20000000298023224;
+        this.hsb[2] = 0.4000000059604645;
+      }
+      if (this.embos === 16) {
+        this.pa = trunc((fr(this.m.random() * fr(this.n))));
+        this.pb = trunc((fr(this.m.random() * fr(this.n))));
+        // base port: bounded -- an interpolated redraw replays the tick's recorded
+        // randoms (Medium.random), and a short cycle equal to pa would spin forever.
+        // ponytail: 32 tries, then the next vertex; only a degenerate replay gets there.
+        for (let tries = 0; this.pa === this.pb; ++tries) {
+          if (tries === 32) { this.pb = (this.pa + 1) % this.n; break; }
+          this.pb = trunc((fr(this.m.random() * fr(this.n))));
+        }
+      }
+      if (this.embos >= 16) {
+        let byte0 = 1;
+        let byte2 = 1;
+        let j3 = 0;
+        for (j3 = (Math.abs(j1) | 0); j3 > 270; j3 = i32(j3 - 360)) {
+        }
+        j3 = (Math.abs(j3) | 0);
+        if (j3 > 90) {
+          byte0 = -1;
+        }
+        let i4 = 0;
+        for (i4 = (Math.abs(i1) | 0); i4 > 270; i4 = i32(i4 - 360)) {
+        }
+        i4 = (Math.abs(i4) | 0);
+        if (i4 > 90) {
+          byte2 = -1;
+        }
+        let ai6 = scratch(5, 3);
+        let ai7 = scratch(6, 3);
+        ai[0] = i32(this.ox[this.pa] + i);
+        ai3[0] = i32(this.oy[this.pa] + j);
+        ai2[0] = i32(this.oz[this.pa] + k);
+        ai[1] = i32(this.ox[this.pb] + i);
+        ai3[1] = i32(this.oy[this.pb] + j);
+        let actualflame = flameheight;
+        if (this.m.effect[6]) {
+          actualflame = flameheight / 100.0;
+        }
+        if (floorguardian) {
+          actualflame = 1.5;
+        }
+        ai2[1] = i32(this.oz[this.pb] + k);
+        while ((Math.abs(i32(ai[0] - ai[1])) | 0) > trunc((100.0 * actualflame))) {
+          if (ai[1] > ai[0]) {
+            let array = ai;
+            let n = 1;
+            array[n] = i32(array[n] - trunc((30.0 * actualflame)));
+          } else {
+            let array2 = ai;
+            let n2 = 1;
+            array2[n2] = i32(array2[n2] + trunc((30.0 * actualflame)));
+          }
+        }
+        while ((Math.abs(i32(ai2[0] - ai2[1])) | 0) > trunc((100.0 * actualflame))) {
+          if (ai2[1] > ai2[0]) {
+            let array3 = ai2;
+            let n3 = 1;
+            array3[n3] = i32(array3[n3] - trunc((30.0 * actualflame)));
+          } else {
+            let array4 = ai2;
+            let n4 = 1;
+            array4[n4] = i32(array4[n4] + trunc((30.0 * actualflame)));
+          }
+        }
+        let i5 = trunc(((idiv((Math.abs(i32(ai[0] - ai[1])) | 0), 3)) * ((0.5 - this.m.random()))));
+        let l3 = trunc(((idiv((Math.abs(i32(ai2[0] - ai2[1])) | 0), 3)) * ((0.5 - this.m.random()))));
+        ai[2] = i32((idiv(((i32(ai[0] + ai[1]))), 2)) + trunc((i5 * actualflame)));
+        ai2[2] = i32((idiv(((i32(ai2[0] + ai2[1]))), 2)) + trunc((l3 * actualflame)));
+        let i6 = trunc(((((i32((Math.abs(i32(ai[0] - ai[1])) | 0) + (Math.abs(i32(ai2[0] - ai2[1])) | 0)))) / 1.5) * (((fr(this.m.random() / 2.0)) + 0.5))));
+        ai3[2] = i32((idiv(((i32(ai3[0] + ai3[1]))), 2)) - trunc(((Math.imul((Math.imul(byte0, byte2)), i6)) * actualflame)));
+        this.rot(ai, ai3, i, j, i1, 3);
+        this.rot(ai3, ai2, j, k, j1, 3);
+        this.rot(ai, ai2, i, k, l, 3);
+        this.rot(ai, ai2, this.m.cx, this.m.cz, this.m.xz, 3);
+        this.rot(ai3, ai2, this.m.cy, this.m.cz, this.m.zy, 3);
+        let k3 = 0;
+        do {
+          ai6[k3] = this.xs(ai[k3], ai2[k3]);
+          ai7[k3] = this.ys(ai3[k3], ai2[k3]);
+        } while (++k3 < 3);
+        let flamecolours = Float32Array.from([255.0, 169.0, 89.0]);
+        if (greenflame) {
+          flamecolours[0] = 50.0;
+          flamecolours[1] = 180.0;
+          flamecolours[2] = 255.0;
+        }
+        if (floorguardian) {
+          flamecolours[0] = fr(dmgcolours[0]);
+          flamecolours[1] = fr(dmgcolours[1]);
+          flamecolours[2] = fr(dmgcolours[2]);
+        }
+        k3 = trunc((fr(flamecolours[0] + (fr(flamecolours[0] * ((fr(fr(this.m.snap[0]) / 400.0))))))));
+        if (k3 > 255) {
+          k3 = 255;
+        }
+        if (k3 < 0) {
+          k3 = 0;
+        }
+        let i7 = 0;
+        i7 = trunc((fr(flamecolours[1] + (fr(flamecolours[1] * ((fr(fr(this.m.snap[1]) / 300.0))))))));
+        if (i7 > 255) {
+          i7 = 255;
+        }
+        if (i7 < 0) {
+          i7 = 0;
+        }
+        let k4 = 0;
+        k4 = trunc((fr(flamecolours[2] + (fr(flamecolours[2] * ((fr(fr(this.m.snap[2]) / 200.0))))))));
+        if (k4 > 255) {
+          k4 = 255;
+        }
+        if (k4 < 0) {
+          k4 = 0;
+        }
+        g.setColor(k3, i7, k4);
+        g.fillPolygon(ai6, ai7, 3);
+        ai[0] = i32(this.ox[this.pa] + i);
+        ai3[0] = i32(this.oy[this.pa] + j);
+        ai2[0] = i32(this.oz[this.pa] + k);
+        ai[1] = i32(this.ox[this.pb] + i);
+        ai3[1] = i32(this.oy[this.pb] + j);
+        ai2[1] = i32(this.oz[this.pb] + k);
+        while ((Math.abs(i32(ai[0] - ai[1])) | 0) > trunc((100.0 * actualflame))) {
+          if (ai[1] > ai[0]) {
+            let array5 = ai;
+            let n5 = 1;
+            array5[n5] = i32(array5[n5] - trunc((30.0 * actualflame)));
+          } else {
+            let array6 = ai;
+            let n6 = 1;
+            array6[n6] = i32(array6[n6] + trunc((30.0 * actualflame)));
+          }
+        }
+        while ((Math.abs(i32(ai2[0] - ai2[1])) | 0) > trunc((100.0 * actualflame))) {
+          if (ai2[1] > ai2[0]) {
+            let array7 = ai2;
+            let n7 = 1;
+            array7[n7] = i32(array7[n7] - trunc((30.0 * actualflame)));
+          } else {
+            let array8 = ai2;
+            let n8 = 1;
+            array8[n8] = i32(array8[n8] + trunc((30.0 * actualflame)));
+          }
+        }
+        ai[2] = i32((idiv(((i32(ai[0] + ai[1]))), 2)) + trunc((i5 * actualflame)));
+        ai2[2] = i32((idiv(((i32(ai2[0] + ai2[1]))), 2)) + trunc((l3 * actualflame)));
+        i6 = trunc(i6 * 0.8);
+        ai3[2] = i32((idiv(((i32(ai3[0] + ai3[1]))), 2)) - trunc(((Math.imul((Math.imul(byte0, byte2)), i6)) * actualflame)));
+        this.rot(ai, ai3, i, j, i1, 3);
+        this.rot(ai3, ai2, j, k, j1, 3);
+        this.rot(ai, ai2, i, k, l, 3);
+        this.rot(ai, ai2, this.m.cx, this.m.cz, this.m.xz, 3);
+        this.rot(ai3, ai2, this.m.cy, this.m.cz, this.m.zy, 3);
+        let i8 = 0;
+        do {
+          ai6[i8] = this.xs(ai[i8], ai2[i8]);
+          ai7[i8] = this.ys(ai3[i8], ai2[i8]);
+        } while (++i8 < 3);
+        k3 = trunc((fr(flamecolours[0] + (fr(flamecolours[0] * ((fr(fr(this.m.snap[0]) / 400.0))))))));
+        if (k3 > 255) {
+          k3 = 255;
+        }
+        if (k3 < 0) {
+          k3 = 0;
+        }
+        i7 = trunc((fr(flamecolours[1] + (fr(flamecolours[1] * ((fr(fr(this.m.snap[1]) / 300.0))))))));
+        if (i7 > 255) {
+          i7 = 255;
+        }
+        if (i7 < 0) {
+          i7 = 0;
+        }
+        k4 = trunc((fr(flamecolours[2] + (fr(flamecolours[2] * ((fr(fr(this.m.snap[2]) / 200.0))))))));
+        if (k4 > 255) {
+          k4 = 255;
+        }
+        if (k4 < 0) {
+          k4 = 0;
+        }
+        g.setColor(k3, i7, k4);
+        g.fillPolygon(ai6, ai7, 3);
+      }
+      for (let k5 = 0; k5 < this.n; k5 = i32(k5 + 1)) {
+        if (this.typ === 1) {
+          ai[k5] = trunc((fr((fr(fr(this.ox[k5]) * f)) + fr(i))));
+        } else {
+          ai[k5] = i32(this.ox[k5] + i);
+        }
+        if (this.typ === 2) {
+          ai3[k5] = trunc((fr((fr(fr(this.oy[k5]) * f)) + fr(j))));
+        } else {
+          ai3[k5] = i32(this.oy[k5] + j);
+        }
+        if (this.typ === 3) {
+          ai2[k5] = trunc((fr((fr(fr(this.oz[k5]) * f)) + fr(k))));
+        } else {
+          ai2[k5] = i32(this.oz[k5] + k);
+        }
+      }
+      if (!this.m.interpolating) {   // base port: the damage animation steps at tick rate
+        if (this.embos !== 70) {
+          this.embos = i32(this.embos + 1);
+        } else {
+          this.embos = 16;
+        }
+      }
+    }
+    if (this.wz !== 0) {
+      this.rot(ai3, ai2, i32(this.wy + j), i32(this.wz + k), l1, this.n);
+    }
+    if (this.wx !== 0) {
+      this.rot(ai, ai2, i32(this.wx + i), i32(this.wz + k), k1, this.n);
+    }
+    if ((this.chip === 1) && !this.m.interpolating && (((this.m.random() > 0.6) || (this.bfase === 0)))) {
+      this.chip = 0;
+      if ((this.bfase === 0) && this.nocol) {
+        this.bfase = 1;
+      }
+    }
+    if (this.chip !== 0) {
+      // base port: spawning the shard is a tick's job; an interpolated frame only redraws it
+      if (this.chip === 1 && !this.m.interpolating) {
+        this.cxz = l;
+        this.cxy = i1;
+        this.czy = j1;
+        let i9 = trunc((fr(this.m.random() * fr(this.n))));
+        this.cox[0] = this.ox[i9];
+        this.coz[0] = this.oz[i9];
+        this.coy[0] = this.oy[i9];
+        if (this.ctmag > 3.0) {
+          this.ctmag = 3.0;
+        }
+        if (this.ctmag < -3.0) {
+          this.ctmag = -3.0;
+        }
+        this.cox[1] = trunc((fr(fr(this.cox[0]) + (fr(this.ctmag * ((fr(10.0 - (fr(this.m.random() * 20.0))))))))));
+        this.cox[2] = trunc((fr(fr(this.cox[0]) + (fr(this.ctmag * ((fr(10.0 - (fr(this.m.random() * 20.0))))))))));
+        this.coy[1] = trunc((fr(fr(this.coy[0]) + (fr(this.ctmag * ((fr(10.0 - (fr(this.m.random() * 20.0))))))))));
+        this.coy[2] = trunc((fr(fr(this.coy[0]) + (fr(this.ctmag * ((fr(10.0 - (fr(this.m.random() * 20.0))))))))));
+        this.coz[1] = trunc((fr(fr(this.coz[0]) + (fr(this.ctmag * ((fr(10.0 - (fr(this.m.random() * 20.0))))))))));
+        this.coz[2] = trunc((fr(fr(this.coz[0]) + (fr(this.ctmag * ((fr(10.0 - (fr(this.m.random() * 20.0))))))))));
+        this.dx = 0;
+        this.dy = 0;
+        this.dz = 0;
+        if (this.bfase !== -7) {
+          this.vx = trunc((fr(this.ctmag * ((fr(30.0 - (fr(this.m.random() * 60.0))))))));
+          this.vz = trunc((fr(this.ctmag * ((fr(30.0 - (fr(this.m.random() * 60.0))))))));
+          this.vy = trunc((fr(this.ctmag * ((fr(30.0 - (fr(this.m.random() * 60.0))))))));
+        } else {
+          this.vx = trunc((fr(this.ctmag * ((fr(10.0 - (fr(this.m.random() * 20.0))))))));
+          this.vz = trunc((fr(this.ctmag * ((fr(10.0 - (fr(this.m.random() * 20.0))))))));
+          this.vy = trunc((fr(this.ctmag * ((fr(10.0 - (fr(this.m.random() * 20.0))))))));
+        }
+        this.chip = 2;
+      }
+      let ai8 = scratch(7, 3);
+      let ai9 = scratch(8, 3);
+      let ai10 = scratch(9, 3);
+      let k6 = 0;
+      do {
+        ai8[k6] = i32(this.cox[k6] + i);
+        ai10[k6] = i32(this.coy[k6] + j);
+        ai9[k6] = i32(this.coz[k6] + k);
+      } while (++k6 < 3);
+      this.rot(ai8, ai10, i, j, this.cxy, 3);
+      this.rot(ai10, ai9, j, k, this.czy, 3);
+      this.rot(ai8, ai9, i, k, this.cxz, 3);
+      k6 = 0;
+      do {
+        let array9 = ai8;
+        let n9 = k6;
+        array9[n9] = i32(array9[n9] + this.dx);
+        let array10 = ai10;
+        let n10 = k6;
+        array10[n10] = i32(array10[n10] + this.dy);
+        let array11 = ai9;
+        let n11 = k6;
+        array11[n11] = i32(array11[n11] + this.dz);
+      } while (++k6 < 3);
+      if (!this.m.interpolating) {   // base port: the shard flies at tick rate
+        this.dx = i32(this.dx + this.vx);
+        this.dz = i32(this.dz + this.vz);
+        this.dy = i32(this.dy + this.vy);
+        this.vy = i32(this.vy + 7);
+        if (ai10[0] > groundlevel) {
+          this.chip = 19;
+        }
+      }
+      this.rot(ai8, ai9, this.m.cx, this.m.cz, this.m.xz, 3);
+      this.rot(ai10, ai9, this.m.cy, this.m.cz, this.m.zy, 3);
+      let ai11 = scratch(10, 3);
+      let ai12 = scratch(11, 3);
+      let l4 = 0;
+      do {
+        ai11[l4] = this.xs(ai8[l4], ai9[l4]);
+        ai12[l4] = this.ys(ai10[l4], ai9[l4]);
+        if ((ai12[l4] < 45) && (this.m.flex !== 0)) {
+          this.m.flex = 0;
+        }
+      } while (++l4 < 3);
+      if (this.bfase !== -7) {
+        if (l4 === 0) {
+          g.setColorOf(new Color(this.c[0], this.c[1], this.c[2]).darker());
+        }
+        if (l4 === 1) {
+          g.setColor(this.c[0], this.c[1], this.c[2]);
+        }
+        if (l4 === 2) {
+          g.setColorOf(new Color(this.c[0], this.c[1], this.c[2]).brighter());
+        }
+      } else {
+        g.setColorOf(Color.getHSBColor(this.hsb[0], this.hsb[1], this.hsb[2]));
+      }
+      g.fillPolygon(ai11, ai12, 3);
+      l4 = trunc((fr(this.m.random() * 3.0)));
+      if (!this.m.interpolating) {
+        this.chip = i32(this.chip + 1);
+        if (this.chip === 20) {
+          this.chip = 0;
+        }
+      }
+    }
+    this.rot(ai, ai3, i, j, i1, this.n);
+    this.rot(ai3, ai2, j, k, j1, this.n);
+    this.rot(ai, ai2, i, k, l, this.n);
+    if (((i1 !== 0) || (j1 !== 0)) || (l !== 0)) {
+      this.projf = 1.0;
+      let j4 = 0;
+      do {
+        let l5 = 0;
+        do {
+          if (l5 !== j4) {
+            this.projf = fr(this.projf * fr((Math.sqrt(i32((Math.imul(((i32(ai[j4] - ai[l5]))), (i32(ai[j4] - ai[l5])))) + (Math.imul(((i32(ai2[j4] - ai2[l5]))), (i32(ai2[j4] - ai2[l5])))))) / 100.0)));
+          }
+        } while (++l5 < 3);
+      } while (++j4 < 3);
+      this.projf = fr(this.projf / 3.0);
+    }
+    this.rot(ai, ai2, this.m.cx, this.m.cz, this.m.xz, this.n);
+    let flag2 = false;
+    let ai13 = scratch(12, this.n);
+    let ai14 = scratch(13, this.n);
+    let l6 = 500;
+    for (let j5 = 0; j5 < this.n; j5 = i32(j5 + 1)) {
+      ai13[j5] = this.xs(ai[j5], ai2[j5]);
+      ai14[j5] = this.ys(ai3[j5], ai2[j5]);
+    }
+    let k7 = 0;
+    let i10 = 1;
+    for (let j6 = 0; j6 < this.n; j6 = i32(j6 + 1)) {
+      for (let j7 = 0; j7 < this.n; j7 = i32(j7 + 1)) {
+        if ((j6 !== j7) && ((i32((Math.abs(i32(ai13[j6] - ai13[j7])) | 0) - (Math.abs(i32(ai14[j6] - ai14[j7])) | 0))) < l6)) {
+          i10 = j6;
+          k7 = j7;
+          l6 = i32((Math.abs(i32(ai13[j6] - ai13[j7])) | 0) - (Math.abs(i32(ai14[j6] - ai14[j7])) | 0));
+        }
+      }
+    }
+    if (ai14[k7] < ai14[i10]) {
+      let k8 = k7;
+      k7 = i10;
+      i10 = k8;
+    }
+    if (this.spy(ai[k7], ai2[k7]) > this.spy(ai[i10], ai2[i10])) {
+      flag2 = true;
+      let l7 = 0;
+      for (let k9 = 0; k9 < this.n; k9 = i32(k9 + 1)) {
+        if ((ai2[k9] < 50) && (ai3[k9] > this.m.cy)) {
+          flag2 = false;
+        } else if (ai3[k9] === ai3[0]) {
+          l7 = i32(l7 + 1);
+        }
+      }
+      if ((l7 === this.n) && (ai3[0] > this.m.cy)) {
+        flag2 = false;
+      }
+    }
+    this.rot(ai3, ai2, this.m.cy, this.m.cz, this.m.zy, this.n);
+    let flag3 = true;
+    let ai15 = scratch(14, this.n);
+    let ai16 = scratch(15, this.n);
+    let j8 = 0;
+    let l8 = 0;
+    let j9 = 0;
+    let l9 = 0;
+    let j10 = 0;
+    for (let k10 = 0; k10 < this.n; k10 = i32(k10 + 1)) {
+      ai15[k10] = this.xs(ai[k10], ai2[k10]);
+      ai16[k10] = this.ys(ai3[k10], ai2[k10]);
+      if ((ai16[k10] < 0) || (ai2[k10] < 10)) {
+        j8 = i32(j8 + 1);
+      }
+      if ((ai16[k10] > this.m.h) || (ai2[k10] < 10)) {
+        l8 = i32(l8 + 1);
+      }
+      if ((ai15[k10] < 0) || (ai2[k10] < 10)) {
+        j9 = i32(j9 + 1);
+      }
+      if ((ai15[k10] > this.m.w) || (ai2[k10] < 10)) {
+        l9 = i32(l9 + 1);
+      }
+      if ((ai16[k10] < 45) && (this.m.flex !== 0)) {
+        this.m.flex = 0;
+      }
+      if (ai2[k10] < 10) {
+        j10 = i32(j10 + 1);
+      }
+    }
+    if (i2 !== -1) {
+      let l10 = 0;
+      let j11 = 0;
+      for (let k11 = 0; k11 < this.n; k11 = i32(k11 + 1)) {
+        for (let l11 = k11; l11 < this.n; l11 = i32(l11 + 1)) {
+          if (k11 !== l11) {
+            if ((Math.abs(i32(ai15[k11] - ai15[l11])) | 0) > l10) {
+              l10 = (Math.abs(i32(ai15[k11] - ai15[l11])) | 0);
+            }
+            if ((Math.abs(i32(ai16[k11] - ai16[l11])) | 0) > j11) {
+              j11 = (Math.abs(i32(ai16[k11] - ai16[l11])) | 0);
+            }
+          }
+        }
+      }
+      if ((l10 === 0) || (j11 === 0)) {
+        flag3 = false;
+      } else if ((((l10 < 3) && (j11 < 3)) && ((idiv(i2, l10)) > 15)) && ((idiv(i2, j11)) > 15)) {
+        flag3 = false;
+      }
+    }
+    if ((((j9 === this.n) || (j8 === this.n)) || (l8 === this.n)) || (l9 === this.n)) {
+      flag3 = false;
+    }
+    if (this.m.trk && (((((j9 !== 0) || (j8 !== 0)) || (l8 !== 0)) || (l9 !== 0)))) {
+      flag3 = false;
+    }
+    if (j10 !== 0) {
+      flag = true;
+    }
+    if (flag3) {
+      let i11 = 1;
+      let byte3 = 1;
+      let byte4 = 1;
+      if ((Math.abs(i32(ai16[0] - ai16[1])) | 0) > (Math.abs(i32(ai16[2] - ai16[1])) | 0)) {
+        byte3 = 0;
+        byte4 = 2;
+      } else {
+        byte3 = 2;
+        byte4 = 0;
+        i11 = Math.imul(i11, -1);
+      }
+      if (ai16[1] > ai16[byte3]) {
+        i11 = Math.imul(i11, -1);
+      }
+      if (ai15[1] > ai15[byte4]) {
+        i11 = Math.imul(i11, -1);
+      }
+      let i12 = this.gr;
+      if ((i12 < 0) && (i12 >= -17)) {
+        i12 = 0;
+      }
+      if (this.gr === -11) {
+        i12 = -90;
+      }
+      if ((this.gr === -14) || (this.gr === -15)) {
+        i12 = -50;
+      }
+      if (this.gr === -16) {
+        i12 = 35;
+      }
+      if (this.fs !== 0) {
+        i11 = Math.imul(i11, this.fs);
+        if (i11 === -1) {
+          i12 = i32(i12 + 40);
+          if (!this.road) {
+            i11 = -111;
+          }
+        }
+      }
+      if (this.m.lightson && (this.light === 2)) {
+        i12 = i32(i12 - 40);
+      }
+      let j12 = 0;
+      let k12 = 0;
+      let k13 = 0;
+      let l12 = 0;
+      let i13 = 0;
+      let j13 = 0;
+      for (let k14 = 0; k14 < this.n; k14 = i32(k14 + 1)) {
+        let i14 = 0;
+        let k15 = 0;
+        let i15 = 0;
+        let j14 = 0;
+        let k16 = 0;
+        let l13 = 0;
+        for (let i16 = 0; i16 < this.n; i16 = i32(i16 + 1)) {
+          if (ai3[k14] >= ai3[i16]) {
+            i14 = i32(i14 + 1);
+          }
+          if (ai3[k14] <= ai3[i16]) {
+            k15 = i32(k15 + 1);
+          }
+          if (ai[k14] >= ai[i16]) {
+            i15 = i32(i15 + 1);
+          }
+          if (ai[k14] <= ai[i16]) {
+            j14 = i32(j14 + 1);
+          }
+          if (ai2[k14] >= ai2[i16]) {
+            k16 = i32(k16 + 1);
+          }
+          if (ai2[k14] <= ai2[i16]) {
+            l13 = i32(l13 + 1);
+          }
+        }
+        if (i14 === this.n) {
+          j12 = ai3[k14];
+        }
+        if (k15 === this.n) {
+          k12 = ai3[k14];
+        }
+        if (i15 === this.n) {
+          k13 = ai[k14];
+        }
+        if (j14 === this.n) {
+          l12 = ai[k14];
+        }
+        if (k16 === this.n) {
+          i13 = ai2[k14];
+        }
+        if (l13 === this.n) {
+          j13 = ai2[k14];
+        }
+      }
+      let l14 = idiv(((i32(j12 + k12))), 2);
+      let j15 = idiv(((i32(k13 + l12))), 2);
+      let l15 = idiv(((i32(i13 + j13))), 2);
+      this.av = trunc(Math.sqrt(i32((i32((i32((Math.imul(((i32(this.m.cy - l14))), (i32(this.m.cy - l14)))) + (Math.imul(((i32(this.m.cx - j15))), (i32(this.m.cx - j15)))))) + (Math.imul(l15, l15)))) + (Math.imul((Math.imul(i12, i12)), i12)))));
+      if ((((this.av > 100000) || (this.av === 0))) && !this.m.trk) {
+        flag3 = false;
+      }
+      if ((i11 === -111) && (this.av > 4500)) {
+        flag3 = false;
+      }
+      if ((i11 === -111) && (this.av > 1500)) {
+        flag = true;
+      }
+      if ((this.av > 3000) && (this.m.adv <= 900)) {
+        let speciallines = false;
+        if (((((spatk || freeze) || leech) || weaken) || strswap) || playerglow) {
+          speciallines = true;
+        }
+        if (((!this.m.effect[5] && !speciallines) && !this.m.effect[11]) && !this.m.effect[10]) {
+          flag = true;
+        }
+      }
+      if ((this.gr === -12) && (this.av < 11200)) {
+        this.m.lastmaf = i11;
+      }
+      if ((this.gr === -13) && ((!this.m.lastcheck || (i2 !== -1)))) {
+        flag3 = false;
+      }
+      if ((this.gr === -16) && (this.av > 1500)) {
+        flag3 = false;
+      }
+      if ((this.flx !== 0) && (this.m.random() > 0.3)) {
+        flag3 = false;
+      }
+      // port: an NFM2 stage's pieces keep the base port's culls (web/Plane.js, after `this.av`):
+      // gone past the piece's fade[disline] (Extended: 100000), and the special faces far,
+      // back-facing or in a tunnel. race.js sets basecull on those pieces only.
+      if (this.basecull && !this.m.trk) {
+        if (this.av > this.m.fade[this.disline]) flag3 = false;
+        if ((this.gr === -14 || this.gr === -15 || this.gr === -12) && (this.av > 11000 || flag2 || i11 === -111 || this.m.resdown === 2)) flag3 = false;
+        if (this.gr === -11 && this.av > 11000) flag3 = false;
+        if (this.glass === 2 && this.av > 6700) flag3 = false;
+      }
+    }
+    if (flag3) {
+      this.sortpieces(g, flag, flag2, i2, weakstage, shadowcar, invisiblepiece, ai15, ai16, glowlines, glowcolour, spatk, freeze, weaken, leech, strswap, sred, sgreen, sblue, playerglow, teleported, telefade, floorguardian, dmgcolours, isacar, lightup, outoftrack);
+    }
+  }
+
+  sortpieces(g, flag, flag1, i2, weakstage, shadowcar, invisiblepiece, ai14, ai15, glowlines, glowcolour, spatk, freeze, weaken, leech, strswap, sred, sgreen, sblue, playerglow, teleported, telefade, floorguardian, dmgcolours, isacar, lightup, outoftrack) {
+    let f1 = fr(((fr(this.projf / this.deltaf)) + 0.3));
+    if (flag && !this.solo) {
+      let flag2 = false;
+      if (f1 > 1.0) {
+        if (f1 >= 1.27) {
+          flag2 = true;
+        }
+        f1 = 1.0;
+      }
+      if (flag2) {
+        f1 = fr(f1 * 0.89);
+      } else {
+        f1 = fr(f1 * 0.86);
+      }
+      if (f1 < 0.37) {
+        f1 = 0.3700000047683716;
+      }
+      if (this.gr === -9) {
+        f1 = 0.699999988079071;
+      }
+      if (this.gr === -4) {
+        f1 = 0.7400000095367432;
+      }
+      if ((this.gr !== -7) && flag1) {
+        f1 = 0.3199999928474426;
+      }
+      if (((this.gr === -8) || (this.gr === -14)) || (this.gr === -15)) {
+        f1 = 1.0;
+      }
+      if (this.gr === -11) {
+        f1 = 0.6700000166893005;
+        if (i2 === -1) {
+          if (this.m.cpflik || ((this.m.nochekflk && !this.m.lastcheck))) {
+            f1 = 1.0;
+          } else {
+            f1 = 0.7599999904632568;
+          }
+        }
+      }
+      if ((this.gr === -13) && (i2 === -1)) {
+        if (this.m.cpflik) {
+          f1 = 0.0;
+        } else {
+          f1 = 0.7599999904632568;
+        }
+      }
+      if (this.gr === -6) {
+        f1 = 0.6200000047683716;
+      }
+      if (this.gr === -5) {
+        f1 = 0.550000011920929;
+      }
+    } else {
+      if (f1 > 1.0) {
+        f1 = 1.0;
+      }
+      if ((f1 < 0.6) || flag1) {
+        f1 = 0.6000000238418579;
+      }
+    }
+    let color = Color.getHSBColor(this.hsb[0], this.hsb[1], fr(this.hsb[2] * f1));
+    let l11 = color.getRed();
+    let j13 = color.getGreen();
+    let k14 = color.getBlue();
+    if (this.m.lightson) {
+      if (this.light === 2) {
+        l11 = 210;
+        j13 = 0;
+        k14 = 0;
+      }
+      if (this.light === 1) {
+        l11 = 210;
+        j13 = 210;
+        k14 = 210;
+      }
+    }
+    if (!this.m.trk) {
+      let l12 = 0;
+      do {
+        if (this.av > this.m.fade[l12]) {
+          l11 = idiv(((i32((Math.imul(l11, this.m.fogd)) + this.m.cfade[0]))), (i32(this.m.fogd + 1)));
+          j13 = idiv(((i32((Math.imul(j13, this.m.fogd)) + this.m.cfade[1]))), (i32(this.m.fogd + 1)));
+          k14 = idiv(((i32((Math.imul(k14, this.m.fogd)) + this.m.cfade[2]))), (i32(this.m.fogd + 1)));
+        }
+      } while (++l12 < 16);
+    }
+    let redcol = l11;
+    let greencol = j13;
+    let bluecol = k14;
+    if (weakstage > 0) {
+      if (this.m.effect[6]) {
+        redcol = i32(l11 + trunc((fr(fr(l11) * ((fr(fr(weakstage) / 100.0)))))));
+      }
+      if (this.m.effect[7]) {
+        greencol = i32(j13 + trunc((fr(fr(j13) * ((fr(fr(weakstage) / 100.0)))))));
+      }
+    }
+    if (redcol > 255) {
+      redcol = 255;
+    }
+    if (greencol > 255) {
+      greencol = 255;
+    }
+    if (bluecol > 255) {
+      bluecol = 255;
+    }
+    let shadow = 255;
+    if ((shadowcar && (this.light !== 1)) && (this.light !== 2)) {
+      shadow = this.m.shadowtrans;
+    }
+    if (floorguardian) {
+      shadow = 200;
+    }
+    g.setColorOf(new Color(redcol, greencol, bluecol, shadow));
+    if (teleported) {
+      g.setColorOf(new Color(redcol, greencol, bluecol, telefade));
+    }
+    if ((invisiblepiece !== 255) && !this.m.trk) {
+      g.setColorOf(new Color(l11, j13, bluecol, invisiblepiece));
+    }
+    if (this.m.effect[10] && !isacar) {
+      let trans = 20;
+      if (this.m.trk || lightup) {
+        trans = 50;
+      }
+      g.setColorOf(new Color(glowcolour[0], glowcolour[1], glowcolour[2], trans));
+    }
+    g.fillPolygon(ai14, ai15, this.n);
+    if (this.m.trk && (this.gr === -10)) {
+      flag = false;
+    }
+    let speciallines = false;
+    if ((((((spatk || freeze) || strswap) || weaken) || leech) || playerglow) || this.m.effect[11]) {
+      speciallines = true;
+    }
+    if (this.m.effect[10] && !isacar) {
+      speciallines = false;
+      glowlines = false;
+      if (lightup) {
+        speciallines = true;
+        glowlines = true;
+      }
+    }
+    if (((!flag && ((((!shadowcar && !floorguardian)) || speciallines))) && !teleported) && (invisiblepiece === 255)) {
+      if (this.flx === 0) {
+        if (!this.solo) {
+          l11 = 0;
+          j13 = 0;
+          k14 = 0;
+          if (this.m.lightson) {
+            if (this.light === 2) {
+              l11 = 100;
+            }
+            if (this.light === 1) {
+              l11 = 100;
+              j13 = 100;
+              k14 = 100;
+            }
+          }
+          g.setColor(l11, j13, k14);
+          let trans2 = 255;
+          if (shadowcar || floorguardian) {
+            trans2 = 100;
+          }
+          if (((this.m.effect[5] || speciallines) || playerglow) || this.m.effect[11]) {
+            if (trans2 === 255) {
+              g.setColor(sred, sgreen, sblue);
+            } else {
+              g.setColorOf(new Color(sred, sgreen, sblue, trans2));
+            }
+          }
+          if (this.m.effect[10] && lightup) {
+            g.setColor(glowcolour[0], glowcolour[1], glowcolour[2]);
+          }
+          g.drawPolygon(ai14, ai15, this.n);
+          g.setColor(l11, j13, k14);
+        }
+      } else {
+        if (this.flx === 2) {
+          g.setColor(0, 0, 0);
+          g.drawPolygon(ai14, ai15, this.n);
+        }
+        if (this.flx === 1) {
+          l11 = 0;
+          j13 = trunc((fr(223.0 + (fr(223.0 * ((fr(fr(this.m.snap[1]) / 100.0))))))));
+          if (j13 > 255) {
+            j13 = 255;
+          }
+          if (j13 < 0) {
+            j13 = 0;
+          }
+          k14 = trunc((fr(255.0 + (fr(255.0 * ((fr(fr(this.m.snap[2]) / 100.0))))))));
+          if (k14 > 255) {
+            k14 = 255;
+          }
+          if (k14 < 0) {
+            k14 = 0;
+          }
+          g.setColor(l11, j13, k14);
+          g.drawPolygon(ai14, ai15, this.n);
+          this.flx = 2;
+        }
+        if (this.flx === 3) {
+          l11 = 0;
+          j13 = trunc((fr(255.0 + (fr(255.0 * ((fr(fr(this.m.snap[1]) / 100.0))))))));
+          if (j13 > 255) {
+            j13 = 255;
+          }
+          if (j13 < 0) {
+            j13 = 0;
+          }
+          k14 = trunc((fr(223.0 + (fr(223.0 * ((fr(fr(this.m.snap[2]) / 100.0))))))));
+          if (k14 > 255) {
+            k14 = 255;
+          }
+          if (k14 < 0) {
+            k14 = 0;
+          }
+          g.setColor(l11, j13, k14);
+          g.drawPolygon(ai14, ai15, this.n);
+          this.flx = 2;
+        }
+      }
+    } else if ((((((((this.road && (this.av <= 3000)) && !this.m.trk) && (this.m.fade[0] > 4000)) && !this.m.effect[10])) || glowlines)) && (((invisiblepiece === 255) || this.m.effect[9]))) {
+      let colours = scratch(16, 3);
+      for (let a = 0; a < 3; a = i32(a + 1)) {
+        if (glowlines) {
+          colours[a] = glowcolour[a];
+        } else {
+          colours[a] = 0;
+        }
+      }
+      l11 = i32(l11 - 10);
+      if (l11 < colours[0]) {
+        l11 = colours[0];
+      }
+      j13 = i32(j13 - 10);
+      if (j13 < colours[1]) {
+        j13 = colours[1];
+      }
+      k14 = i32(k14 - 10);
+      if (k14 < colours[2]) {
+        k14 = colours[2];
+      }
+      g.setColor(l11, j13, k14);
+      if (this.m.effect[10] && lightup) {
+        g.setColorOf(new Color(l11, j13, k14, 50));
+      }
+      g.drawPolygon(ai14, ai15, this.n);
+    }
+    if ((((((this.gr === -10) && !shadowcar) && !floorguardian) && !teleported) && (invisiblepiece === 255)) && !this.m.effect[10]) {
+      if (!this.m.trk) {
+        let i3 = this.c[0];
+        let k15 = this.c[1];
+        let l13 = this.c[2];
+        if (i2 === -1) {
+          if (this.m.nochekflk && !this.m.lastcheck) {
+            i3 = trunc(i3 * 1.25);
+            if (i3 > 255) {
+              i3 = 255;
+            }
+            k15 = trunc(k15 * 1.25);
+            if (k15 > 255) {
+              k15 = 255;
+            }
+            l13 = trunc(l13 * 1.25);
+            if (l13 > 255) {
+              l13 = 255;
+            }
+          } else if (this.m.cpflik) {
+            i3 = trunc(i3 * 1.5);
+            if (i3 > 255) {
+              i3 = 255;
+            }
+            k15 = trunc(k15 * 1.5);
+            if (k15 > 255) {
+              k15 = 255;
+            }
+            l13 = trunc(l13 * 1.5);
+            if (l13 > 255) {
+              l13 = 255;
+            }
+          }
+        }
+        let i4 = 0;
+        do {
+          if (this.av > this.m.fade[i4]) {
+            i3 = idiv(((i32((Math.imul(i3, this.m.fogd)) + this.m.cfade[0]))), (i32(this.m.fogd + 1)));
+            k15 = idiv(((i32((Math.imul(k15, this.m.fogd)) + this.m.cfade[1]))), (i32(this.m.fogd + 1)));
+            l13 = idiv(((i32((Math.imul(l13, this.m.fogd)) + this.m.cfade[2]))), (i32(this.m.fogd + 1)));
+          }
+        } while (++i4 < 16);
+        g.setColor(i3, k15, l13);
+        g.drawPolygon(ai14, ai15, this.n);
+      } else if (this.m.cpflik && (this.m.hit === 5000)) {
+        let l14 = trunc((random() * 115.0));
+        let j14 = i32((Math.imul(l14, 2)) - 54);
+        if (j14 < 0) {
+          j14 = 0;
+        }
+        if (j14 > 255) {
+          j14 = 255;
+        }
+        let i5 = i32(202 + (Math.imul(l14, 2)));
+        if (i5 < 0) {
+          i5 = 0;
+        }
+        if (i5 > 255) {
+          i5 = 255;
+        }
+        l14 = i32(l14 + 101);
+        if (l14 < 0) {
+          l14 = 0;
+        }
+        if (l14 > 255) {
+          l14 = 255;
+        }
+        g.setColor(j14, l14, i5);
+        g.drawPolygon(ai14, ai15, this.n);
+      }
+    }
+    if (((((((this.gr === -18) && !this.m.trk) && !shadowcar) && !floorguardian) && !teleported) && (invisiblepiece === 255)) && !this.m.effect[10]) {
+      let k16 = this.c[0];
+      let i6 = this.c[1];
+      let j15 = this.c[2];
+      if (this.m.cpflik && (this.m.elecr >= 0.0)) {
+        k16 = trunc((fr(25.5 * this.m.elecr)));
+        if (k16 > 255) {
+          k16 = 255;
+        }
+        i6 = trunc((fr(128.0 + (fr(12.800000190734863 * this.m.elecr)))));
+        if (i6 > 255) {
+          i6 = 255;
+        }
+        j15 = 255;
+      }
+      let j16 = 0;
+      do {
+        if (this.av > this.m.fade[j16]) {
+          k16 = idiv(((i32((Math.imul(k16, this.m.fogd)) + this.m.cfade[0]))), (i32(this.m.fogd + 1)));
+          i6 = idiv(((i32((Math.imul(i6, this.m.fogd)) + this.m.cfade[1]))), (i32(this.m.fogd + 1)));
+          j15 = idiv(((i32((Math.imul(j15, this.m.fogd)) + this.m.cfade[2]))), (i32(this.m.fogd + 1)));
+        }
+      } while (++j16 < 16);
+      g.setColor(k16, i6, j15);
+      g.drawPolygon(ai14, ai15, this.n);
+    }
+  }
+
+  rot(ai, ai1, i, j, k, l) {
+    if (k !== 0) {
+      // ext-patch rot-hoist: one table read per rotation, not four per vertex (web/tools/ext-patches.mjs)
+      const cos = this.m.cos(k), sin = this.m.sin(k);
+      for (let i2 = 0; i2 < l; i2 = i32(i2 + 1)) {
+        let j2 = ai[i2];
+        let k2 = ai1[i2];
+        ai[i2] = i32(i + trunc((fr((fr(fr(((i32(j2 - i)))) * cos)) - (fr(fr(((i32(k2 - j)))) * sin))))));
+        ai1[i2] = i32(j + trunc((fr((fr(fr(((i32(j2 - i)))) * sin)) + (fr(fr(((i32(k2 - j)))) * cos))))));
+      }
+    }
+  }
+
+  xs(i, j) {
+    if (j < this.m.cz) {
+      j = this.m.cz;
+    }
+    return i32((idiv((Math.imul(((i32(j - this.m.focus_point))), (i32(this.m.cx - i)))), j)) + i);
+  }
+
+  s(g, i, j, k, l, i1, j1, k1, groundlevel, teleported, telefade, shadcol, outoftrack) {
+    let ai = scratch(17, this.n);
+    let ai2 = scratch(18, this.n);
+    let ai3 = scratch(19, this.n);
+    for (let l2 = 0; l2 < this.n; l2 = i32(l2 + 1)) {
+      ai[l2] = i32(this.ox[l2] + i);
+      ai3[l2] = i32(this.oy[l2] + j);
+      ai2[l2] = i32(this.oz[l2] + k);
+    }
+    this.rot(ai, ai3, i, j, i1, this.n);
+    this.rot(ai3, ai2, j, k, j1, this.n);
+    this.rot(ai, ai2, i, k, l, this.n);
+    let coladj = Int32Array.from([this.m.cgrnd[0], this.m.cgrnd[1], this.m.cgrnd[2]]);
+    let i2 = trunc((fr(coladj[0]) / 1.5));
+    let j2 = trunc((fr(coladj[1]) / 1.5));
+    let k2 = trunc((fr(coladj[2]) / 1.5));
+    for (let l3 = 0; l3 < this.n; l3 = i32(l3 + 1)) {
+      ai3[l3] = groundlevel;
+    }
+    if (k1 === 0) {
+      let i3 = 0;
+      let j3 = 0;
+      let k3 = 0;
+      let l4 = 0;
+      for (let l5 = 0; l5 < this.n; l5 = i32(l5 + 1)) {
+        let l6 = 0;
+        let k4 = 0;
+        let j4 = 0;
+        let i4 = 0;
+        for (let k5 = 0; k5 < this.n; k5 = i32(k5 + 1)) {
+          if (ai[l5] >= ai[k5]) {
+            l6 = i32(l6 + 1);
+          }
+          if (ai[l5] <= ai[k5]) {
+            k4 = i32(k4 + 1);
+          }
+          if (ai2[l5] >= ai2[k5]) {
+            j4 = i32(j4 + 1);
+          }
+          if (ai2[l5] <= ai2[k5]) {
+            i4 = i32(i4 + 1);
+          }
+        }
+        if (l6 === this.n) {
+          i3 = ai[l5];
+        }
+        if (k4 === this.n) {
+          j3 = ai[l5];
+        }
+        if (j4 === this.n) {
+          k3 = ai2[l5];
+        }
+        if (i4 === this.n) {
+          l4 = ai2[l5];
+        }
+      }
+      let i5 = idiv(((i32(i3 + j3))), 2);
+      let i6 = idiv(((i32(k3 + l4))), 2);
+      // port: only the trackers under the face's centre (trackgrid.js), same test, same order
+      const near = nearTrackers(this.t, i32(i5 + this.m.x), i32(i6 + this.m.z), 0);
+      for (let q = near ? near.length - 1 : this.t.nt - 1; q >= 0; q--) {
+        const l7 = near ? near[q] : q;
+        if ((this.t.y[l7] === groundlevel) || !this.m.effect[9]) {
+          if ((this.t.y[l7] <= groundlevel) || this.m.effect[9]) {
+            let k6 = 0;
+            if (((((Math.abs(this.t.zy[l7]) | 0) !== 90) && ((Math.abs(this.t.xy[l7]) | 0) !== 90)) && ((Math.abs(i32(i5 - ((i32(this.t.x[l7] - this.m.x))))) | 0) < this.t.radx[l7])) && ((Math.abs(i32(i6 - ((i32(this.t.z[l7] - this.m.z))))) | 0) < this.t.radz[l7])) {
+              k6 = i32(k6 + 1);
+            }
+            if (k6 !== 0) {
+              for (let j5 = 0; j5 < this.n; j5 = i32(j5 + 1)) {
+                ai3[j5] = i32(this.t.y[l7] - this.m.y);
+                if (this.t.zy[l7] !== 0) {
+                  let array = ai3;
+                  let n = j5;
+                  array[n] = trunc(fr(fr(array[n]) + ((fr((fr((fr(fr(((i32(ai2[j5] - ((i32((i32(this.t.z[l7] - this.m.z)) - this.t.radz[l7]))))))) * this.m.sin(this.t.zy[l7]))) / this.m.sin(i32(90 - this.t.zy[l7])))) - (fr((fr(fr(this.t.radz[l7]) * this.m.sin(this.t.zy[l7]))) / this.m.sin(i32(90 - this.t.zy[l7])))))))));
+                }
+                if (this.t.xy[l7] !== 0) {
+                  let array2 = ai3;
+                  let n2 = j5;
+                  array2[n2] = trunc(fr(fr(array2[n2]) + ((fr((fr((fr(fr(((i32(ai[j5] - ((i32((i32(this.t.x[l7] - this.m.x)) - this.t.radx[l7]))))))) * this.m.sin(this.t.xy[l7]))) / this.m.sin(i32(90 - this.t.xy[l7])))) - (fr((fr(fr(this.t.radx[l7]) * this.m.sin(this.t.xy[l7]))) / this.m.sin(i32(90 - this.t.xy[l7])))))))));
+                }
+              }
+              let red = this.t.c[l7][0];
+              let green = this.t.c[l7][1];
+              let blue = this.t.c[l7][2];
+              if ((((((this.m.switchfase === 0) || (this.m.switchfase === 10)) || (this.m.switchfase === 20))) && this.m.effect[2]) && !this.m.trk) {
+                red = trunc((fr(fr(this.t.oc[l7][0]) + (fr(fr(this.t.oc[l7][0]) * ((fr(fr(this.m.snap[0]) / 100.0))))))));
+                green = trunc((fr(fr(this.t.oc[l7][1]) + (fr(fr(this.t.oc[l7][1]) * ((fr(fr(this.m.snap[1]) / 100.0))))))));
+                blue = trunc((fr(fr(this.t.oc[l7][2]) + (fr(fr(this.t.oc[l7][2]) * ((fr(fr(this.m.snap[2]) / 100.0))))))));
+              }
+              i2 = trunc((fr(red) / 1.5));
+              j2 = trunc((fr(green) / 1.5));
+              k2 = trunc((fr(blue) / 1.5));
+              break;
+            }
+          }
+        }
+      }
+    }
+    let flag = true;
+    let ai4 = scratch(20, this.n);
+    let ai5 = scratch(21, this.n);
+    if (k1 === 2) {
+      i2 = 80;
+      j2 = 80;
+      k2 = 80;
+    } else {
+      for (let i7 = 0; i7 < this.m.nsp; i7 = i32(i7 + 1)) {
+        for (let j6 = 0; j6 < this.n; j6 = i32(j6 + 1)) {
+          if (((Math.abs(i32(ai[j6] - this.m.spx[i7])) | 0) < this.m.sprad[i7]) && ((Math.abs(i32(ai2[j6] - this.m.spz[i7])) | 0) < this.m.sprad[i7])) {
+            flag = false;
+          }
+        }
+      }
+    }
+    if (flag) {
+      this.rot(ai, ai2, this.m.cx, this.m.cz, this.m.xz, this.n);
+      this.rot(ai3, ai2, this.m.cy, this.m.cz, this.m.zy, this.n);
+      let j7 = 0;
+      let k7 = 0;
+      let j8 = 0;
+      let i8 = 0;
+      for (let l8 = 0; l8 < this.n; l8 = i32(l8 + 1)) {
+        ai4[l8] = this.xs(ai[l8], ai2[l8]);
+        ai5[l8] = this.ys(ai3[l8], ai2[l8]);
+        if ((ai5[l8] < 0) || (ai2[l8] < 10)) {
+          j7 = i32(j7 + 1);
+        }
+        if ((ai5[l8] > this.m.h) || (ai2[l8] < 10)) {
+          k7 = i32(k7 + 1);
+        }
+        if ((ai4[l8] < 0) || (ai2[l8] < 10)) {
+          j8 = i32(j8 + 1);
+        }
+        if ((ai4[l8] > this.m.w) || (ai2[l8] < 10)) {
+          i8 = i32(i8 + 1);
+        }
+      }
+      if ((((j8 === this.n) || (j7 === this.n)) || (k7 === this.n)) || (i8 === this.n)) {
+        flag = false;
+      }
+    }
+    if (flag) {
+      let k8 = 0;
+      do {
+        if (this.av > this.m.fade[k8]) {
+          i2 = idiv(((i32((Math.imul(i2, this.m.fogd)) + this.m.cfade[0]))), (i32(this.m.fogd + 1)));
+          j2 = idiv(((i32((Math.imul(j2, this.m.fogd)) + this.m.cfade[1]))), (i32(this.m.fogd + 1)));
+          k2 = idiv(((i32((Math.imul(k2, this.m.fogd)) + this.m.cfade[2]))), (i32(this.m.fogd + 1)));
+        }
+      } while (++k8 < 16);
+      g.setColor(i2, j2, k2);
+      if (teleported) {
+        g.setColorOf(new Color(i2, j2, k2, telefade));
+      }
+      g.fillPolygon(ai4, ai5, this.n);
+      if (this.m.effect[11] && outoftrack) {
+        g.setColorOf(new Color(shadcol[0], shadcol[1], shadcol[2], 50));
+        g.drawPolygon(ai4, ai5, this.n);
+      }
+    }
+  }
+
+  spy(i, j) {
+    return trunc(Math.sqrt(i32((Math.imul(((i32(i - this.m.cx))), (i32(i - this.m.cx)))) + (Math.imul(j, j)))));
+  }
+}

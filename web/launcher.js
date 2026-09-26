@@ -23,7 +23,7 @@ import { NetPeer, makeRoomCode } from './netpeer.js';
 import { Lobby, MAX_PLAYERS } from './netlobby.js';
 import { Directory } from './netdirectory.js';
 import * as music from './music.js';
-import { translateDocument, setLang } from './i18n.js';
+import { translateDocument, setLang, tr } from './i18n.js';
 import { loadCareer, saveCareer, effectiveUnlocked } from './career.js';
 
 const $ = (id) => document.getElementById(id);
@@ -36,7 +36,7 @@ const STAGE_COUNT = 32;
 const STORE_KEY = 'nfm.launcher';
 const DEFAULTS = {
   name: '', car: 'Formula 7', stage: 1, players: 7, opponents: 'stage',
-  sfxvol: 100, musicvol: 100, res: 2, interp: true, ghost: false, unlockall: false, hud: 'auto',
+  sfxvol: 100, musicvol: 100, res: 2, interp: true, ghost: false, hud: 'auto', devmode: false, perf: 'fps',
   visibility: 'public', lang: 'en',
 };
 let S = { ...DEFAULTS };
@@ -99,13 +99,13 @@ const V = {
     list: () => [1, 1.5, 2, 3],
     get: () => V.res.list().indexOf(S.res),
     set: (i) => { S.res = V.res.list()[i]; save(); },
-    text: () => `${S.res}x${S.res > 2 ? ' — heavy' : S.res === 1 ? ' — fastest' : ''}`,
+    text: () => `${S.res}x`,
   },
   interp: {
     list: () => [false, true],
     get: () => (S.interp ? 1 : 0),
     set: (i) => { S.interp = !!i; save(); },
-    text: () => (S.interp ? 'on — display rate' : 'off — 18.9 fps'),
+    text: () => (S.interp ? 'Yes' : 'No'),
   },
   // Recording the replay clones every car's model six times a cycle, which is
   // the game's largest source of garbage by a wide margin and can stall when
@@ -124,22 +124,32 @@ const V = {
     list: () => [false, true],
     get: () => (S.ghost ? 1 : 0),
     set: (i) => { S.ghost = !!i; save(); },
-    text: () => (S.ghost ? 'on' : 'off — smoother'),
+    text: () => (S.ghost ? 'Yes' : 'No'),
   },
   // Dark-sky HUD: the port's rim around the lettering, or the Java's boxes.
   hud: {
     list: () => ['auto', 'outline', 'boxes'],
     get: () => Math.max(0, ['auto', 'outline', 'boxes'].indexOf(S.hud)),
     set: (i) => { S.hud = ['auto', 'outline', 'boxes'][i]; save(); },
-    text: () => ({ auto: 'automatic — colours by contrast', outline: 'outline', boxes: 'boxes — as the original' })[S.hud] || 'automatic — colours by contrast',
+    text: () => ({ auto: 'Automatic', outline: 'Outline', boxes: 'Boxes' })[S.hud] || 'Automatic',
   },
-  // The port's, not the Java's: the NFM 1 / NFM 2 careers open every stage
-  // and car. The saved career is left alone (see career.js).
-  unlockall: {
+  // The race's performance line (bottom of the screen): nothing, the frame rate, the frame
+  // rate with the ms a tick and a frame cost, or everything the port measures.
+  perf: {
+    list: () => ['off', 'fps', 'ms', 'all'],
+    get: () => Math.max(0, V.perf.list().indexOf(S.perf)),
+    set: (i) => { S.perf = V.perf.list()[i]; save(); },
+    text: () => ({ off: 'No', fps: 'FPS', ms: 'FPS + ms', all: 'Everything' })[S.perf] || 'FPS',
+  },
+  // Test switches in a page's URL (?stage=, ?selftest=, ?stats=, ...) count
+  // only with this on; the editors' Test Drive links always work (devmode.js).
+  // It also opens every stage and car of the NFM 1 / NFM 2 careers (the saved
+  // career is left alone, see career.js); Extended's career stays the real one.
+  devmode: {
     list: () => [false, true],
-    get: () => (S.unlockall ? 1 : 0),
-    set: (i) => { S.unlockall = !!i; save(); },
-    text: () => (S.unlockall ? 'on — every stage and car' : 'off — win races to unlock'),
+    get: () => (S.devmode ? 1 : 0),
+    set: (i) => { S.devmode = !!i; save(); },
+    text: () => (S.devmode ? 'Yes' : 'No'),
   },
 };
 
@@ -155,12 +165,13 @@ function applyLang() {
 }
 
 /* ---- pages -------------------------------------------------------------- */
-const MENU = ['Single Player', 'Multiplayer', 'Car Maker', 'Stage Maker', 'Settings'];
+const MENU = ['Single Player', 'Extended Edition', 'Multiplayer', 'Car Maker', 'Stage Maker', 'Settings'];
 const OPT_ROWS = [['players', 'Cars on track'], ['opponents', 'Opponents']];
 const SET_ROWS = [['sfxvol', 'Sound'], ['musicvol', 'Music'],
                   ['res', 'Resolution'], ['interp', 'Smooth frames'],
                   ['ghost', 'Replay recording'], ['hud', 'HUD on dark skies'],
-                  ['unlockall', 'Unlock everything'],
+                  ['perf', 'Show performance'],
+                  ['devmode', 'Developer mode'],
                   ['lang', 'Language']];
 
 const valueBits = (k) =>
@@ -184,12 +195,20 @@ const GM = ['NFM 1', 'NFM 2', 'Free Play'];
 $('gm-rows').innerHTML = GM.map((t, i) =>
   `<li class="item" role="menuitem" data-act="gm:${(i + 1) % 3}"><span class="label">${t}</span></li>`).join('');
 
+// Extended Edition: NFM2 Extended Mode v2.8, raced by web/ext/race.js. Free
+// Play picks any of its 39 cars and an NFM 2 or Extended stage (freeplay.js);
+// career is its xtGraphics menu's RPG mode. The jar's Classic Mode stays at
+// ?ext=classic.
+const EXT = [['free', 'Free Play'], ['career', 'Career Mode']];
+$('ext-rows').innerHTML = EXT.map(([k, t]) =>
+  `<li class="item" role="menuitem" data-act="ext:${k}"><span class="label">${t}</span></li>`).join('');
+
 // Spanish, when chosen: everything above wrote the pages' English; this
 // translates it and whatever is written later.
 translateDocument();
 
-const PAGE_IDS = ['menu', 'gm', 'sp', 'opts', 'mp', 'lobby', 'set'];
-const BACK = { gm: 'menu', sp: 'menu', opts: 'sp', mp: 'menu', lobby: 'mp', set: 'menu' };
+const PAGE_IDS = ['menu', 'gm', 'ext', 'sp', 'opts', 'mp', 'lobby', 'set'];
+const BACK = { gm: 'menu', ext: 'menu', sp: 'menu', opts: 'sp', mp: 'menu', lobby: 'mp', set: 'menu' };
 const PAGES = {};
 for (const id of PAGE_IDS) refreshItems(id);
 
@@ -206,6 +225,7 @@ const page = () => PAGES[pageName()];
 const HINTS = {
   menu:  '<kbd>↑</kbd><kbd>↓</kbd> move · <kbd>Enter</kbd> select',
   gm:    '<kbd>↑</kbd><kbd>↓</kbd> move · <kbd>Enter</kbd> select · <kbd>Esc</kbd> back',
+  ext:   '<kbd>↑</kbd><kbd>↓</kbd> move · <kbd>Enter</kbd> select · <kbd>Esc</kbd> back',
   sp:    '<kbd>↑</kbd><kbd>↓</kbd> move · <kbd>←</kbd><kbd>→</kbd> change · <kbd>Enter</kbd> open / start · <kbd>Esc</kbd> back',
   opts:  '<kbd>↑</kbd><kbd>↓</kbd> move · <kbd>←</kbd><kbd>→</kbd> change · <kbd>Esc</kbd> back',
   mp:    '<kbd>↑</kbd><kbd>↓</kbd> move · <kbd>Enter</kbd> join / host · <kbd>←</kbd><kbd>→</kbd> public–private · <kbd>Esc</kbd> back',
@@ -476,18 +496,22 @@ addEventListener('pointerdown', unlockMenuMusic);
  * same keys, so the menu adds no second way to configure a race. */
 function raceParams(extra = {}) {
   const p = new URLSearchParams();
-  const car = CARS[V.car.get()];
-  if (car?.custom) p.set('mycar', car.name);
-  else if (car) p.set('car', String(car.slot));
-  p.set('stage', String(S.stage));
-  p.set('players', String(S.players));
-  if (S.opponents === 'same') p.set('cars', 'same');
+  // An Extended race (extra.ext) has its own cars, stages and field size.
+  if (!extra.ext) {
+    const car = CARS[V.car.get()];
+    if (car?.custom) p.set('mycar', car.name);
+    else if (car) p.set('car', String(car.slot));
+    p.set('stage', String(S.stage));
+    p.set('players', String(S.players));
+    if (S.opponents === 'same') p.set('cars', 'same');
+  }
   p.set('sfxvol', String(S.sfxvol));
   p.set('musicvol', String(S.musicvol));
   p.set('res', String(S.res));
   if (!S.interp) p.set('interp', '0');
   if (!S.ghost) p.set('ghost', '0');
   if (S.hud !== 'auto') p.set('hud', S.hud);
+  p.set('perf', S.perf);
   for (const [k, v] of Object.entries(extra)) p.set(k, String(v));
   return p;
 }
@@ -545,7 +569,7 @@ async function startRace(session, extra = {}) {
 function careerFor(gmode) {
   if (!gmode) return null;
   const c = loadCareer();
-  return { gmode, unlocked: effectiveUnlocked(c, S.unlockall), scm: c.scm, ...(lastRace?.gmode === gmode ? lastRace : {}) };
+  return { gmode, unlocked: effectiveUnlocked(c, S.devmode), scm: c.scm, ...(lastRace?.gmode === gmode ? lastRace : {}) };
 }
 // How the last career race ended (finish() -> sessionStorage 'nfm.next'):
 // the Java keeps winner/justwon in memory into the next stage select.
@@ -846,11 +870,14 @@ function fire() {
       // Single player opens the game's own car select, as the Java's menu
       // does. The 'sp' page stays for its race options but nothing links it.
       if (+arg === 0) return goPage('gm');
-      if (+arg === 1) return goPage('mp');
-      if (+arg === 2) return void (location.href = './web/careditor.html');
-      if (+arg === 3) return void (location.href = './web/stagemaker.html');
+      if (+arg === 1) return goPage('ext');
+      if (+arg === 2) return goPage('mp');
+      if (+arg === 3) return void (location.href = './web/careditor.html');
+      if (+arg === 4) return void (location.href = './web/stagemaker.html');
       return goPage('set');
     case 'gm':    return void startCarSelect(+arg);
+    // Extended's race in the same shell as the base race (web/ext/race.js).
+    case 'ext':   return void startRace(null, { ext: arg });
     case 'opts':  return goPage('opts');
     case 'lang':  return applyLang();
     case 'back':  return goPage(BACK[pageName()]);
@@ -995,7 +1022,11 @@ const booted = new Promise((r) => { bootedResolve = r; });
     await drawStagePreview();
     draw();
     bootedResolve();
-    if (!(await resumeCareer())) await resumeRoom();
+    // the Car Maker's "Try in Extended" (web/careditor/extended.js): straight into Extended's Free Play
+    let tryExt = false;
+    try { tryExt = sessionStorage.getItem('nfm.ext.try') === '1'; sessionStorage.removeItem('nfm.ext.try'); } catch { /* private mode */ }
+    if (tryExt) await startRace(null, { ext: 'free' });
+    else if (!(await resumeCareer())) await resumeRoom();
   } catch (e) {
     bootedResolve();
     $('brandsub').textContent = 'failed to load game data';

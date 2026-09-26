@@ -6,6 +6,7 @@ mystages/** -text
 mycars/**   -text
 music/**    -text
 java/**     -text
+ext/**      -text
 *.radq      binary
 *.jar       binary
 *.zip       binary
