@@ -125,7 +125,9 @@ export async function bootExtended(params, log, onExit) {
   if (mode !== 'career') {
     for (const { name, donor } of newList) {
       const text = await readCar(name);
-      const car = text && carFromRad(name, text, Number.isInteger(donor) && donor >= 0 && donor < 39 ? donor : undefined);
+      const car = text && carFromRad(name, text);
+      // ?newcar=name:donor, a developer switch: the donor after ':' overrides the .rad's
+      if (car && Number.isInteger(donor) && donor >= 0 && donor < 39) car.donor = donor;
       if (car) newcars.push(car); else console.log(`new car "${name}" skipped: not a car Extended can load`);
     }
   }

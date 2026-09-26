@@ -24,7 +24,7 @@ test('the lists name every per-car table (a regeneration that adds one fails her
 test('a new car gets a column in every table: finite, stock columns untouched', () => {
   setNewCars([]);
   const before = JSON.stringify(MAD_TABLES.map((k) => flat(Array.from(new Madness({}, {}, {}, 0)[k]))));
-  setNewCars([carFromRad('Simple Car', simple, 30)]);
+  setNewCars([carFromRad('Simple Car', simple + '\nextspecial(30)\n')]);
   const m = new Madness({}, {}, {}, 0), x = new xtGraphics({}, null, null, {});
   growMadness(m); growXt(x);
   for (const k of MAD_TABLES) {
@@ -37,7 +37,7 @@ test('a new car gets a column in every table: finite, stock columns untouched', 
 });
 
 test('mirrors hold the CarDefine value; Extended-only tables hold the donor value', () => {
-  const car = carFromRad('Simple Car', simple, 30);
+  const car = carFromRad('Simple Car', simple + '\nextspecial(30)\n');
   setNewCars([car]);
   const m = new Madness({}, {}, {}, 0);
   const stock = new Madness({}, {}, {}, 0);
@@ -49,14 +49,14 @@ test('mirrors hold the CarDefine value; Extended-only tables hold the donor valu
 });
 
 test('growing twice is a no-op (the patch runs once per construction)', () => {
-  setNewCars([carFromRad('Simple Car', simple, 30)]);
+  setNewCars([carFromRad('Simple Car', simple + '\nextspecial(30)\n')]);
   const m = new Madness({}, {}, {}, 0);
   growMadness(m); const n = m.acelf.length; growMadness(m);
   assert.strictEqual(m.acelf.length, n);
 });
 
 test('a donor column is a copy: changing the new car leaves the donor alone', () => {
-  setNewCars([carFromRad('Simple Car', simple, 30)]);
+  setNewCars([carFromRad('Simple Car', simple + '\nextspecial(30)\n')]);
   const x = new xtGraphics({}, null, null, {});
   growXt(x);
   x.specialstats[NEW_BASE][0][0] = 99;

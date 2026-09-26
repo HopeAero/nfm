@@ -1,7 +1,9 @@
 // A Car Maker .rad as an Extended new car: the physics the base port's CarDefine
 // computes from stat()/physics()/handling() (NFM 2's formulas, not Extended's
 // hand-tuned tables), measured on the base ContO as CarDefine.loadcar measures it.
+// The donor and Extended's own values come from the .rad's ext* lines (extlines.js).
 import { CarDefine } from '../CarDefine.js';
+import { readExt, forLoadstat } from './extlines.js';
 import { ContO as BaseContO } from '../ContO.js';
 import { floatArray, intArray } from '../java.js';
 
@@ -39,16 +41,21 @@ const wheelsOk = (o) => !(o.keyz[0] < 0 || o.keyx[0] > 0) && !(o.keyz[1] < 0 || 
 
 const SLOT = 16;   // CarDefine's first custom slot
 
-export function carFromRad(name, text, donor) {
+export function carFromRad(name, text) {
   let model;
   try { model = new BaseContO(text, stubMedium(), stubTrackers()); } catch { return null; }
   if (model.errd || model.npl <= 60 || !wheelsOk(model)) return null;
+  const ext = readExt(text);
   const cd = new CarDefine(null, null, null, null);
-  cd.loadstat(text, name, model.maxR, model.roofat, model.wh, SLOT);
+  // Extended's own stats and handling, when the Car Maker's Extended tab set them
+  cd.loadstat(forLoadstat(text), name, model.maxR, model.roofat, model.wh, SLOT);
   if (!cd.names[SLOT]) return null;          // loadstat blanks the name when stat() is missing
   const stat = {};
   const copy = (v) => (v?.length !== undefined ? v.slice() : v);
   for (const f of STAT_FIELDS) stat[f] = copy(cd[f][SLOT]);
+  // health and damage taken in Extended, as percentages of NFM 2's (float32, trunc as loadstat does)
+  if (ext.health !== null) stat.maxmag = Math.trunc(Math.fround(stat.maxmag * ext.health / 100));
+  if (ext.damage !== null) stat.dammult = Math.fround(stat.dammult * ext.damage / 100);
   const cclass = cd.cclass[SLOT];
-  return { name, text, stat, cclass, donor: Number.isInteger(donor) ? donor : defaultDonor(cclass) };
+  return { name, text, stat, cclass, donor: ext.special ?? defaultDonor(cclass) };
 }
