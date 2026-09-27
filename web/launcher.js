@@ -25,6 +25,7 @@ import { Directory } from './netdirectory.js';
 import * as music from './music.js';
 import { translateDocument, setLang, tr } from './i18n.js';
 import { loadCareer, saveCareer, effectiveUnlocked } from './career.js';
+import { RIVALS_KEY, NFM2_CCLASS, loadRivals, runRivals, saveRivals, tierOfClass } from './rivals.js';
 
 const $ = (id) => document.getElementById(id);
 const STAGE_COUNT = 32;
@@ -619,18 +620,33 @@ async function startCarSelect(gmode = 0) {
   $('gl').hidden = $('overlay').hidden = true;
   let slot = null;
   let stage = null;
+  let rivals = null;
   try {
     const { runCarSelect, runStageSelect } = await import('./carselect.js');
     const cur = CARS[V.car.get()];
     let start = cur && !cur.custom ? cur.slot : 0;
-    // Car, then stage, as the Java orders them. Esc on the stage select goes
-    // back to the car select; Esc there leaves to this menu.
+    let stagePick = gmode ? S.stage : (S.mystage || S.stage);
+    // Car, then stage, as the Java orders them; free play then its Rivals screen
+    // (rivals.js). Esc on Rivals goes back to the stage, Esc on the stage select
+    // back to the car select, Esc there leaves to this menu.
     for (;;) {
       slot = await runCarSelect(canvas, start, careerFor(gmode));
       if (slot === null) break;
       start = slot;
       if (gmode) saveCareer(gmode, slot, null);      // setcarcookie on the pick
-      stage = await runStageSelect(canvas, gmode ? S.stage : (S.mystage || S.stage), careerFor(gmode));
+      for (;;) {
+        stage = await runStageSelect(canvas, stagePick, careerFor(gmode));
+        if (stage === null || gmode) break;
+        stagePick = stage;
+        rivals = await runRivals({
+          host: $('stage'),
+          title: typeof stage === 'string' ? stage : STAGES.find((s) => s.n === stage)?.name,
+          cars: CARS.filter((c) => !c.custom).map((c) => ({ i: c.slot, name: c.name, tier: tierOfClass(NFM2_CCLASS[c.slot]) })),
+          tiers: ['C', 'B', 'A'], min: 1, max: 8,
+          cfg: loadRivals(RIVALS_KEY.nfm2, 16, 8),
+        });
+        if (rivals) break;
+      }
       if (stage !== null) break;
     }
   } catch (e) {
@@ -669,6 +685,11 @@ async function startCarSelect(gmode = 0) {
     // to five) drawn by sortcars(), whatever the free-play options say.
     extra.players = 7;
     extra.cars = 'stage';
+  }
+  if (!gmode && rivals) {
+    saveRivals(RIVALS_KEY.nfm2, rivals);
+    extra.players = rivals.count;
+    extra.rivals = JSON.stringify({ mode: rivals.mode, pool: rivals.pool, fixed: rivals.fixed });
   }
   await startRace(null, extra);
 }

@@ -20,7 +20,7 @@ import { ContO, setFaceSortRank } from './ContO.js';
 import { Plane } from './Plane.js';
 import { XtGraphics } from './XtGraphics.js';
 import { loadIntoCarDefine } from './carstore.js';
-import { objArray, setDrawPhase, setSeed } from './java.js';
+import { objArray, random, setDrawPhase, setSeed } from './java.js';
 import { readZip, readText, detectFpath } from './vfs.js';
 import { loadHudImages, loadFinishImages, readable } from './images.js';
 import { spanishPauseBackground } from './ui-sprites-es.js';
@@ -36,6 +36,7 @@ import { createRaceMenu } from './race-ui.js';
 import { highlightTitle, shouldPlayHighlight } from './highlight.js';
 import { saveCareer } from './career.js';
 import { perfLevel, perfLine } from './perfline.js';
+import { parseRivals, pickRivals } from './rivals.js';
 
 const log = (msg) => {
   console.log(msg);
@@ -232,6 +233,8 @@ export async function boot(opts = {}) {
   let car = cfg.car;
   const players = cfg.players;
   const sameCars = params.get('cars') === 'same';
+  // ?rivals=: Free Play's Rivals screen (rivals.js), the field's size being ?players=
+  const rivals = params.has('rivals') ? parseRivals(params.get('rivals'), 16, 8) : null;
   setSeed(cfg.seed);
 
   const glCanvas = document.getElementById('gl');
@@ -365,7 +368,7 @@ export async function boot(opts = {}) {
     // AI locally -- it would fight the state arriving on the wire. See the
     // `remote` gate in GameSparker.simulate().
     for (let i = 0; i < 8; ++i) gs.u[i].remote = sync ? sync.isRemote(i) : false;
-  } else if (sameCars) {
+  } else if (sameCars && !rivals) {
     for (let i = 1; i < 8; ++i) xt.sc[i] = car;
   } else {
     // The original never races eight identical cars: sortcars() draws the
@@ -375,6 +378,10 @@ export async function boot(opts = {}) {
     // whatever it had.
     xt.sortcars(stage);
     xt.sc[7] = car;
+    if (rivals) {
+      const sc = pickRivals(rivals, xt.sc, players, random);
+      for (let k = 1; k < players; ++k) xt.sc[k] = sc[k];
+    }
   }
   checkPoints.stage = stage;
 
