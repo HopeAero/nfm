@@ -314,3 +314,25 @@ export function withRivals(sortcars, load, random) {
     for (let k = 1; k < this.nplayers; k++) this.sc[k] = sc[k];
   };
 }
+
+/**
+ * Extended's classic draw (the NFM 2 stages, xtGraphics.sortcars) never repeats a car
+ * and has sixteen to draw from (23-38, and M A S H E E N only in slots 1-2): the jar
+ * races seven there, and past about fifteen its `while (!aflag)` never ends. It draws
+ * its own seven; the rest come from the same sixteen, repeats allowed, each passing the
+ * jar's own proba rejection. Normal mode repeats past eleven cars and needs none of this.
+ */
+export const CLASSIC_FIELD = 7;
+export function withClassicField(sortcars, random) {
+  return function (...a) {
+    const n = this.nplayers;
+    if (!this.classicmode || n <= CLASSIC_FIELD) return sortcars.apply(this, a);
+    this.nplayers = CLASSIC_FIELD;
+    try { sortcars.apply(this, a); } finally { this.nplayers = n; }
+    for (let k = CLASSIC_FIELD; k < n; k++) {
+      let c;
+      do c = 23 + Math.trunc(random() * 16); while (c === 36 || random() < this.proba[c]);
+      this.sc[k] = c;
+    }
+  };
+}

@@ -28,7 +28,7 @@ import { RaceTick } from './racetick.js';
 import { Bots } from './Bots.js';
 import { appendModels, baseGround, baseLook, prepareBaseStage, renumberOldStage, translateStage } from './stagecompat.js';
 import { runMenus } from './menus.js';
-import { RIVALS_KEY, loadRivals, withRivals } from '../rivals.js';
+import { RIVALS_KEY, loadRivals, withClassicField, withRivals } from '../rivals.js';
 import { EXT_CARS } from './catalog.js';
 import { buildTrackGrid } from './trackgrid.js';
 import { Bench, countScene, frameCap, installProfile } from './benchtools.js';
@@ -217,6 +217,8 @@ export async function bootExtended(params, log, onExit) {
         });
         return stat.apply(this, a);
       };
+      // past the jar's seven cars on an NFM 2 stage its classic draw never ends (rivals.js)
+      xt.sortcars = withClassicField(xt.sortcars, random);
       // The Rivals screen's pool and pinned slots over the game's own draw
       // (not under a self-test: its hash must not depend on this browser's stored pool)
       if (!params.get('selftest')) xt.sortcars = withRivals(xt.sortcars, () => loadRivals(RIVALS_KEY.ext, EXT_CARS.length, 19), random);
