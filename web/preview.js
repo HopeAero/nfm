@@ -18,6 +18,7 @@ import { CarDefine } from './CarDefine.js';
 import { Mad } from './Mad.js';
 import { GameSparker, CAR_NAMES, TRACK_NAMES } from './GameSparker.js';
 import { XtGraphics } from './XtGraphics.js';
+import { fitThumb } from './rivals.js';
 import { ContO } from './ContO.js';
 import { objArray, setSeed, idiv } from './java.js';
 import { readZip, readText, detectFpath } from './vfs.js';
@@ -555,4 +556,21 @@ export function drawMinimap(canvas, stage) {
   ctx.beginPath();
   ctx.arc(px(stage.start.x), py(stage.start.z), 4.5 * k, 0, Math.PI * 2);
   ctx.fill();
+}
+
+// The Rivals screen's car cards: drawCar on one shared canvas, copied out. The
+// camera and the model's pose are shared with every other view, so both are put back.
+let thumbGL = null;
+const CAM = ['trk', 'crs', 'x', 'y', 'z', 'xz', 'zy', 'ground', 'ih', 'iw', 'w', 'h', 'focus_point', 'cx', 'cy', 'cz'];
+const POSE = ['x', 'y', 'z', 'xz', 'zy', 'xy', 'wzy'];
+export function carThumb(car, angle = 200) {
+  const { medium, models } = world;
+  const o = car < CAR_COUNT ? models[car] : world.cd.bco[car];
+  const cam = CAM.map((k) => medium[k]), pose = POSE.map((k) => o[k]);
+  thumbGL ??= Object.assign(document.createElement('canvas'), { width: 800, height: 450 });
+  drawCar(thumbGL, car, angle);
+  const out = fitThumb(thumbGL);
+  CAM.forEach((k, j) => { medium[k] = cam[j]; });
+  POSE.forEach((k, j) => { o[k] = pose[j]; });
+  return out;
 }

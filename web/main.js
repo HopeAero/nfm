@@ -36,7 +36,7 @@ import { createRaceMenu } from './race-ui.js';
 import { highlightTitle, shouldPlayHighlight } from './highlight.js';
 import { saveCareer } from './career.js';
 import { perfLevel, perfLine } from './perfline.js';
-import { parseRivals, pickRivals } from './rivals.js';
+import { parseRivals, pickRivals, seededRandom } from './rivals.js';
 
 const log = (msg) => {
   console.log(msg);
@@ -379,7 +379,8 @@ export async function boot(opts = {}) {
     xt.sortcars(stage);
     xt.sc[7] = car;
     if (rivals) {
-      const sc = pickRivals(rivals, xt.sc, players, random);
+      // the pool on its own seed: the race's is fixed, and would draw the same grid every time
+      const sc = pickRivals(rivals, xt.sc, players, rivals.seed != null ? seededRandom(rivals.seed) : random);
       for (let k = 1; k < players; ++k) xt.sc[k] = sc[k];
     }
   }

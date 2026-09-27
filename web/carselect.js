@@ -21,6 +21,7 @@ import { trunc, random } from './java.js';
 import { loadCarSelectImages, loadFinishImages, loadStageSelectImages } from './images.js';
 import { listAll as listCustomStages } from './stagestore.js';
 import { tr } from './i18n.js';
+import { rivalsButton } from './rivals.js';
 import { lang } from './i18n.js';
 
 const TICK_MS = 40;             // menus: 10 frames per 400ms
@@ -57,7 +58,7 @@ function loadImages(xt) {
  * themselves (carselect clears control.right after acting on it), and
  * clearing on keyup drops any tap shorter than one tick.
  */
-function runScreen(control, tick) {
+function runScreen(control, tick, gate = {}) {
   control.left = control.right = control.enter = control.handb = false;
   return new Promise((resolve) => {
     let raf = 0;
@@ -74,6 +75,7 @@ function runScreen(control, tick) {
       resolve(result);
     };
     const onKey = (e) => {
+      if (gate.paused) return;           // the Rivals screen is up: its keys
       const down = e.type === 'keydown';
       switch (e.code) {
         case 'ArrowLeft':  if (down) control.left = true; break;
@@ -193,9 +195,10 @@ function makeChoices(host) {
 /**
  * @param {HTMLCanvasElement} canvas
  * @param {number|string} stage       stage to start on: a number, or a custom stage's name
+ * @param {() => Promise<void>} [onRivals]  free play: the RIVALS button opens it (rivals.js)
  * @returns {Promise<number|string|null>}  the chosen stage (a custom one by name), or null on Esc
  */
-export async function runStageSelect(canvas, stage, career = null) {
+export async function runStageSelect(canvas, stage, career = null, onRivals = null) {
   const { xt, gs, medium, checkPoints, placed } = await initPreview();
   await loadImages(xt);
   const customs = await listCustomStages().catch(() => []);
@@ -282,6 +285,19 @@ export async function runStageSelect(canvas, stage, career = null) {
   };
   paintChoices();
   if (gmode !== 0) ui.box.hidden = true;
+  // free play: RIVALS beside the Java's CONTINUAR; the screen keeps drawing under it
+  const gate = { paused: false };
+  const rivals = onRivals && rivalsButton(async () => {
+    gate.paused = true;
+    try { await onRivals(); } finally {
+      control.left = control.right = control.enter = control.handb = false;
+      gate.paused = false;
+    }
+  });
+  if (rivals) {
+    rivals.style.cssText += 'position:absolute;left:478px;top:358px;z-index:3;';
+    canvas.parentElement.append(rivals);
+  }
 
   xt.nfmtab = tab;
   xt.removeds = 0;
@@ -380,9 +396,10 @@ export async function runStageSelect(canvas, stage, career = null) {
       }
       if (xt.fase === 5) return typeof cur === 'string' ? cur : checkPoints.stage;
       return undefined;
-    });
+    }, gate);
   } finally {
     ui.box.remove();
+    rivals?.remove();
     xt.rd = savedRd;
   }
 }

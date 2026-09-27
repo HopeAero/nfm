@@ -29,7 +29,8 @@ import { tr } from '../i18n.js';
 import { restoreStats, statsOf } from './career-save.js';
 import { NEW_BASE, lastCar, firstCar, newCars, setCarGroup, carGroup, cycleCarGroup, groupOf } from './newcars.js';
 import { groupSprites } from './cargroup.js';
-import { RIVALS_KEY, loadRivals, runRivals, saveRivals } from '../rivals.js';
+import { RIVALS_KEY, closeRivals, fitThumb, loadRivals, rivalsButton, runRivals, saveRivals } from '../rivals.js';
+import { JGraphics } from './jgraphics.js';
 import { EXT_TIER } from './tiers.js';
 
 const STORE_KEY = 'nfm.ext.free';
@@ -127,6 +128,7 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
   };
 
   // ---- the jar's screens, as the menus need them ----------------------------
+  let aconto = null;
   const own = { carselect: xt.carselect, stageselect: xt.stageselect, trackbg$m: xt.trackbg$m, loadingstage: xt.loadingstage };
   if (!career) {
     xt.careermode = xt.classicmode = false;
@@ -143,6 +145,7 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
       // what Undo returns to: the stats as last saved (by Confirm, or by the jar's own saves)
       if (stat.base === null || careerStore.saves() !== stat.saves) { stat.base = statsOf(this, stat.mad); stat.saves = careerStore.saves(); }
     }
+    aconto = rest[0];                    // the car models, for the Rivals cards
     own.carselect.call(this, control_, ...rest);
     if (careerStore) stat.pending = statsOf(this, stat.mad) !== stat.base;
     if (this.fase !== 6476) return;      // Enter: the car is chosen, on to the stage
@@ -174,25 +177,44 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
     xt.fase = 5;
     try { xt.stages.stop(); xt.stages.unloadMod(); } catch { /* no stage music loaded */ }
   };
-  // Free play's Rivals screen (rivals.js), after the stage select's Enter. The stage is
-  // already loaded with the old field, so its choice reloads it (fase 6476: randomno,
-  // loadstage, sortcars -- race.js applies the pool) and the reload goes straight to the race.
-  let rivalsOpen = false, raceOnLoad = false;
-  const openRivals = async (name) => {
+  // Free play's RIVALS button on the stage select (rivals.js). The stage on show was
+  // loaded with the old field, so a changed config reloads it (fase 6476: randomno,
+  // loadstage, sortcars -- race.js applies it) and the select carries on.
+  let rivalsOpen = false;
+  const openRivals = async () => {
+    if (rivalsOpen || xt.fase !== 1) return;
     rivalsOpen = true;
+    const before = loadRivals(RIVALS_KEY.ext, EXT_CARS.length, 19);
     const cfg = await runRivals({
-      host, title: name,
+      host, tiers: ['C', 'B', 'A', 'S'], min: 1, max: 19,
+      gameCount: xt.classicmode ? 7 : 11,          // the jar's randomno for the stage group
       cars: EXT_CARS.map((n, i) => ({ i, name: n, tier: EXT_TIER[i] })),
-      tiers: ['C', 'B', 'A', 'S'], min: 1, max: 19,
-      cfg: loadRivals(RIVALS_KEY.ext, EXT_CARS.length, 19),
+      cfg: before, thumb: carThumb,
     });
     rivalsOpen = false;
     painted = '';
-    if (!cfg) return;                    // Esc: back to this stage's select
+    if (!cfg || JSON.stringify(cfg) === JSON.stringify(before)) return;
     saveRivals(RIVALS_KEY.ext, cfg);
     setPlayers(cfg.count);
-    raceOnLoad = true;
     xt.fase = 6476;
+  };
+  // a car card: the car select's camera and spin pose on a canvas of its own, the
+  // shared camera and the model put back after (xtGraphics.carselect)
+  let thumbCanvas = null, thumbRd = null;
+  const carThumb = (i) => {
+    const o = aconto?.[i];
+    if (!o) return null;
+    thumbCanvas ??= Object.assign(document.createElement('canvas'), { width: 870 * 2, height: 480 * 2 });
+    thumbRd ??= new JGraphics(thumbCanvas, 870, 480);
+    const m = xt.m, CAM = ['crs', 'x', 'y', 'z', 'xz', 'zy', 'ground'], POSE = ['x', 'y', 'z', 'xz', 'zy', 'wzy'];
+    const cam = CAM.map((k) => m[k]), pose = POSE.map((k) => o[k]);
+    Object.assign(m, { crs: true, x: -435, y: -540, z: -50, xz: 0, zy: 10, ground: 510 });
+    Object.assign(o, { x: 0, y: -34 - o.grat, z: 950, xz: 200, zy: 0 });
+    thumbCanvas.getContext('2d').clearRect(0, 0, thumbCanvas.width, thumbCanvas.height);
+    o.d(thumbRd);
+    CAM.forEach((k, j) => { m[k] = cam[j]; });
+    POSE.forEach((k, j) => { o[k] = pose[j]; });
+    return fitThumb(thumbCanvas);
   };
   xt.stageselect = function (checkpoints, c, madness) {
     // The career: the jar's own stage select, drawn over the rendered stage -- the base port's
@@ -203,11 +225,6 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
       paint();
       if (this.bonstage && c.left) { c.left = false; extra.normal(); return; }
       return own.stageselect.call(this, checkpoints, c, madness);
-    }
-    if (raceOnLoad) {                    // the stage reloaded with the Rivals screen's field: race it
-      raceOnLoad = false;
-      go(c, `Stage ${pick.stage}:  ${checkpoints.name}`);
-      return;
     }
     // what the jar's stageselect does besides drawing: forget loaded music, play the menu's
     for (let i = 0; i < 200; i++) {
@@ -227,9 +244,8 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
     c.left = c.right = c.up = c.down = false;
     choose(group, to);
     if (c.enter || c.handb) {
-      c.enter = c.handb = false;
       savePick(pick);
-      openRivals(checkpoints.name);
+      go(c, `Stage ${pick.stage}:  ${checkpoints.name}`);
     }
   };
   const extra = {
@@ -424,6 +440,7 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
       <button data-k="prev" style="${btn}">◂</button>
       <button data-k="go" style="${btn}">${tr('Race')}</button>
       <button data-k="next" style="${btn}">▸</button>
+      <span data-k="rivals"></span>
     </div>
     <div data-k="hint" style="position:absolute;left:0;right:0;top:458px;text-align:center;font-size:12px;opacity:.85;${shade}">
       ${tr('◂ ▸ stage · ▴ ▾ stages · Enter race · Esc change car')}</div>`;
@@ -434,6 +451,7 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
   $('prev').onclick = () => { control.left = true; };
   $('next').onclick = () => { control.right = true; };
   $('go').onclick = () => { control.enter = true; };
+  $('rivals').replaceWith(Object.assign(rivalsButton(() => openRivals()), { style: 'pointer-events:auto' }));
   for (const k of Object.keys(extra)) if ($(k)) $(k).onclick = (e) => { e.currentTarget.blur(); extra[k](); painted = ''; };
   // the career: the jar draws the rest, the bonus stage's way back is the port's
   if (career) ui.replaceChildren($('normal'));
@@ -482,6 +500,7 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
     };
     addEventListener('keydown', onKey, true);
     const finish = (err) => {
+      closeRivals();
       cancelAnimationFrame(raf);
       removeEventListener('keydown', onKey, true);
       ui.remove();

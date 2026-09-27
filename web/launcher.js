@@ -18,7 +18,7 @@
 // See netlobby.js.
 
 import { initPreview, carNames, carStats, drawCar, loadStage, stageName,
-         faceURL, drawStage3D, drawMinimap, CAR_COUNT, loadCustomCars } from './preview.js';
+         faceURL, drawStage3D, drawMinimap, CAR_COUNT, loadCustomCars, carThumb } from './preview.js';
 import { NetPeer, makeRoomCode } from './netpeer.js';
 import { Lobby, MAX_PLAYERS } from './netlobby.js';
 import { Directory } from './netdirectory.js';
@@ -612,33 +612,27 @@ async function startCarSelect(gmode = 0) {
   $('gl').hidden = $('overlay').hidden = true;
   let slot = null;
   let stage = null;
-  let rivals = null;
   try {
     const { runCarSelect, runStageSelect } = await import('./carselect.js');
     const cur = CARS[V.car.get()];
     let start = cur && !cur.custom ? cur.slot : 0;
-    let stagePick = gmode ? S.stage : (S.mystage || S.stage);
-    // Car, then stage, as the Java orders them; free play then its Rivals screen
-    // (rivals.js). Esc on Rivals goes back to the stage, Esc on the stage select
-    // back to the car select, Esc there leaves to this menu.
+    // Free play's RIVALS button on the stage select (rivals.js): who races, and how many
+    const onRivals = gmode ? null : async () => {
+      const cfg = await runRivals({
+        host: $('stage'), tiers: ['C', 'B', 'A'], min: 1, max: 8, gameCount: 7,
+        cars: CARS.filter((c) => !c.custom).map((c) => ({ i: c.slot, name: c.name, tier: tierOfClass(NFM2_CCLASS[c.slot]) })),
+        cfg: loadRivals(RIVALS_KEY.nfm2, 16, 8), thumb: carThumb,
+      });
+      if (cfg) saveRivals(RIVALS_KEY.nfm2, cfg);
+    };
+    // Car, then stage, as the Java orders them. Esc on the stage select goes
+    // back to the car select; Esc there leaves to this menu.
     for (;;) {
       slot = await runCarSelect(canvas, start, careerFor(gmode));
       if (slot === null) break;
       start = slot;
       if (gmode) saveCareer(gmode, slot, null);      // setcarcookie on the pick
-      for (;;) {
-        stage = await runStageSelect(canvas, stagePick, careerFor(gmode));
-        if (stage === null || gmode) break;
-        stagePick = stage;
-        rivals = await runRivals({
-          host: $('stage'),
-          title: typeof stage === 'string' ? stage : STAGES.find((s) => s.n === stage)?.name,
-          cars: CARS.filter((c) => !c.custom).map((c) => ({ i: c.slot, name: c.name, tier: tierOfClass(NFM2_CCLASS[c.slot]) })),
-          tiers: ['C', 'B', 'A'], min: 1, max: 8,
-          cfg: loadRivals(RIVALS_KEY.nfm2, 16, 8),
-        });
-        if (rivals) break;
-      }
+      stage = await runStageSelect(canvas, gmode ? S.stage : (S.mystage || S.stage), careerFor(gmode), onRivals);
       if (stage !== null) break;
     }
   } catch (e) {
@@ -678,10 +672,13 @@ async function startCarSelect(gmode = 0) {
     extra.players = 7;
     extra.cars = 'stage';
   }
-  if (!gmode && rivals) {
-    saveRivals(RIVALS_KEY.nfm2, rivals);
-    extra.players = rivals.count;
-    extra.rivals = JSON.stringify({ mode: rivals.mode, pool: rivals.pool, fixed: rivals.fixed });
+  if (!gmode) {
+    // the Rivals screen's field; the pool draws on its own seed (the race's is fixed)
+    const r = loadRivals(RIVALS_KEY.nfm2, 16, 8);
+    if (r.count != null) extra.players = r.count;
+    if (r.mode === 'pool' || r.fixed.some((v) => v != null)) {
+      extra.rivals = JSON.stringify({ mode: r.mode, pool: r.pool, fixed: r.fixed, seed: (Math.random() * 2 ** 31) | 0 });
+    }
   }
   await startRace(null, extra);
 }

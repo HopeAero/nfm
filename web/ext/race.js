@@ -70,9 +70,10 @@ export async function bootExtended(params, log, onExit) {
   const free = mode === 'free';
   const playersParam = params.has('players') ? Number(params.get('players')) : NaN;
   // Free Play's field: ?players= (developer mode, the self-tests), else the Rivals
-  // screen's (rivals.js), which menus.js updates through setPlayers before the stage reloads
-  let freePlayPlayers = !free ? null : Number.isInteger(playersParam)
-    ? Math.max(1, Math.min(19, playersParam)) : loadRivals(RIVALS_KEY.ext, EXT_CARS.length, 19).count;
+  // screen's (rivals.js; menus.js updates it through setPlayers). null: the jar's own
+  // randomno (11, or 7 on the NFM 2 stages). A self-test never reads the stored one.
+  let freePlayPlayers = !free ? null : Number.isInteger(playersParam) ? Math.max(1, Math.min(19, playersParam))
+    : params.get('selftest') ? null : loadRivals(RIVALS_KEY.ext, EXT_CARS.length, 19).count;
   // ?selftest= with ?stage= goes straight to the race, as before the menus: a hash that repeats
   const menus = (free || mode === 'career') && !(params.get('selftest') && params.has('stage'));
   // a real career is saved (career-save.js); developer mode races it with everything open, unsaved
@@ -188,39 +189,37 @@ export async function bootExtended(params, log, onExit) {
   gs.readdata = function (x, madness, cp) {
     GameSparker.prototype.readdata.call(this, x, madness, cp);
     xt = x; checkpoints = cp;
-    if (freePlayPlayers !== null) {
+    if (free) {
       // Let the game's stage setup run first, then replace its default 11-car
-      // free-play field with the launcher's chosen size before loadstage uses it.
+      // free-play field with the chosen size (if any) before loadstage uses it.
       const randomno = xt.randomno;
-      xt.nplayers = freePlayPlayers;
+      if (freePlayPlayers != null) xt.nplayers = freePlayPlayers;
       xt.randomno = function (...a) {
         const result = randomno.apply(this, a);
-        this.nplayers = freePlayPlayers;
+        if (freePlayPlayers != null) this.nplayers = freePlayPlayers;
         return result;
       };
-      if (free) {
-        // Extended treats zero wasted opponents as an immediate wasting win.
-        // In a one-car time trial, skip that one check so the lap can finish.
-        // The count can change on the Rivals screen after this, so it is read per call.
-        const stat = xt.stat$m;
-        xt.stat$m = function (...a) {
-          if (freePlayPlayers !== 1) return stat.apply(this, a);
-          let firstWastedRead = true;
-          a[1] = new Proxy(a[1], {
-            get(target, key, receiver) {
-              if (key === 'wasted' && firstWastedRead) {
-                firstWastedRead = false;
-                return Math.max(1, Reflect.get(target, key, receiver));
-              }
-              return Reflect.get(target, key, receiver);
-            },
-          });
-          return stat.apply(this, a);
-        };
-        // The Rivals screen's pool and pinned slots over the game's own draw
-        // (not under a self-test: its hash must not depend on this browser's stored pool)
-        if (!params.get('selftest')) xt.sortcars = withRivals(xt.sortcars, () => loadRivals(RIVALS_KEY.ext, EXT_CARS.length, 19), random);
-      }
+      // Extended treats zero wasted opponents as an immediate wasting win.
+      // In a one-car time trial, skip that one check so the lap can finish.
+      // The count can change on the Rivals screen after this, so it is read per call.
+      const stat = xt.stat$m;
+      xt.stat$m = function (...a) {
+        if (freePlayPlayers !== 1) return stat.apply(this, a);
+        let firstWastedRead = true;
+        a[1] = new Proxy(a[1], {
+          get(target, key, receiver) {
+            if (key === 'wasted' && firstWastedRead) {
+              firstWastedRead = false;
+              return Math.max(1, Reflect.get(target, key, receiver));
+            }
+            return Reflect.get(target, key, receiver);
+          },
+        });
+        return stat.apply(this, a);
+      };
+      // The Rivals screen's pool and pinned slots over the game's own draw
+      // (not under a self-test: its hash must not depend on this browser's stored pool)
+      if (!params.get('selftest')) xt.sortcars = withRivals(xt.sortcars, () => loadRivals(RIVALS_KEY.ext, EXT_CARS.length, 19), random);
     }
     // The presenter's screen shows the race music's real download in place of the jar's
     // hand-written size per stage (sndsize, "N KB").
