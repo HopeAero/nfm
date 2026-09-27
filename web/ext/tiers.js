@@ -36,7 +36,7 @@ export const EXT_TIER = [
   'B',   // 31 Drifter X  score 0.60 maxmag 12000
   'B',   // 32 Sword of Justice  score 0.40 maxmag 9700
   'B',   // 33 High Rider  score 0.60 maxmag 13000
-  'C',   // 34 EL KING  score 0.35 maxmag 10700
+  'B',   // 34 EL KING  score 0.35 maxmag 10700  // hand (the user, 2026-09-27)
   'A',   // 35 Mighty Eight  score 0.71 maxmag 13000
   'S',   // 36 M A S H E E N  score 0.44 maxmag 63000
   'B',   // 37 Radical One  score 0.53 maxmag 5800

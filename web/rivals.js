@@ -147,3 +147,18 @@ export function runRivals({ host, title = '', cars, tiers, min, max, cfg }) {
     host.append(box);
   });
 }
+
+/**
+ * Extended's xt.sortcars with the Rivals config (load()) over the game's draw. The
+ * player's sc[0] is put back: sortcars writes the stage's boss car to sc[nplayers-1],
+ * which with one car on track is the player's own slot.
+ */
+export function withRivals(sortcars, load, random) {
+  return function (...a) {
+    const me = this.sc[0];
+    sortcars.apply(this, a);
+    this.sc[0] = me;
+    const sc = pickRivals(load(), this.sc, this.nplayers, random);
+    for (let k = 1; k < this.nplayers; k++) this.sc[k] = sc[k];
+  };
+}
