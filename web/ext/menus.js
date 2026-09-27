@@ -29,6 +29,8 @@ import { tr } from '../i18n.js';
 import { restoreStats, statsOf } from './career-save.js';
 import { NEW_BASE, lastCar, firstCar, newCars, setCarGroup, carGroup, cycleCarGroup, groupOf } from './newcars.js';
 import { groupSprites } from './cargroup.js';
+import { RIVALS_KEY, loadRivals, runRivals, saveRivals } from '../rivals.js';
+import { EXT_TIER } from './tiers.js';
 
 const STORE_KEY = 'nfm.ext.free';
 // the career's stages only in developer mode (catalog.js)
@@ -105,8 +107,9 @@ export const bonusAt = (stage) => [5, 11, 15, 18].indexOf(stage);
  * @param o.setBaseStage    (n | null) -> the NFM 2 stage loadstage substitutes (free play)
  * @param o.exit            back to the launcher
  * @param o.careerStore     a real career's { save, saves, reset } (race.js), or null
+ * @param o.setPlayers      (n) -> the free-play field size race.js gives randomno (the Rivals screen)
  */
-export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, nfm2Names = [], setBaseStage = () => {}, prepareStage = () => Promise.resolve(), exit, careerStore = null }) {
+export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, nfm2Names = [], setBaseStage = () => {}, prepareStage = () => Promise.resolve(), exit, careerStore = null, setPlayers = () => {} }) {
   const career = mode === 'career';
   const GROUPS = groups();
   const pick = loadPick(GROUPS);
@@ -171,6 +174,26 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
     xt.fase = 5;
     try { xt.stages.stop(); xt.stages.unloadMod(); } catch { /* no stage music loaded */ }
   };
+  // Free play's Rivals screen (rivals.js), after the stage select's Enter. The stage is
+  // already loaded with the old field, so its choice reloads it (fase 6476: randomno,
+  // loadstage, sortcars -- race.js applies the pool) and the reload goes straight to the race.
+  let rivalsOpen = false, raceOnLoad = false;
+  const openRivals = async (name) => {
+    rivalsOpen = true;
+    const cfg = await runRivals({
+      host, title: name,
+      cars: EXT_CARS.map((n, i) => ({ i, name: n, tier: EXT_TIER[i] })),
+      tiers: ['C', 'B', 'A', 'S'], min: 1, max: 19,
+      cfg: loadRivals(RIVALS_KEY.ext, EXT_CARS.length, 19),
+    });
+    rivalsOpen = false;
+    painted = '';
+    if (!cfg) return;                    // Esc: back to this stage's select
+    saveRivals(RIVALS_KEY.ext, cfg);
+    setPlayers(cfg.count);
+    raceOnLoad = true;
+    xt.fase = 6476;
+  };
   xt.stageselect = function (checkpoints, c, madness) {
     // The career: the jar's own stage select, drawn over the rendered stage -- the base port's
     // look (its arrows, CONTINUE, the locked-stage screen) with Extended's own buttons (bonus
@@ -181,6 +204,11 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
       if (this.bonstage && c.left) { c.left = false; extra.normal(); return; }
       return own.stageselect.call(this, checkpoints, c, madness);
     }
+    if (raceOnLoad) {                    // the stage reloaded with the Rivals screen's field: race it
+      raceOnLoad = false;
+      go(c, `Stage ${pick.stage}:  ${checkpoints.name}`);
+      return;
+    }
     // what the jar's stageselect does besides drawing: forget loaded music, play the menu's
     for (let i = 0; i < 200; i++) {
       this.mtracks[i] = null; this.stracks[i] = null;
@@ -188,6 +216,7 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
     }
     this.stages.play();
     paint();
+    if (rivalsOpen) { c.left = c.right = c.up = c.down = c.enter = c.handb = false; return; }
     let group = pick.group, to = pick.stage;
     if (c.left) to = step(listOf(group), to, -1);
     if (c.right) to = step(listOf(group), to, +1);
@@ -198,8 +227,9 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
     c.left = c.right = c.up = c.down = false;
     choose(group, to);
     if (c.enter || c.handb) {
+      c.enter = c.handb = false;
       savePick(pick);
-      go(c, `Stage ${pick.stage}:  ${checkpoints.name}`);
+      openRivals(checkpoints.name);
     }
   };
   const extra = {
@@ -433,6 +463,7 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
     let acc = 0, last = performance.now(), raf = 0;
     let preparedBotStage = null, pendingBotStage = null, botLoadError = null;
     const onKey = (e) => {
+      if (rivalsOpen) return;             // the Rivals screen has the keys (its own capture listener)
       // ▴ ▾ on the free play car select: the game's cars / yours. On keydown, not through the
       // jar's control flags: a quick tap releases before the next menu tick and was lost.
       if ((e.key === 'ArrowUp' || e.key === 'ArrowDown') && !career && xt.fase === 7 && newCars().length) {
@@ -490,7 +521,7 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
       frame.next();
       if (xt.fase === 1 && !onMenu) gl.end();
       menuCanvas.style.display = MENU_FASES.has(xt.fase) ? '' : 'none';
-      ui.style.display = xt.fase === 1 ? '' : 'none';
+      ui.style.display = xt.fase === 1 && !rivalsOpen ? '' : 'none';   // the Rivals screen covers it
       paintStat();
       paintCars();
     };

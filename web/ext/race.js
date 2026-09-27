@@ -28,6 +28,8 @@ import { RaceTick } from './racetick.js';
 import { Bots } from './Bots.js';
 import { appendModels, baseGround, baseLook, prepareBaseStage, renumberOldStage, translateStage } from './stagecompat.js';
 import { runMenus } from './menus.js';
+import { RIVALS_KEY, loadRivals, pickRivals } from '../rivals.js';
+import { EXT_CARS } from './catalog.js';
 import { buildTrackGrid } from './trackgrid.js';
 import { Bench, countScene, frameCap, installProfile } from './benchtools.js';
 import { perfLevel, perfLine } from '../perfline.js';
@@ -67,8 +69,10 @@ export async function bootExtended(params, log, onExit) {
   const mode = ['career', 'free'].includes(params.get('ext')) ? params.get('ext') : 'classic';
   const free = mode === 'free';
   const playersParam = params.has('players') ? Number(params.get('players')) : NaN;
-  const freePlayPlayers = free && Number.isInteger(playersParam)
-    ? Math.max(1, Math.min(19, playersParam)) : null;
+  // Free Play's field: ?players= (developer mode, the self-tests), else the Rivals
+  // screen's (rivals.js), which menus.js updates through setPlayers before the stage reloads
+  let freePlayPlayers = !free ? null : Number.isInteger(playersParam)
+    ? Math.max(1, Math.min(19, playersParam)) : loadRivals(RIVALS_KEY.ext, EXT_CARS.length, 19).count;
   // ?selftest= with ?stage= goes straight to the race, as before the menus: a hash that repeats
   const menus = (free || mode === 'career') && !(params.get('selftest') && params.has('stage'));
   // a real career is saved (career-save.js); developer mode races it with everything open, unsaved
@@ -194,11 +198,13 @@ export async function bootExtended(params, log, onExit) {
         this.nplayers = freePlayPlayers;
         return result;
       };
-      if (freePlayPlayers === 1) {
+      if (free) {
         // Extended treats zero wasted opponents as an immediate wasting win.
         // In a one-car time trial, skip that one check so the lap can finish.
+        // The count can change on the Rivals screen after this, so it is read per call.
         const stat = xt.stat$m;
         xt.stat$m = function (...a) {
+          if (freePlayPlayers !== 1) return stat.apply(this, a);
           let firstWastedRead = true;
           a[1] = new Proxy(a[1], {
             get(target, key, receiver) {
@@ -210,6 +216,14 @@ export async function bootExtended(params, log, onExit) {
             },
           });
           return stat.apply(this, a);
+        };
+        // The Rivals screen's pool and pinned slots over the game's own draw
+        const sortcars = xt.sortcars;
+        xt.sortcars = function (...a) {
+          sortcars.apply(this, a);
+          if (params.get('selftest')) return;   // a self-test's hash must not depend on this browser's stored pool
+          const sc = pickRivals(loadRivals(RIVALS_KEY.ext, EXT_CARS.length, 19), this.sc, this.nplayers, random);
+          for (let k = 1; k < this.nplayers; k++) this.sc[k] = sc[k];
         };
       }
     }
@@ -353,6 +367,7 @@ export async function bootExtended(params, log, onExit) {
       nfm2Names: nfm2?.names, exit: () => exit(),
       // the car select's Confirm / Undo and New career (menus.js): a real career only
       careerStore: realCareer ? { save: () => careerSave(), saves: () => careerSaves, reset: () => { clearCareer(); location.reload(); } } : null,
+      setPlayers: (n) => { freePlayPlayers = n; },
       setBaseStage: (n) => { baseStage = n ? { n, name: null, text: nfm2.texts[n - 1], zip: nfm2.zip } : null; },
     });
     menuCanvas.remove();
