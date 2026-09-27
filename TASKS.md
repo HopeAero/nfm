@@ -1061,9 +1061,10 @@ replay (`web/tools/ext-trace.mjs`, DiffRun `-Ddiffrun.trace=Class.method`).
       jar hides them only in classic/career); they do nothing there.
 - [ ] Free Play: NFM 2 stages 1-10 and 28-32 have no classic twin, so they race
       with classic stage 1's per-stage AI (Control has ~260 stage checks).
-- [x] **Rivals screen (2026-09-27)**, NFM2 and Extended Free Play: after the stage
-      select, `web/rivals.js` sets the field size (1-8 / 1-19), draws opponents from a
-      pool ticked by car or by tier (C/B/A from `CarDefine.cclass`; Extended's C/B/A/S
+- [x] **Rivals screen (2026-09-27)**, NFM2 and Extended Free Play: an optional RIVALS
+      button on the stage select opens `web/rivals.js` (the game's look, a 3D card per
+      car). It sets the field size (1-8 / 1-19; default the game's own), draws opponents
+      from a pool ticked by car or by tier (C/B/A from `CarDefine.cclass`; Extended's C/B/A/S
       in `web/ext/tiers.js`, drafted by `web/tools/ext-tiers.mjs`) and pins cars to
       slots. Replaces Extended's launcher "Free Play cars" row. Spec:
       `docs/superpowers/specs/2026-09-27-free-play-rivals-design.md`.

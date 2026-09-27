@@ -295,7 +295,7 @@ export async function runStageSelect(canvas, stage, career = null, onRivals = nu
     }
   });
   if (rivals) {
-    rivals.style.cssText += 'position:absolute;left:478px;top:358px;z-index:3;';
+    rivals.style.cssText += 'position:absolute;left:470px;top:362px;z-index:3;font-size:13px;padding:1px 12px;';   // CONTINUAR's size
     canvas.parentElement.append(rivals);
   }
 

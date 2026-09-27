@@ -567,7 +567,16 @@ export function carThumb(car, angle = 200) {
   const { medium, models } = world;
   const o = car < CAR_COUNT ? models[car] : world.cd.bco[car];
   const cam = CAM.map((k) => medium[k]), pose = POSE.map((k) => o[k]);
-  thumbGL ??= Object.assign(document.createElement('canvas'), { width: 800, height: 450 });
+  if (!thumbGL) {
+    // read back, never composited: it has to clear its own frames (Graphics2D opts.clear)
+    thumbGL = Object.assign(document.createElement('canvas'), { width: 800, height: 450 });
+    const overlay = Object.assign(document.createElement('canvas'), { width: 800, height: 450 });
+    thumbGL._rd = new Graphics2D(thumbGL, overlay, 800, 450, { clear: true });
+  }
+  // twice: a model's first draw paints its faces in the wrong order (the sort
+  // reads the last frame's projection; there is no depth buffer)
+  drawCar(thumbGL, car, angle);
+  o.wzy = pose[6];
   drawCar(thumbGL, car, angle);
   const out = fitThumb(thumbGL);
   CAM.forEach((k, j) => { medium[k] = cam[j]; });

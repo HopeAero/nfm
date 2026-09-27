@@ -134,8 +134,9 @@ function ensureStyle() {
     st.textContent = CSS;
     document.head.append(st);
   }
-  // Extended has the face already (race.js); the launcher's NFM2 does not
-  fontReady ??= document.fonts.check('16px Adventure') ? Promise.resolve()
+  // Extended has the face already (race.js); the launcher's NFM2 does not. (Not
+  // document.fonts.check: it answers true for a face that does not exist at all.)
+  fontReady ??= [...document.fonts].some((f) => f.family.replace(/"/g, '') === 'Adventure') ? Promise.resolve()
     : new FontFace('Adventure', `url(${fpath}ext/fonts/Adventure.ttf)`).load()
       .then((f) => document.fonts.add(f), () => { /* Arial stands in */ });
   return fontReady;
