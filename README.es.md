@@ -9,6 +9,8 @@ navegador, en JavaScript + WebGL, sin Java ni plugins. Los dos juegos salen del 
 launcher, comparten el motor de dibujo, el sonido, el Car Maker y el Stage Maker, y un auto
 hecho en el Car Maker se puede correr en los dos.
 
+**[Jugar aquí](https://hopeaero.github.io/nfm/)**
+
 Qué cambió desde el punto de partida: [`CHANGELOG.es.md`](CHANGELOG.es.md).
 
 ## De dónde parte

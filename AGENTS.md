@@ -51,17 +51,22 @@ when `serve.py` serves the page (its `nfm-devserver` cookie). Under another
 server, a fresh profile ignores them and races the defaults.
 
 ### Deploying
+The site is https://hopeaero.github.io/nfm/ (GitHub Pages). **A push to `main`
+deploys it**: `.github/workflows/pages.yml` runs `sh deploy.sh _site` and
+publishes that tree. Watch it with `gh run watch -R HopeAero/nfm`.
 ```sh
-./deploy.sh                        # -> cop:/www/nfm/ (a flat tree)
+./deploy.sh DIR                    # the same tree into a local directory
+./deploy.sh user@host:path         # rsync it to a host instead
 ```
-**Run it whenever you finish a change the user is meant to look at or listen
+**Deploy whenever you finish a change the user is meant to look at or listen
 to.** The deployed site is where they check the work; leaving it on the last
 deploy means they judge a change that never shipped. Say in your reply that you
 deployed.
-Mirrors with `rsync --delete` and stamps every ES module import with a content
-hash. **The stamping is not optional:** the host sends no `Cache-Control`, so a
-module graph otherwise goes stale one file at a time and you debug last
-deploy's code.
+`deploy.sh` copies only what the browser loads and stamps every ES module
+import with a content hash. **The stamping is not optional:** Pages sends
+`max-age=600` (and a bare host none), so a module graph otherwise goes stale one
+file at a time and you debug last deploy's code. A new subdirectory under `web/`
+needs its own copy line in `deploy.sh`.
 
 ## Verifying a change
 Three levels, cheapest first.
