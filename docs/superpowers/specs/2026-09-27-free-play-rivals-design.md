@@ -60,10 +60,13 @@ como el resto.
   selects de pista), para que las teclas sigan llegando a la pantalla.
 - Persistencia por modo en `localStorage`, envuelta en try/catch:
   `nfm.rivals.nfm2` / `nfm.rivals.ext` =
-  `{ mode: 'game'|'pool', pool: [carIndex...], fixed: [carIndex|null...] }`.
-  La cantidad sigue en `S.players` / `S.extplayers` (launcher). La fila "Free
-  Play cars" del menú Extended se elimina.
-- Pool por defecto (sin nada guardado): todos los autos; modo `game`.
+  `{ count, mode: 'game'|'pool', pool: [carIndex...], fixed: [carIndex|null...] }`.
+  La cantidad vive aquí, no en `S.players` / `S.extplayers`: Extended abre
+  Rivales dentro de la página de carrera, que no escribe los ajustes del
+  launcher, y `S.players` sigue siendo el tamaño de sala del multijugador.
+  La fila "Free Play cars" del menú Extended y `S.extplayers` se eliminan.
+  `?players=` en la URL sigue mandando (modo desarrollador / selftest).
+- Pool por defecto (sin nada guardado): 7 autos; todos los autos; modo `game`.
 
 ## Tiers
 
@@ -117,8 +120,10 @@ Conexión:
   del selector de pista y antes de pasar a fase 5; `Esc` vuelve a la pista.
   `web/ext/race.js` envuelve `xt.sortcars` (como ya envuelve `randomno`),
   solo en Free Play: corre el original y aplica `pickRivals`.
-  `freePlayPlayers` pasa de `const` a `let` y la pantalla lo actualiza, para
-  que la cantidad elegida valga en esa misma carga de pista.
+  `freePlayPlayers` pasa de `const` a `let` y la pantalla lo actualiza.
+  Extended ya cargó la pista (y corrió `sortcars` y colocó `nplayers` autos)
+  durante el selector de pista, así que al confirmar Rivales se recarga la
+  pista (`xt.fase = 6476`) y, al volver a fase 1, se pasa directo a fase 5.
 
 ## Pruebas
 
@@ -126,8 +131,9 @@ Conexión:
   puestos fijos sobre ambos modos, más rivales que autos en el pool
   (repite solo al agotarse), `sc[0]` intacto, determinismo con el mismo
   `random`.
-- `web/ext/tiers.test.js`: 39 entradas, todas en C/B/A/S; lista de los autos
-  23–38 cuyo tier difiere del de NFM2 igual a la aprobada.
+- `web/ext/tiers.test.js`: 39 entradas, todas en C/B/A/S. Los autos 23–38
+  que difieren de su tier NFM2 los imprime el script al generar (revisión
+  humana, no test).
 - `cd web && node --test` completo en verde.
 - Navegador real, ambos modos: "full Mini", "full MASHEEN", puestos fijos,
   1 / 8 / 19 autos; `Enter` directo corre con lo recordado; `Esc` vuelve a la
