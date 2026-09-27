@@ -1061,6 +1061,12 @@ replay (`web/tools/ext-trace.mjs`, DiffRun `-Ddiffrun.trace=Class.method`).
       jar hides them only in classic/career); they do nothing there.
 - [ ] Free Play: NFM 2 stages 1-10 and 28-32 have no classic twin, so they race
       with classic stage 1's per-stage AI (Control has ~260 stage checks).
+- [x] **Rivals screen (2026-09-27)**, NFM2 and Extended Free Play: after the stage
+      select, `web/rivals.js` sets the field size (1-8 / 1-19), draws opponents from a
+      pool ticked by car or by tier (C/B/A from `CarDefine.cclass`; Extended's C/B/A/S
+      in `web/ext/tiers.js`, drafted by `web/tools/ext-tiers.mjs`) and pins cars to
+      slots. Replaces Extended's launcher "Free Play cars" row. Spec:
+      `docs/superpowers/specs/2026-09-27-free-play-rivals-design.md`.
 - [x] **Sound and music (2026-09-25):** effects are the base port's (web/audio.js over
       data/sounds.zip) behind getAudioClip by file name (web/ext/sound.js), plus caught/redflash
       from Extended and the base's scrape sounds on the player's sparks; tracker music (.radq
@@ -1282,7 +1288,8 @@ AI and UI are the mod.
 - Base deviations flagged as possibly unintended (Medium.ys clamp at 50, dsprk
   truncation): not to be copied.
 - Base-only screens (car maker, stage maker, lobby) and ?mystage / ?mycar /
-  ?cars=same / ?players.
+  ?cars=same / ?players. (Extended's Free Play now has both through the
+  Rivals screen, 2026-09-27.)
 
 - [ ] **Extended's own menus, last** (as in the base port, the launcher stands
       in for them). They already run from the transpiled `xtGraphics`; images
