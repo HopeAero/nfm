@@ -1,3 +1,5 @@
+**Español** · [English](README.en.md)
+
 # Need for Madness en el navegador — NFM 2 y Extended Mode
 
 ![icon](data/icon.png)

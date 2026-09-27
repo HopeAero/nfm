@@ -1,3 +1,5 @@
+**Español** · [English](CHANGELOG.en.md)
+
 # Cambios desde el port de radicalarchive
 
 Todo lo que cambió desde el port base de
