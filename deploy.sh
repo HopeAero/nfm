@@ -2,6 +2,9 @@
 # Deploy the JS/WebGL port to the static host.
 #
 # Usage: ./deploy.sh [user@host:path]     (default: cop:/www/nfm/)
+#        ./deploy.sh DIR                  (no ':' -- write the tree to a local
+#                                          directory; the GitHub Pages workflow,
+#                                          .github/workflows/pages.yml, does this)
 #
 # Builds a staging tree, then mirrors it with rsync --delete, so the remote
 # directory ends up containing exactly what's here and nothing else.
@@ -89,6 +92,16 @@ echo "cache stamp: $STAMP"
 
 echo "staging tree:"
 du -sh "$STAGE"
+
+case "$DEST" in
+  *:*) ;;
+  *)
+    mkdir -p "$DEST"
+    cp -r "$STAGE/." "$DEST/"
+    echo "wrote $DEST"
+    exit 0
+    ;;
+esac
 
 # --chmod is not optional: the staging dir comes from mktemp -d (mode 700) and
 # rsync -a would propagate that, leaving the web server with a 403 on every
