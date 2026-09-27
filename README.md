@@ -19,21 +19,22 @@ con WebGL para dibujar. Ese port ya traía:
 
 - NFM 2 jugable, con su física, HUD, sonido y menús
 - multijugador online privado
-- repetición instantánea (los últimos 300 ticks)
-- los controles clásicos de carrera (A: flechas de autos, S: radar/mapa, Esc: pausa)
-- el Car Maker y el Stage Maker
+- el Car Maker
 - mejoras de resolución y fps sobre los 800x450 / 19 fps fijos del original
 - una versión parcheada del juego de Java para correr en Java moderno (`./start.sh`)
-- el código de Extended Mode descompilado y validado contra su jar, como referencia para un
-  port futuro (`decompilation/extended/`)
 
 Sobre esa base, este fork:
 
-- **porta Extended Mode al navegador**: Free Play, Modo Carrera con progreso guardado, sus
-  39 autos, sus pistas y también las de NFM 2 y el Stage Maker, a 60 fps y en español;
-- **agrega autos nuevos del Car Maker a Extended**, con una pestaña propia en el Car Maker;
-- **arregla y mejora el port base**: colores idénticos a Java, sonido sin silbidos ni
-  zumbidos en ningún navegador, pistas multijugador de NFM 2 en Free Play, entre otras cosas.
+- **agrega un Stage Maker** que el port no tenía, con vista 3D de la pista por la que te
+  puedes mover mientras la editas;
+- **completa el port base**: repetición instantánea, highlights de fin de carrera, menú de
+  pausa y controles clásicos, todo en español;
+- **arregla el port base**: humo de las ruedas, colores y física idénticos a Java, sonido sin
+  silbidos ni zumbidos en ningún navegador;
+- **porta Extended Mode al navegador**: lo descompila y valida contra su jar, y lo hace
+  jugable con Free Play, Modo Carrera con progreso guardado, sus 39 autos, sus pistas y
+  también las de NFM 2 y el Stage Maker, a 60 fps;
+- **agrega autos nuevos del Car Maker a Extended**, con una pestaña propia en el Car Maker.
 
 El detalle, separado entre port base, Extended y Car Maker, está en
 [`CHANGELOG.md`](CHANGELOG.md).
@@ -63,8 +64,8 @@ Tests: `cd web && node --test`. Cómo medir, verificar y desplegar: `AGENTS.md`.
 - **`ext/`** — los datos de Extended (sus `.radq`, fuentes y sonidos), sin modificar.
 - **`java/`** — el juego original parcheado (`Game.jar`, lo corre `start.sh`) y el jar
   intacto (`Game.jar.bak`). Es la referencia contra la que se compara el port, no se compila.
-- **`decompilation/`** — el Java descompilado de NFM 2 y de Extended, y el plan del port.
-  Solo lectura.
+- **`decompilation/`** — el Java descompilado de NFM 2 (de radicalarchive) y de Extended
+  (reparado y validado contra su jar en este fork), y el plan del port. Solo lectura.
 - **`data/`, `stages/`, `mycars/`, `mystages/`, `music/`** — los archivos del juego,
   idénticos byte a byte al original y **no se modifican**.
 
