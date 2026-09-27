@@ -140,3 +140,30 @@ Conexión:
   pista.
 - Deploy (push a `main`) al terminar; anotar en `TASKS.md` y lo aprendido en
   `WORK.md`.
+
+## v2 (2026-09-27, tras probarlo el usuario) — reemplaza "Flujo" y "Pantalla Rivales"
+
+El paso obligatorio Pista → Rivales se ve ajeno al juego y estorba. Cambia a:
+
+- **Entrada:** botón **RIVALES** en el selector de pista (solo Free Play), junto a
+  CONTINUAR/Race. Opcional. CONTINUAR corre directo con la configuración guardada
+  (o la del juego si no hay).
+- **Salida:** LISTO guarda y vuelve al selector de pista; Esc cierra sin guardar.
+  En Extended, si la configuración cambió, la pista se recarga (`xt.fase = 6476`)
+  y se queda en el selector, para que el grid quede puesto antes de CONTINUAR.
+- **Por defecto = el juego:** `count: null` significa la cantidad del juego (NFM2 7,
+  Extended 11, `randomno` del jar). Modo `game`, sin puestos fijos. Se recuerda lo
+  que el jugador cambie; el botón COMO EL JUEGO lo devuelve todo al defecto.
+- **Estilo del juego:** fuente Adventure (`ext/fonts/Adventure.ttf`), título naranja
+  con contorno como ELIGE PISTA, botones pastilla amarillos como ATRÁS/SIGUE,
+  panel oscuro sobre la pista.
+- **Autos visibles:** tarjetas con miniatura 3D real por auto (NFM2: `drawCar` de
+  `preview.js`; Extended: `aconto[i].d()` sobre un `JGraphics` aparte, con la cámara
+  del selector de autos y el estado restaurado después). Marcado = color, sin
+  marcar = gris. Filtro por tier C/B/A/S/TODOS; clic en la letra del tier marca o
+  desmarca el tier entero. Puestos fijos: clic en un puesto y luego en un auto;
+  AL AZAR lo libera.
+- **Sorteo de pool en NFM2:** semilla propia por carrera (`seed` en `?rivals=`),
+  porque el juego base corre con semilla fija 12345 y el pool daría siempre el
+  mismo grid.
+- Un selftest ignora la cantidad guardada; un error en los menús cierra el panel.
