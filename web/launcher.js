@@ -674,8 +674,11 @@ async function startCarSelect(gmode = 0) {
   }
   if (!gmode) {
     // the Rivals screen's field; the pool draws on its own seed (the race's is fixed)
+    // Free play never races the lobby's saved room size (S.players) or the old
+    // "same as mine" option: null is the game's own field, seven cars
     const r = loadRivals(RIVALS_KEY.nfm2, 16, 8);
-    if (r.count != null) extra.players = r.count;
+    extra.players = r.count ?? 7;
+    extra.cars = 'stage';
     if (r.mode === 'pool' || r.fixed.some((v) => v != null)) {
       extra.rivals = JSON.stringify({ mode: r.mode, pool: r.pool, fixed: r.fixed, seed: (Math.random() * 2 ** 31) | 0 });
     }

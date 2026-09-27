@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
 import fs from 'node:fs';
-import { NFM2_CCLASS, defaultRivals, parseRivals, pickRivals, seededRandom, tierClick, tierOfClass, toggleTier } from './rivals.js';
+import { NFM2_CCLASS, defaultRivals, parseRivals, pickRivals, sameRivals, seededRandom, tierClick, tierOfClass, toggleTier } from './rivals.js';
 
 // a deterministic stand-in for java.js random(): cycles through the given values
 const seq = (...v) => { let k = 0; return () => v[k++ % v.length]; };
@@ -84,6 +84,15 @@ test('tierClick: from every car, a tier narrows to it; else it toggles; ALL fill
   assert.deepStrictEqual(tierClick([0, 1, 2], cars, 'C'), [2]);
   assert.deepStrictEqual(tierClick([2], cars, 'ALL'), [0, 1, 2, 3]);
   assert.deepStrictEqual(tierClick([0, 1, 2, 3], cars, 'ALL'), []);
+});
+
+test('sameRivals compares what races, not how it is written', () => {
+  const a = { count: null, mode: 'pool', pool: [3, 1, 2], fixed: [null, 5, null] };
+  assert.ok(sameRivals(a, { count: null, mode: 'pool', pool: [1, 2, 3], fixed: [null, 5] }));
+  assert.ok(sameRivals({ count: 7, mode: 'game', pool: [1], fixed: [] }, { count: 7, mode: 'game', pool: [2], fixed: [null] }));
+  assert.ok(!sameRivals(a, { ...a, count: 7 }));
+  assert.ok(!sameRivals(a, { ...a, fixed: [5] }));
+  assert.ok(!sameRivals(a, { ...a, pool: [1, 2] }));
 });
 
 test('NFM2_CCLASS is CarDefine.cclass, and gives 6 C / 5 B / 5 A', () => {

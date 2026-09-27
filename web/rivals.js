@@ -44,8 +44,9 @@ export function saveRivals(key, cfg) {
 
 /**
  * The grid for slots 1..n-1. 'pool' draws from the pool with `random` (the game's
- * seeded one, so a replay draws the same), no repeats until every pool car is used;
- * an empty pool is the game's pick. Pinned slots (fixed[k-1]) win in both modes.
+ * seeded one for Extended; NFM2 passes seededRandom, its race seed being fixed), no
+ * repeats until every pool car is used; an empty pool is the game's pick. Pinned
+ * slots (fixed[k-1]) win in both modes.
  */
 export function pickRivals({ mode, pool, fixed }, gameSc, n, random) {
   const sc = Array.from(gameSc);
@@ -57,6 +58,13 @@ export function pickRivals({ mode, pool, fixed }, gameSc, n, random) {
     sc[k] = bag.splice(Math.floor(random() * bag.length), 1)[0];
   }
   return sc;
+}
+
+/** Two configs that race the same field (the pool only counts when drawing from it). */
+export function sameRivals(a, b) {
+  const pins = (f) => { const t = f.map((v) => v ?? null); while (t.length && t[t.length - 1] === null) t.pop(); return t.join(); };
+  const pool = (c) => (c.mode === 'pool' ? [...c.pool].sort((x, y) => x - y).join() : '');
+  return a.count === b.count && a.mode === b.mode && pool(a) === pool(b) && pins(a.fixed) === pins(b.fixed);
 }
 
 /**
@@ -250,7 +258,7 @@ export function runRivals({ host, cars, tiers, min, max, gameCount, cfg, thumb =
       resolve(v);
     };
     closeOpen = done;
-    const result = () => ({ ...st, fixed: st.fixed.slice(0, count() - 1) });
+    const result = () => ({ ...st, fixed: st.fixed.slice(0, (st.count ?? max) - 1) });
     const setCount = (d) => { st.count = Math.max(min, Math.min(max, count() + d)); render(); };
     const onKey = (e) => {
       e.stopImmediatePropagation();      // the game's keys stay the game's: none of them while this is up
@@ -267,7 +275,7 @@ export function runRivals({ host, cars, tiers, min, max, gameCount, cfg, thumb =
       if (k === 'cancel') return done(null);
       if (k === 'done') return done(result());
       if (k === 'less' || k === 'more') return setCount(k === 'more' ? 1 : -1);
-      if (k === 'game') Object.assign(st, { mode: 'game', count: null, fixed: [] });
+      if (k === 'game') Object.assign(st, { mode: 'game', count: null, fixed: [], pool: cars.map((c) => c.i) });
       if (k === 'pool') st.mode = 'pool';
       if (b.dataset.tier) {                // a tier chooses: see tierClick
         st.pool = tierClick(st.mode === 'pool' ? st.pool : cars.map((c) => c.i), cars, b.dataset.tier);

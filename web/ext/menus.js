@@ -29,7 +29,7 @@ import { tr } from '../i18n.js';
 import { restoreStats, statsOf } from './career-save.js';
 import { NEW_BASE, lastCar, firstCar, newCars, setCarGroup, carGroup, cycleCarGroup, groupOf } from './newcars.js';
 import { groupSprites } from './cargroup.js';
-import { RIVALS_KEY, closeRivals, fitThumb, loadRivals, rivalsButton, runRivals, saveRivals } from '../rivals.js';
+import { RIVALS_KEY, closeRivals, fitThumb, loadRivals, rivalsButton, runRivals, sameRivals, saveRivals } from '../rivals.js';
 import { JGraphics } from './jgraphics.js';
 import { EXT_TIER } from './tiers.js';
 
@@ -193,7 +193,7 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
     });
     rivalsOpen = false;
     painted = '';
-    if (!cfg || JSON.stringify(cfg) === JSON.stringify(before)) return;
+    if (!cfg || sameRivals(cfg, before)) return;
     saveRivals(RIVALS_KEY.ext, cfg);
     setPlayers(cfg.count);
     xt.fase = 6476;
@@ -210,6 +210,10 @@ export function runMenus({ mode, gs, frame, xt, cp, gl, menu, menuCanvas, host, 
     const cam = CAM.map((k) => m[k]), pose = POSE.map((k) => o[k]);
     Object.assign(m, { crs: true, x: -435, y: -540, z: -50, xz: 0, zy: 10, ground: 510 });
     Object.assign(o, { x: 0, y: -34 - o.grat, z: 950, xz: 200, zy: 0 });
+    thumbCanvas.getContext('2d').clearRect(0, 0, thumbCanvas.width, thumbCanvas.height);
+    // twice: the face sort reads the last draw's projection (ContO p[].av), and these
+    // base models are otherwise never drawn (the race draws copies) -- no depth buffer
+    o.d(thumbRd);
     thumbCanvas.getContext('2d').clearRect(0, 0, thumbCanvas.width, thumbCanvas.height);
     o.d(thumbRd);
     CAM.forEach((k, j) => { m[k] = cam[j]; });
