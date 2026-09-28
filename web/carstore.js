@@ -17,6 +17,9 @@
 
 import { readText, readZip, entryText } from './vfs.js';
 import { CAR_NAMES } from './GameSparker.js';
+import { readRadq } from './ext/radq.js';
+import { AS } from './ext/models.js';
+import { EXT_CARS } from './ext/catalog.js';
 
 const DB_NAME = 'nfm';
 const DB_VERSION = 1;
@@ -73,6 +76,42 @@ export async function readBuiltin(name) {
   if (!entry) return null;
   if (!modelsZip) modelsZip = readZip('data/models.zip');
   const bytes = (await modelsZip).get(`${entry}.rad`);
+  return bytes ? entryText(bytes) : null;
+}
+
+/**
+ * Extended Mode's own cars, for the editor's picker. Read-only like BUILTIN:
+ * no stats in the .rad (Extended keeps none), so they open as "not set".
+ *
+ * v2.8 (ext/data/models.radq): cars 0-22 of loadbase; 23-38 are the NFM2
+ * sixteen, already in BUILTIN. The 3rd release (ext/3rd/models.radq, the 2013
+ * build): cars 16-40; its 0-15 are the NFM2 sixteen with the same geometry.
+ */
+export const EXT_MODELS = Object.fromEntries(EXT_CARS.slice(0, 23).map((n, i) => [n, AS[i]]));
+export const EXT3_MODELS = {
+  'Basic Racer': 'basicracer', 'Turbo Dragster': 'dragster', 'Desert Humvee': 'humvee',
+  'Lamborghini Gallardo': 'lamborghini', 'Armored Corvette': 'corvette', 'Radical Racer': 'radicalracer',
+  'Saleen S7 Twin Turbo': 'saleens7twinturbo', 'Sting Rod': 'stingrod', 'Zonich Tank': 'zonichtank',
+  'Matlos Tank': 'matlostank', 'Air Rebound': 'rebound', 'Bugatti Veyron': 'bugatti',
+  'EL ROCKET KING': 'rocketking', 'ROCKET M A S H E E N': 'rocketmasheen', 'DR Rocket Monstaa': 'rocketmonster',
+  'The Awesome Radical One': 'awesomeradicalone', 'Over=Kill': 'overkill', 'Tactical Nuke': 'tacticalnuke',
+  'The Phantom': 'phantom', 'Lightning Rod': 'lightning', 'EPIC TANK': 'epictank',
+  'KILL-O-MATIC': 'killomatic', 'The Destroyer': 'destroyer', 'TRAIN of TERROR': 'train', 'A-1': 'A-1',
+};
+const PACKS = {
+  ext: [EXT_MODELS, 'ext/data/models.radq'],
+  ext3: [EXT3_MODELS, 'ext/3rd/models.radq'],
+};
+const packs = {};
+
+/** The .rad text of a read-only game model: src is 'base', 'ext' or 'ext3'. */
+export async function readModel(src, name) {
+  if (src === 'base') return readBuiltin(name);
+  const [table, path] = PACKS[src] || [];
+  const entry = table && table[name];
+  if (!entry) return null;
+  packs[src] ||= readRadq(path);
+  const bytes = (await packs[src]).get(`${entry}.rad`);
   return bytes ? entryText(bytes) : null;
 }
 
