@@ -99,21 +99,23 @@ test('loadIntoCarDefine leaves nlcars at 16 and lastload alone when nothing load
   assert.strictEqual(cd.lastload, 0);
 });
 
-test('readModel: every Extended car in the editor picker opens as a car', async () => {
-  const { readModel, EXT_MODELS, EXT3_MODELS } = await import('./carstore.js');
+test('readModel: every Extended / Revised and Recharged car in the editor picker opens as a car', async () => {
+  const { readModel, EXT_MODELS, RR_MODELS } = await import('./carstore.js');
   const { setFpath } = await import('./vfs.js');
   const saved = globalThis.fetch;
   globalThis.fetch = async (p) => new Response(readFileSync(new URL(p, import.meta.url)));
   setFpath('../');
   try {
     assert.strictEqual(Object.keys(EXT_MODELS).length, 23);
-    assert.strictEqual(Object.keys(EXT3_MODELS).length, 25);
-    for (const [src, table] of [['ext', EXT_MODELS], ['ext3', EXT3_MODELS]]) {
+    assert.strictEqual(Object.keys(RR_MODELS).length, 25);
+    for (const [src, table] of [['ext', EXT_MODELS], ['rr', RR_MODELS]]) {
       for (const name of Object.keys(table)) {
         assert.match(await readModel(src, name) ?? '', /\nw\(/, `${src}:${name}`);
       }
     }
-    assert.strictEqual(await readModel('ext3', 'Formula 7'), null);
+    assert.match(await readModel('rr', 'A-1'), /\ncarmaker\(Ryan Albano\)\n$/);
+    assert.doesNotMatch(await readModel('ext', 'Remington'), /carmaker\(Ryan/);
+    assert.strictEqual(await readModel('rr', 'Formula 7'), null);
   } finally {
     globalThis.fetch = saved;
   }

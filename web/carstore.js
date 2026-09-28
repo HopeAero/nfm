@@ -84,11 +84,12 @@ export async function readBuiltin(name) {
  * no stats in the .rad (Extended keeps none), so they open as "not set".
  *
  * v2.8 (ext/data/models.radq): cars 0-22 of loadbase; 23-38 are the NFM2
- * sixteen, already in BUILTIN. The 3rd release (ext/3rd/models.radq, the 2013
- * build): cars 16-40; its 0-15 are the NFM2 sixteen with the same geometry.
+ * sixteen, already in BUILTIN. NFM 2 Revised and Recharged
+ * (ext/recharged/models.radq, 2013, shipped as "3rd release"): cars 16-40, all
+ * by Ryan Albano, credited with carmaker(); its 0-15 are the NFM2 sixteen.
  */
 export const EXT_MODELS = Object.fromEntries(EXT_CARS.slice(0, 23).map((n, i) => [n, AS[i]]));
-export const EXT3_MODELS = {
+export const RR_MODELS = {
   'Basic Racer': 'basicracer', 'Turbo Dragster': 'dragster', 'Desert Humvee': 'humvee',
   'Lamborghini Gallardo': 'lamborghini', 'Armored Corvette': 'corvette', 'Radical Racer': 'radicalracer',
   'Saleen S7 Twin Turbo': 'saleens7twinturbo', 'Sting Rod': 'stingrod', 'Zonich Tank': 'zonichtank',
@@ -100,19 +101,21 @@ export const EXT3_MODELS = {
 };
 const PACKS = {
   ext: [EXT_MODELS, 'ext/data/models.radq'],
-  ext3: [EXT3_MODELS, 'ext/3rd/models.radq'],
+  rr: [RR_MODELS, 'ext/recharged/models.radq', 'Ryan Albano'],
 };
 const packs = {};
 
-/** The .rad text of a read-only game model: src is 'base', 'ext' or 'ext3'. */
+/** The .rad text of a read-only game model: src is 'base', 'ext' or 'rr'. */
 export async function readModel(src, name) {
   if (src === 'base') return readBuiltin(name);
-  const [table, path] = PACKS[src] || [];
+  const [table, path, author] = PACKS[src] || [];
   const entry = table && table[name];
   if (!entry) return null;
   packs[src] ||= readRadq(path);
   const bytes = (await packs[src]).get(`${entry}.rad`);
-  return bytes ? entryText(bytes) : null;
+  if (!bytes) return null;
+  const text = entryText(bytes);
+  return author && !/^\s*carmaker\(/m.test(text) ? `${text.trimEnd()}\n\ncarmaker(${author})\n` : text;
 }
 
 let dbPromise = null;

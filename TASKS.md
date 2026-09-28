@@ -1155,7 +1155,7 @@ Gameplay stays separate; Extended learns to read what the editors make.
       (`carmaker(name)`), credited in the car select instead of the donor's creator
       (ext-patches `newcar-credit-*`). Plan: `docs/superpowers/plans/2026-09-26-ext-carmaker.md`.
 - [x] **Car Maker picker: Extended models (2026-09-28)**: "Extended v2.8" (its 23 own
-      cars) and "Extended 3rd release" (25, `ext/3rd/models.radq`) groups, read-only like
+      cars) and "Revised and Recharged" (25 by Ryan Albano, `ext/recharged/models.radq`) groups, read-only like
       the base sixteen; saving makes your copy. Cars over the base 286-polygon cap preview
       truncated (WORK.md).
 - [ ] **The web Car Maker cannot calibrate the crash** (`physics()` value 16, `actmag`): only

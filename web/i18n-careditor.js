@@ -29,7 +29,7 @@ export const CAREDITOR_ES = {
   'Colour of the rims inside the tyres.': 'Color de los rines dentro de las llantas.',
   'not set': 'sin definir', 'not calibrated': 'sin calibrar',
   'ready to race': 'listo para correr', 'not raceable yet': 'todavía no se puede correr',
-  'My cars': 'Mis autos', 'Default Cars': 'Autos del juego', 'Extended 3rd release': 'Extended 3ra versión','My Car': 'Mi auto',
+  'My cars': 'Mis autos', 'Default Cars': 'Autos del juego', 'My Car': 'Mi auto',
   "Start from one of the game's own cars — copies its stats so you can adjust from there.":
     'Parte de uno de los autos del juego: copia sus estadísticas para que ajustes desde ahí.',
   "This is one of the game's cars. Saving makes your own copy of it — the original stays as it is.":

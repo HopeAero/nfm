@@ -26,7 +26,7 @@ import { physicsHelp, crashHelp, crashTestHelp, STAT_HELP, CLASS_HELP,
 import { newCarMaker } from './state.js';
 import { setupo } from './files.js';
 import { listAll, listStored, readCar, readModel, writeCar, deleteCar,
-         BUILTIN_NAMES, EXT_MODELS, EXT3_MODELS } from '../carstore.js';
+         BUILTIN_NAMES, EXT_MODELS, RR_MODELS } from '../carstore.js';
 import { detectFpath } from '../vfs.js';
 import { Graphics2D } from '../graphics.js';
 import { tr, translateDocument } from '../i18n.js';
@@ -43,7 +43,7 @@ const DEFAULT_CAR = 'Formula 7';
 
 // A picker option identifies a car by SOURCE as well as by name, because the
 // lists can hold the same name: `base:` is a model out of models.zip, `ext:` /
-// `ext3:` out of Extended's (readModel), `own:` goes through readCar(), which
+// `rr:` out of Extended's and Revised and Recharged's (readModel), `own:` goes through readCar(), which
 // prefers storage over mycars/. Everything but `own:` is read-only.
 const key = (name, src = 'own') => (name ? `${src}:${name}` : '');
 const unkey = (k = '') => {
@@ -626,7 +626,7 @@ async function refreshList(select = key(current, currentSrc)) {
   group('My cars', all, 'own', ' (shipped)');
   group('Default Cars', BUILTIN_NAMES, 'base', '');
   group('Extended v2.8', Object.keys(EXT_MODELS), 'ext', '');
-  group('Extended 3rd release', Object.keys(EXT3_MODELS), 'ext3', '');
+  group('Revised and Recharged', Object.keys(RR_MODELS), 'rr', '');
   if (select) pick.value = select;
   const sel = unkey(pick.value);
   // A base model is never deletable, and neither is the base model whose name
