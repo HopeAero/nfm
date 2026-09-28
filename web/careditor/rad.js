@@ -11,6 +11,8 @@
 // but the UI no longer inherits the applet's pagination, its Apply/Save pairs,
 // or its habit of keeping state in AWT text fields.
 
+import { MAX_POLYS } from '../ContO.js';
+
 const trunc = (v) => (v < 0 ? Math.ceil(v) : Math.floor(v));
 
 /** A directive's comma-separated arguments, as raw strings. */
@@ -406,7 +408,11 @@ export function problems(text, o) {
   }
   if (o) {
     if (o.npl <= 60) out.push('There is barely any car here yet — build more of it before racing.');
-    if (o.npl > 286) out.push(`The car has too many pieces (${o.npl}). The game allows up to 286 — simplify it a little.`);
+  }
+  // Counted in the text: the parser stops at the limit, so o.npl never passes it.
+  const polys = (text.match(/^\s*<p>/gm) || []).length;
+  if (polys > MAX_POLYS) out.push(`The car has too many pieces (${polys}). The game allows up to ${MAX_POLYS} — simplify it a little.`);
+  if (o) {
     if (o.maxR > 400) out.push(`The car is too big to race. Scale it down by about ${Math.round((o.maxR / 400 - 1) * 100)}% on the Body tab.`);
     if (o.maxR < 120 && o.maxR > 0) out.push(`The car is too small to race. Scale it up by about ${Math.round((120 / o.maxR - 1) * 100)}% on the Body tab.`);
   }

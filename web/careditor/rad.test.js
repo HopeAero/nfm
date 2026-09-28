@@ -204,3 +204,10 @@ test('an author cannot break the line: parens, commas and newlines go', () => {
   assert.equal(rad.readAuthor(rad.writeAuthor('', 'a(b),c\nd')), 'abcd');
   assert.equal(rad.readAuthor(rad.writeAuthor('', 'x'.repeat(50))).length, rad.AUTHOR_MAX);
 });
+
+test('problems: too many pieces is counted in the text, past MAX_POLYS', () => {
+  const car = (n) => '<p>\nc(1,1,1)\np(0,0,0)\np(1,0,0)\np(0,1,0)\n</p>\n'.repeat(n);
+  const flagged = (n) => rad.problems(car(n), null).some((m) => m.includes('too many pieces'));
+  assert.equal(flagged(924), false);
+  assert.equal(flagged(925), true);
+});

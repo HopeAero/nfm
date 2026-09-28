@@ -116,6 +116,10 @@ test('readModel: every Extended / Revised and Recharged car in the editor picker
     assert.match(await readModel('rr', 'A-1'), /\ncarmaker\(Ryan Albano\)\n$/);
     assert.doesNotMatch(await readModel('ext', 'Remington'), /carmaker\(Ryan/);
     assert.strictEqual(await readModel('rr', 'Formula 7'), null);
+    // Past NFM 2's 210 polygons, under the raised 1000-piece cap: loads whole.
+    const big = await readModel('rr', 'Over=Kill');
+    const o = new ContO(new TextEncoder().encode(big), new Medium(), new Trackers());
+    assert.strictEqual(o.npl, big.match(/<p>/g).length + 4 * 19);
   } finally {
     globalThis.fetch = saved;
   }

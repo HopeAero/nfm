@@ -18,6 +18,13 @@
 
 import { idiv, trunc, fr, i32, intArray, floatArray, objArray, RGBtoHSB, HSBtoRGB, JavaRandom, setDrawPhase } from './java.js';
 import { Plane } from './Plane.js';
+
+// NFM 2 read up to 210 polygons, then the wheels (4 x 19 pieces): 286 in all.
+// Raised to Revised and Recharged's 1000 pieces so its big cars load whole.
+// No model the game ships passes 210 (M A S H E E N, 204, is the largest), so
+// nothing that races today changes; only a car with more pieces costs more.
+export const MAX_PIECES = 1000;
+export const MAX_POLYS = MAX_PIECES - 4 * 19;
 import { Wheels } from './Wheels.js';
 import { readLines } from './vfs.js';
 
@@ -137,9 +144,9 @@ export class ContO {
   #initBuf(buf, m, t) {
     this.m = m;
     this.t = t;
-    this.p = objArray(286);
-    const array = intArray(286);
-    for (let i = 0; i < 286; ++i) {
+    this.p = objArray(MAX_PIECES);
+    const array = intArray(MAX_PIECES);
+    for (let i = 0; i < MAX_PIECES; ++i) {
       array[i] = 0;
     }
     if (this.m.loadnew) {
@@ -175,7 +182,7 @@ export class ContO {
       const lines = readLines(text);
       for (const line of lines) {
         string = '' + line.trim();
-        if (this.npl < 210) {
+        if (this.npl < MAX_POLYS) {
           if (string.startsWith('<p>')) {
             n = 1;
             n3 = 0;

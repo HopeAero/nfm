@@ -3,7 +3,7 @@
 // loadsettings, savesettings, checko, fixtext, getvalue, getSvalue, servervalue, serverSvalue, objvalue.
 
 import { idiv, trunc, fr, i32, intArray, floatArray, objArray } from '../java.js';
-import { ContO } from '../ContO.js';
+import { ContO, MAX_PIECES, MAX_POLYS } from '../ContO.js';
 import { hidefields } from './ui.js';
 
 /**
@@ -233,8 +233,8 @@ export function checko(cm, str, text) {
     cm.showMessageDialog(null, "Car is not ready for " + str + "!\nReason:\nNo car seems to be designed!\nYou have not built a car yet please go to the \u2018Car\u2019 tab to find the tutorial on how to build a car.\n", "Car Maker", 1);
     return false;
   }
-  if (cm.o.npl > 286) {
-    cm.showMessageDialog(null, "Car is not ready for " + str + "!\nReason:\nCar contains too many polygons (pieces).\nNumber of polygons used need to be less then 210.\nPlease use the counter in the \u2018Code Edit\u2019 to decrease the number of polygons (pieces).\n", "Car Maker", 1);
+  if (cm.o.npl > MAX_PIECES) {
+    cm.showMessageDialog(null, "Car is not ready for " + str + "!\nReason:\nCar contains too many polygons (pieces).\nNumber of polygons used need to be less then " + MAX_POLYS + ".\nPlease use the counter in the \u2018Code Edit\u2019 to decrease the number of polygons (pieces).\n", "Car Maker", 1);
     return false;
   }
   if (cm.o.maxR > 400) {
