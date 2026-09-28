@@ -1158,7 +1158,9 @@ Gameplay stays separate; Extended learns to read what the editors make.
       cars) and "Revised and Recharged" (25 by Ryan Albano, `ext/recharged/models.radq`) groups, read-only like
       the base sixteen; saving makes your copy. Cars over the base 286-polygon cap preview
       truncated (WORK.md).
-- [ ] **The web Car Maker cannot calibrate the crash** (`physics()` value 16, `actmag`): only
+- [x] **Crash calibration (2026-09-28)**: `careditor/damage.js calibrate()` (the applet's
+      Save & Finish loop, moved out of tab2.js) runs on save when `actmag` is 0. Was:
+      **The web Car Maker cannot calibrate the crash** (`physics()` value 16, `actmag`): only
       the applet's `careditor/tab2.js` computes it, and the new UI never calls it; the
       Physics tab just says "not calibrated". `CarDefine.loadstat` blanks a car without it
       (`if (b && b2)`, CarDefine.js:184/490), so a car built from the template races

@@ -19,7 +19,7 @@
 
 import * as rad from './rad.js';
 import { devMode } from '../devmode.js';
-import { crashOnce, roofCrash } from './damage.js';
+import { crashOnce, roofCrash, calibrate } from './damage.js';
 import { scrubber } from './scrub.js';
 import { physicsHelp, crashHelp, crashTestHelp, STAT_HELP, CLASS_HELP,
          SCALE_HELP, ALIGN_HELP, ENGINE_HELP } from './helptext.js';
@@ -657,7 +657,28 @@ async function open(k) {
   status.textContent = '';
 }
 
+/**
+ * Fill in physics() value 16 when it is 0, as the applet's Save & Finish did.
+ * CarDefine.loadstat drops a car without it, and the race then drives the
+ * default car (Formula 7) instead of this one. Runs only once stats and physics
+ * exist; a calibrated car keeps its number.
+ */
+function ensureCalibrated() {
+  const p = rad.readPhysics(code.value), s = rad.readStats(code.value);
+  if (!p || !s || p.actmag) return;
+  cm.stat = s.slice();
+  cm.crash = p.crash.slice();
+  calibrate(cm);
+  const text = rad.writePhysics(code.value, { ...p, crash: cm.crash.slice(), actmag: cm.actmag });
+  writing = true;
+  code.value = text;
+  writing = false;
+  reparse();
+  refresh();
+}
+
 async function save(name) {
+  ensureCalibrated();
   await writeCar(name, code.value);
   // Saving a base model makes YOUR car of that name; from here on the editor
   // is looking at the stored copy, not at models.zip.
@@ -773,6 +794,7 @@ $('drive').onclick = async () => {
 $('tryext').onclick = async () => {
   if (!current) return;
   // a car Extended skips would open Free Play on car 38 instead: say why, and stay
+  ensureCalibrated();
   const why = whyNotExtended(current, source());
   if (why) { status.textContent = tr(why); return; }
   await save(current);

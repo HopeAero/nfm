@@ -23,8 +23,7 @@ export const specialText = (k) => (SPECIALS[k].length ? SPECIALS[k].map(tr).join
 export function whyNotExtended(name, text) {
   if (carFromRad(name, text)) return '';
   const p = readPhysics(text);
-  // ponytail: the web Car Maker cannot calibrate yet (only the applet's tab2.js computes actmag);
-  // cars made in the desktop Car Maker, or copied from one, carry it
+  // the editor calibrates on save (damage.js calibrate); this is a car it could not
   if (p && !p.actmag) return "Extended can't load this car: its crash is not calibrated (Physics tab, Crash look).";
   return "This car can't race yet — see the list under the preview.";
 }
