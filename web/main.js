@@ -37,7 +37,7 @@ import { highlightTitle, shouldPlayHighlight } from './highlight.js';
 import { saveCareer } from './career.js';
 import { perfLevel, perfLine } from './perfline.js';
 import { parseRivals, pickRivals, seededRandom } from './rivals.js';
-import { touchEnabled, easyStuntsEnabled, mountTouchControls } from './touch.js';
+import { touchEnabled, easyStuntsEnabled, mountTouchControls, installFinishTap } from './touch.js';
 
 const log = (msg) => {
   console.log(msg);
@@ -894,7 +894,7 @@ export async function boot(opts = {}) {
   // On-screen buttons and the separate easy-stunts preference. Netplay keeps
   // identical physics for every client.
   if (touchEnabled()) {
-    mountTouchControls(() => !raceMenu.isOpen);
+    mountTouchControls(() => !raceMenu.isOpen && !finishing && !xt.holdit);
   }
 
   if (!sync) pad.easyStunts = easyStuntsEnabled();
@@ -910,6 +910,8 @@ export async function boot(opts = {}) {
       return true;
     },
   });
+
+  installFinishTap(glCanvas.parentNode, () => (finishing && xt.fase === -5) || (!finishing && xt.fase === 0 && xt.holdit), pad);
 
   // Chat send. Deliberately tiny -- the point is that the reliable channel is
   // wired end to end, not that this is the final UI; the real lobby and chat

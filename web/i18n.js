@@ -107,6 +107,7 @@ const ES = {
   'RACE HIGHLIGHT · ENTER OR ESC TO SKIP': 'DESTACADO DE LA CARRERA · ENTER O ESC PARA SALTAR',
   'HIGHLIGHT COMPLETE': 'DESTACADO COMPLETO', 'HIGHLIGHT SKIPPED': 'DESTACADO SALTADO',
   'ENTER OR ESC TO RETURN TO THE LAUNCHER': 'ENTER O ESC PARA VOLVER AL MENÚ',
+  'Tap to continue': 'Toca para continuar', "You're wasted! Tap to continue...": '¡Te destruyeron! Toca para continuar...',
   'Continue': 'Continuar', 'Replay finished': 'Repetición terminada', 'Replay skipped': 'Repetición saltada',
   'Replay data is not ready yet. Keep racing for a few seconds.': 'La repetición aún no está lista. Sigue corriendo unos segundos.',
   'GAME INSTRUCTIONS': 'INSTRUCCIONES',
@@ -216,6 +217,7 @@ ES_PATTERNS.unshift(...EXT_ES_PATTERNS);
 
 /** Translate one string. Leading/trailing whitespace is kept as it was. */
 export function tr(s) {
+  if (typeof s === 'string' && s.includes('to continue') && typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches) s = s.replace(/Press\s*\[\s*Enter\s*\]\s*to continue/g, 'Tap to continue');
   if (lang !== 'es' || typeof s !== 'string' || !s) return s;
   if (Object.prototype.hasOwnProperty.call(ES, s)) return ES[s];
   const core = s.trim();

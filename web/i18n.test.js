@@ -133,3 +133,12 @@ test("'Off' is still translated (Settings)", () => {
 test('Free Play car select groups are translated', () => {
   for (const s of ['Game cars', 'My cars', '▴ ▾ my cars / game cars']) assert.notStrictEqual(es.tr(s), s, s);
 });
+
+test('touch screens get a continue prompt they can act on in either language', () => {
+  const previous = globalThis.matchMedia;
+  try {
+    globalThis.matchMedia = () => ({matches:true});
+    assert.strictEqual(en.tr('Press  [ Enter ]  to continue'), 'Tap to continue');
+    assert.strictEqual(es.tr('Press  [ Enter ]  to continue'), 'Toca para continuar');
+  } finally { if(previous === undefined) delete globalThis.matchMedia; else globalThis.matchMedia = previous; }
+});

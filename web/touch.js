@@ -152,3 +152,24 @@ export function easyStuntsEnabled() {
   try { return JSON.parse(localStorage.getItem('nfm.launcher') || '{}').easyStunts === true; }
   catch { return false; }
 }
+
+/** A completed click/tap on a finish screen feeds the same Control flag as Enter.
+ * Require both ends of the gesture on that screen so lifting a race control
+ * when the result appears cannot accidentally skip it. */
+export function installFinishTap(stage, active, control) {
+  const started = new Set();
+  const down = (e) => { if (active()) started.add(e.pointerId); };
+  const up = (e) => {
+    if (started.delete(e.pointerId) && active()) { e.preventDefault(); control.enter = true; }
+  };
+  const cancel = (e) => started.delete(e.pointerId);
+  stage.addEventListener('pointerdown', down);
+  stage.addEventListener('pointerup', up);
+  stage.addEventListener('pointercancel', cancel);
+  return () => {
+    started.clear();
+    stage.removeEventListener('pointerdown', down);
+    stage.removeEventListener('pointerup', up);
+    stage.removeEventListener('pointercancel', cancel);
+  };
+}

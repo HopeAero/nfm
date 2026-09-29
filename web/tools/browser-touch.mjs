@@ -76,11 +76,26 @@ try {
     await touch('touchStart',[positions.target]);
     await touch('touchEnd',[]);
     assert.equal(await tab.evaluate('__nfm.gs.u[0].arrace'),arrowMode,'second press restores arrow mode');
+    // A real pointer gesture on the result overlay feeds Enter even without a keyboard.
+    await tab.evaluate(`__nfm.record.hcaught=false; __nfm.checkPoints.haltall=true; __nfm.checkPoints.clear[0]=__nfm.checkPoints.nlaps*__nfm.checkPoints.nsp; __nfm.checkPoints.pos[0]=0; __nfm.xt.holdcnt=0`);
+    await sleep(100);
+    await touch('touchStart',[{x:466,y:215,id:1}]);
+    await touch('touchEnd',[]);
+    await sleep(300);
+    assert.ok(await tab.evaluate('__nfm.xt.fase !== 0'), 'tap advances the in-race result overlay');
+    {
+      for(let n=0;n<80;n++){if(await tab.evaluate('__nfm.xt.fase === -5'))break;await sleep(100);}
+      assert.equal(await tab.evaluate('__nfm.xt.fase'),-5,'finish screen is ready');
+      await touch('touchStart',[{x:466,y:215,id:1}]);
+      await touch('touchEnd',[]);
+      await sleep(500);
+      assert.ok(await tab.evaluate('!window.__nfm || __nfm.xt.fase !== -5'),'tap exits the finish screen');
+    }
     console.log(`${ext?'Extended':'Classic'}: held gas moves car, simultaneous steering, independent release, controls inside stage`);
   }
 } finally {
   tab?.close(); browser.kill();
   await sleep(500);
-  rmSync(profile,{recursive:true,force:true,maxRetries:10,retryDelay:200});
+  rmSync(profile,{recursive:true,force:true,maxRetries:20,retryDelay:250});
 }
 

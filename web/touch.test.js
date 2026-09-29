@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { touchPointers, touchWanted, easyStuntsEnabled, ACTIONS } from './touch.js';
+import { touchPointers, touchWanted, easyStuntsEnabled, installFinishTap, ACTIONS } from './touch.js';
 
 const log = () => { const out = []; return { out, send: (type, a) => out.push(`${type}:${a}`) }; };
 
@@ -64,4 +64,15 @@ test('easy stunts require explicit opt-in, independent of touch detection', () =
       assert.equal(easyStuntsEnabled(), wanted);
     }
   } finally { if(previous === undefined) delete globalThis.localStorage; else globalThis.localStorage = previous; }
+});
+
+test('finish taps use Enter, never an unfinished or cancelled racing gesture', () => {
+  const stage = new EventTarget(), control = {enter:false}; let active = false;
+  const cleanup = installFinishTap(stage, () => active, control);
+  const send = (type, pointerId = 1) => { const e = new Event(type, {cancelable:true}); e.pointerId = pointerId; stage.dispatchEvent(e); };
+  send('pointerdown'); active = true; send('pointerup');
+  assert.equal(control.enter,false, 'a race finger lifting after the result is not a continue tap');
+  send('pointerdown'); send('pointercancel'); send('pointerup'); assert.equal(control.enter,false);
+  send('pointerdown'); send('pointerup'); assert.equal(control.enter,true);
+  control.enter = false; cleanup(); send('pointerdown'); send('pointerup'); assert.equal(control.enter,false);
 });

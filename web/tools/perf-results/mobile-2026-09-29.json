@@ -1,0 +1,60 @@
+[
+  {
+    "name": "stage9-start-stress",
+    "stage": 9,
+    "res": 2,
+    "cpu": 4,
+    "view": 0,
+    "renderer": "ANGLE (AMD, Radeon RX 5500 (0x00007340) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "report": "BENCHMARK  5.0s window, 2.5s warmup discarded  --  PAUSED, press R to rerun\n  14.7 fps avg   18.7 tick/s   worst frame 150ms\n  sim 0.53 ms/tick   draw 61.23 ms/frame   -> 91% of one core\n  2804 ns/vert submitted   (21838 submitted, 73257 emitted)\n  per frame: 65 objs drawn of 473, 4020 faces, 21838 verts   -> 948.0 us/obj, 15228 ns/face\n  fit over 74 frames: 3.617 us/projected vert + -5.27 ms fixed   (x 15806..21078, R2 0.02)\n  buffer 1600x900   res=2 textres=1 aa=0 interp=1 players=8 stage=9 fill=trap"
+  },
+  {
+    "name": "stage9-start-1x",
+    "stage": 9,
+    "res": 1,
+    "cpu": 4,
+    "view": 0,
+    "renderer": "ANGLE (AMD, Radeon RX 5500 (0x00007340) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "report": "BENCHMARK  5.0s window, 2.5s warmup discarded  --  PAUSED, press R to rerun\n  21.1 fps avg   18.9 tick/s   worst frame 83ms\n  sim 0.27 ms/tick   draw 43.20 ms/frame   -> 91% of one core\n  2045 ns/vert submitted   (21126 submitted, 73668 emitted)\n  per frame: 64 objs drawn of 473, 3980 faces, 21126 verts   -> 675.9 us/obj, 10853 ns/face\n  fit over 106 frames: 1.910 us/projected vert + 8.36 ms fixed   (x 15850..21284, R2 0.04)\n  buffer 800x450   res=1 textres=1 aa=0 interp=1 players=8 stage=9 fill=trap"
+  },
+  {
+    "name": "stage9-start-30fps",
+    "stage": 9,
+    "res": 1,
+    "cpu": 4,
+    "view": 0,
+    "maxfps": 30,
+    "renderer": "ANGLE (AMD, Radeon RX 5500 (0x00007340) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "report": "BENCHMARK  5.0s window, 2.5s warmup discarded  --  PAUSED, press R to rerun\n  16.5 fps avg   18.9 tick/s   worst frame 117ms\n  sim 0.39 ms/tick   draw 53.92 ms/frame   -> 90% of one core\n  2500 ns/vert submitted   (21569 submitted, 73182 emitted)\n  per frame: 64 objs drawn of 473, 4019 faces, 21569 verts   -> 836.4 us/obj, 13415 ns/face\n  fit over 83 frames: 4.610 us/projected vert + -30.95 ms fixed   (x 16255..21001, R2 0.11)\n  buffer 800x450   res=1 textres=1 aa=0 interp=1 players=8 stage=9 fill=trap maxfps=30"
+  },
+  {
+    "name": "stage9-racing-parked",
+    "stage": 9,
+    "res": 2,
+    "cpu": 4,
+    "view": 0,
+    "racing": true,
+    "renderer": "ANGLE (AMD, Radeon RX 5500 (0x00007340) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "report": "BENCHMARK  5.0s window, 2.5s warmup discarded  --  PAUSED, press R to rerun\n  29.4 fps avg   18.8 tick/s   worst frame 100ms\n  sim 9.20 ms/tick   draw 24.00 ms/frame   -> 88% of one core\n  2584 ns/vert submitted   (9290 submitted, 36156 emitted)\n  per frame: 43 objs drawn of 473, 2020 faces, 9290 verts   -> 552.7 us/obj, 11881 ns/face\n  fit over 147 frames: 3.377 us/projected vert + -6.37 ms fixed   (x 7262..18139, R2 0.81)\n  buffer 1600x900   res=2 textres=1 aa=0 interp=1 players=8 stage=9 fill=trap"
+  },
+  {
+    "name": "stage9-racing-orbit",
+    "stage": 9,
+    "res": 2,
+    "cpu": 4,
+    "view": 1,
+    "racing": true,
+    "renderer": "ANGLE (AMD, Radeon RX 5500 (0x00007340) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "report": "BENCHMARK  5.0s window, 2.5s warmup discarded  --  PAUSED, press R to rerun\n  40.2 fps avg   18.8 tick/s   worst frame 150ms\n  sim 7.12 ms/tick   draw 17.64 ms/frame   -> 84% of one core\n  3700 ns/vert submitted   (4768 submitted, 25044 emitted)\n  per frame: 57 objs drawn of 473, 2186 faces, 4768 verts   -> 306.8 us/obj, 8069 ns/face\n  fit over 201 frames: 2.493 us/projected vert + -6.10 ms fixed   (x 6844..15844, R2 0.33)\n  buffer 1600x900   res=2 textres=1 aa=0 interp=1 players=8 stage=9 fill=trap"
+  },
+  {
+    "name": "stage9-racing-1x",
+    "stage": 9,
+    "res": 1,
+    "cpu": 4,
+    "view": 0,
+    "racing": true,
+    "renderer": "ANGLE (AMD, Radeon RX 5500 (0x00007340) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "report": "BENCHMARK  5.0s window, 2.5s warmup discarded  --  PAUSED, press R to rerun\n  21.6 fps avg   18.4 tick/s   worst frame 283ms\n  sim 10.93 ms/tick   draw 28.47 ms/frame   -> 82% of one core\n  2936 ns/vert submitted   (9698 submitted, 41541 emitted)\n  per frame: 47 objs drawn of 473, 2211 faces, 9698 verts   -> 606.2 us/obj, 12874 ns/face\n  fit over 108 frames: 2.339 us/projected vert + 5.53 ms fixed   (x 7522..18047, R2 0.15)\n  buffer 800x450   res=1 textres=1 aa=0 interp=1 players=8 stage=9 fill=trap"
+  }
+]
