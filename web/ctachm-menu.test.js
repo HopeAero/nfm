@@ -3,7 +3,7 @@
 // as GameSparker.java hands xm/ym/mouses to it (xtGraphics.java:7305).
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { XtGraphics } from './xtGraphics.js';
+import { XtGraphics } from './XtGraphics.js';
 
 const img = { width: 60, height: 30 };
 const fake = (fase) => ({ fase, next: [img, img], back: [img, img], contin: [img, img], pnext: 0, pback: 0, pcontin: 0,

@@ -2520,6 +2520,38 @@ export class XtGraphics {
    * xtGraphics.inishcarselect (xtGraphics.java:4844), single-player path.
    * `array` is the car models (ContO[]).
    */
+  /**
+   * Transpiled from xtGraphics.java ctachm (7305-7380), the fases the port's
+   * screens run: 1 (stage select) and 7 (car select). `n3` is GameSparker's
+   * `mouses`: 1 on the tick after a press (the button shows pressed), 2 on the
+   * next (it fires). carselect.js feeds it the pointer.
+   */
+  ctachm(n, n2, n3, control) {
+    if (this.fase === 1 || this.fase === 7) {
+      const [nx, ny, bx, by, cy] = this.fase === 1 ? [625, 135, 115, 135, 360] : [645, 275, 95, 275, 385];
+      if (n3 === 1) {
+        if (this.over(this.next[0], n, n2, nx, ny)) this.pnext = 1;
+        if (this.over(this.back[0], n, n2, bx, by)) this.pback = 1;
+        if (this.over(this.contin[0], n, n2, 355, cy)) this.pcontin = 1;
+      }
+      if (n3 === 2) {
+        if (this.pnext === 1) control.right = true;
+        if (this.pback === 1) control.left = true;
+        if (this.pcontin === 1) {
+          control.enter = true;
+          if (this.fase === 7) this.pcontin = 0;
+        }
+      }
+    }
+  }
+
+  /** Transpiled from xtGraphics.java over (9529): a click within 5px of an image drawn at (n3, n4). */
+  over(image, n, n2, n3, n4) {
+    const height = image?.height ?? 0;
+    const width = image?.width ?? 0;
+    return n > n3 - 5 && n < n3 + width + 5 && n2 > n4 - 5 && n2 < n4 + height + 5;
+  }
+
   inishcarselect(array) {
     this.nplayers = 7;
     this.im = 0;
