@@ -1402,6 +1402,11 @@ export class Madness {
     } else {
       this.pushed = false;
     }
+    if (control.easyStunts) {   // ext-patch easystunt: an arrow pressed in the air starts the stunt
+      const arrows = control.up || control.down || control.left || control.right;
+      if (!this.wtouch && this.loop === 0 && arrows && !this.easyHeld) this.loop = 1;
+      this.easyHeld = arrows;
+    }
     if (this.loop === 1) {
       let f4 = fr(((fr((fr((fr(this.scy[0] + this.scy[1])) + this.scy[2])) + this.scy[3]))) / 4.0);
       let j2 = 0;

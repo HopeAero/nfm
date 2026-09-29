@@ -431,6 +431,23 @@ const LIGHTBRAKE_PATCHES = [
     replace: '    if ((shadowcar && (this.light !== 1)) && (this.light !== 2) && (this.light !== 3)) {   // ext-patch lightbrake-shadow\n' },
 ];
 
+/**
+ * NFM Re-Lit's stunts for the on-screen controls, as the base port's Mad.js
+ * easyStunt: with control.easyStunts (touch.js, player only, never netplay) an
+ * arrow pressed in the air starts the stunt the way the handbrake does.
+ */
+const EASYSTUNT_PATCHES = [
+  { name: 'easystunt', file: 'Madness.js',
+    find: '    } else {\n      this.pushed = false;\n    }\n    if (this.loop === 1) {\n      let f4',
+    replace: '    } else {\n      this.pushed = false;\n    }\n' +
+      '    if (control.easyStunts) {   // ext-patch easystunt: an arrow pressed in the air starts the stunt\n' +
+      '      const arrows = control.up || control.down || control.left || control.right;\n' +
+      '      if (!this.wtouch && this.loop === 0 && arrows && !this.easyHeld) this.loop = 1;\n' +
+      '      this.easyHeld = arrows;\n' +
+      '    }\n' +
+      '    if (this.loop === 1) {\n      let f4' },
+];
+
 export const PATCHES = [
   { name: 'record-ghosts', file: 'Record.js', find: RECORD_GHOSTS_FIND, replace: RECORD_GHOSTS_REPLACE },
   { name: 'record-shift', file: 'Record.js', find: RECORD_SHIFT_FIND, replace: RECORD_SHIFT_REPLACE },
@@ -445,6 +462,7 @@ export const PATCHES = [
   ...SWEEP_PATCHES,
   ...NEWCAR_PATCHES,
   ...LIGHTBRAKE_PATCHES,
+  ...EASYSTUNT_PATCHES,
 ];
 
 /** 'applied' | 'pending' | throws when neither form is there exactly once. */

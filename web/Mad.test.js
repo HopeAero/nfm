@@ -183,3 +183,24 @@ async function drift(odd) {
     }
   }
 }
+
+test('easyStunt (touch controls): an arrow pressed in the air starts the stunt; one held from the ground does not', async () => {
+  const { easyStunt } = await import('./Mad.js');
+  const ctl = (o = {}) => ({ up: false, down: false, left: false, right: false, ...o });
+  const air = { wtouch: false, loop: 0 };
+  easyStunt(air, ctl({ up: true }));
+  assert.equal(air.loop, 1);                          // as the handbrake does
+
+  const steer = { wtouch: true, loop: 0 };
+  easyStunt(steer, ctl({ left: true }));              // steering on the ground...
+  steer.wtouch = false;                               // ...over a bump, still held
+  easyStunt(steer, ctl({ left: true }));
+  assert.equal(steer.loop, 0);
+  easyStunt(steer, ctl());                            // let go, press again in the air
+  easyStunt(steer, ctl({ right: true }));
+  assert.equal(steer.loop, 1);
+
+  const ground = { wtouch: true, loop: 0 };
+  easyStunt(ground, ctl({ down: true }));
+  assert.equal(ground.loop, 0);
+});

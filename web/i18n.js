@@ -45,7 +45,7 @@ const ES = {
   // ---- launcher ----
   'Need for': 'Need for', 'Madness': 'Madness',
   'Free Play': 'Juego libre', 'Unlock everything': 'Todo desbloqueado',
-  'HUD on dark skies': 'HUD en cielos oscuros', 'outline': 'contorno',
+  'HUD on dark skies': 'HUD en cielos oscuros', 'Touch controls': 'Controles táctiles', 'Always': 'Siempre', 'Never': 'Nunca', 'outline': 'contorno',
   'automatic — colours by contrast': 'automático — colores por contraste',
   'boxes — as the original': 'cajas — como el original',
   'on — every stage and car': 'sí — todas las pistas y autos',

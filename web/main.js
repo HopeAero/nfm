@@ -37,6 +37,7 @@ import { highlightTitle, shouldPlayHighlight } from './highlight.js';
 import { saveCareer } from './career.js';
 import { perfLevel, perfLine } from './perfline.js';
 import { parseRivals, pickRivals, seededRandom } from './rivals.js';
+import { touchEnabled, mountTouchControls } from './touch.js';
 
 const log = (msg) => {
   console.log(msg);
@@ -889,6 +890,14 @@ export async function boot(opts = {}) {
   // ?debug=1: the game objects on window, for driving a screen from the
   // console or a headless test (e.g. `__nfm.xt.fase = -2` ends the race).
   if (params.get('debug') === '1') window.__nfm = { xt, checkPoints, gs, medium, record, co: array2 };
+
+  // Phones and tablets: the on-screen buttons (touch.js), and with them Re-Lit's
+  // arrow stunts on the player's own car -- not in netplay, where every client
+  // must simulate every car alike.
+  if (touchEnabled()) {
+    mountTouchControls();
+    if (!sync) pad.easyStunts = true;
+  }
 
   // The finish screen belongs to the game, not the race menu: Esc must not
   // open a pause menu over it.

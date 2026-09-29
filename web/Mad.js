@@ -18,6 +18,20 @@ function int2(a, b) {
   return o;
 }
 
+/**
+ * NFM Re-Lit's stunts, for the on-screen controls (touch.js sets
+ * control.easyStunts on the player's Control): in the air an arrow starts the
+ * stunt the way the handbrake does (loop 0 -> 1, then Mad's own loop 2 takes
+ * the arrows). Only a press made in the air counts -- an arrow still held from
+ * the ground (steering over a bump) does not. Never set for bots or in netplay:
+ * it changes the simulation, and every client must simulate every car alike.
+ */
+export function easyStunt(mad, control) {
+  const arrows = control.up || control.down || control.left || control.right;
+  if (!mad.wtouch && mad.loop === 0 && arrows && !mad.easyHeld) mad.loop = 1;
+  mad.easyHeld = arrows;
+}
+
 export class Mad {
   constructor(cd, m, rpd, xt, im) {
     this.cn = 0;
@@ -276,6 +290,7 @@ export class Mad {
     } else {
       this.pushed = false;
     }
+    if (control.easyStunts) easyStunt(this, control);   // touch controls only (touch.js)
     if (this.loop === 1) {
       const n7 = fr(fr(fr(fr(this.scy[0] + this.scy[1]) + this.scy[2]) + this.scy[3]) / 4.0);
       for (let k = 0; k < 4; ++k) {
