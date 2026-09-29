@@ -84,6 +84,8 @@ const ES = {
   'Show mountains': 'Mostrar montañas', 'Full': 'Completo',
   'Reduced': 'Reducido',
   'Language': 'Idioma',
+  'Graphics': 'Gráficos', 'Audio': 'Audio', 'Interface': 'Interfaz',
+  'Gameplay': 'Jugabilidad', 'Advanced': 'Avanzado',
   'Beginner': 'Principiante', 'Amateur': 'Aficionado', 'Pro': 'Pro', 'Extreme': 'Extremo', 'Bonus': 'Bonus',
   ' · my car': ' · mi auto',
   'off': 'apagado', 'on': 'encendido', 'off — smoother': 'apagado — más fluido',

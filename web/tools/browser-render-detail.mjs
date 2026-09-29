@@ -82,7 +82,7 @@ try {
  await tab.send('Page.navigate',{url:'http://localhost:8123/'});
  await sleep(250);
  for(let i=0;i<150;i++){if(await tab.evaluate('!!document.querySelector("[data-row=mountains] .ar.r")'))break;await sleep(100);}
- await tab.evaluate(`document.querySelector('[data-act="menu:5"]').click();document.querySelector('[data-row=mountains] .ar.l').click();document.querySelector('[data-row=backgroundDetail] .ar.r').click();document.querySelector('[data-row=lightIntro] .ar.r').click();`);
+ await tab.evaluate(`document.querySelector('[data-act="menu:5"]').click();document.querySelector('[data-act="settings:graphics"]').click();document.querySelector('[data-row=mountains] .ar.l').click();document.querySelector('[data-row=backgroundDetail] .ar.r').click();document.querySelector('[data-row=lightIntro] .ar.r').click();`);
  const saved=await tab.evaluate('JSON.parse(localStorage.getItem("nfm.launcher"))');
  assert.equal(saved.mountains,false);assert.equal(saved.backgroundDetail,'low');assert.equal(saved.lightIntro,true);
  await sleep(100);

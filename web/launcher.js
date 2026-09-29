@@ -201,15 +201,15 @@ function applyLang() {
 /* ---- pages -------------------------------------------------------------- */
 const MENU = ['Single Player', 'Extended Edition', 'Multiplayer', 'Car Maker', 'Stage Maker', 'Settings'];
 const OPT_ROWS = [['players', 'Cars on track'], ['opponents', 'Opponents']];
-const SET_ROWS = [['sfxvol', 'Sound'], ['musicvol', 'Music'],
-                  ['res', 'Resolution'], ['interp', 'Smooth frames'],
-                  ['lightIntro', 'Lightweight intro'], ['backgroundDetail', 'Background detail'],
-                  ['mountains', 'Show mountains'],
-                  ['ghost', 'Replay recording'], ['hud', 'HUD on dark skies'],
-                  ['touch', 'Touch controls'], ['easyStunts', 'Easy stunts'],
-                  ['perf', 'Show performance'],
-                  ['devmode', 'Developer mode'],
-                  ['lang', 'Language']];
+const SET_SECTIONS = [
+  { id: 'graphics', label: 'Graphics', rows: [['res', 'Resolution'], ['interp', 'Smooth frames'],
+    ['lightIntro', 'Lightweight intro'], ['backgroundDetail', 'Background detail'], ['mountains', 'Show mountains']] },
+  { id: 'audio', label: 'Audio', rows: [['sfxvol', 'Sound'], ['musicvol', 'Music']] },
+  { id: 'interface', label: 'Interface', rows: [['name', 'Your name'], ['hud', 'HUD on dark skies'],
+    ['touch', 'Touch controls'], ['perf', 'Show performance'], ['lang', 'Language']] },
+  { id: 'gameplay', label: 'Gameplay', rows: [['easyStunts', 'Easy stunts'], ['ghost', 'Replay recording']] },
+  { id: 'advanced', label: 'Advanced', rows: [['devmode', 'Developer mode']] },
+];
 
 const valueBits = (k) =>
   `<span class="pvalue"><b class="ar l">◂</b><span class="val" data-val="${k}"></span><b class="ar r">▸</b></span>`;
@@ -219,13 +219,20 @@ $('menu').innerHTML = MENU.map((t, i) =>
 $('opt-rows').innerHTML = OPT_ROWS.map(([k, label]) =>
   `<li class="item orow" data-row="${k}"><span class="slabel">${label}</span>${valueBits(k)}</li>`).join('')
   + `<li class="item orow" data-act="back" style="justify-content:center"><span class="label" style="flex:none">Done</span></li>`;
-$('set-rows').innerHTML =
-  `<li class="item orow namerow" data-act="name"><span class="slabel">Your name</span>
-     <span class="pvalue"><span class="val" id="setname"></span></span>
-     <span class="rhint">Enter to change</span></li>`
-  + SET_ROWS.map(([k, label]) =>
-    `<li class="item orow" data-row="${k}"${k === 'lang' ? ' data-act="lang"' : ''}><span class="slabel">${label}</span>${valueBits(k)}</li>`).join('')
-  + `<li class="item orow" data-act="back" style="justify-content:center"><span class="label" style="flex:none">Done</span></li>`;
+const settingsBack = `<li class="item orow" data-act="back" style="justify-content:center"><span class="label" style="flex:none">Done</span></li>`;
+$('set-rows').innerHTML = SET_SECTIONS.map(({id, label}) =>
+  `<li class="item orow" data-act="settings:${id}"><span class="slabel">${label}</span><span class="pvalue" aria-hidden="true">▸</span></li>`).join('') + settingsBack;
+for (const section of SET_SECTIONS) {
+  const rows = section.rows.map(([k, label]) => k === 'name'
+    ? `<li class="item orow namerow" data-act="name"><span class="slabel">Your name</span>
+       <span class="pvalue"><span class="val" id="setname"></span></span><span class="rhint">Enter to change</span></li>`
+    : `<li class="item orow" data-row="${k}"${k === 'lang' ? ' data-act="lang"' : ''}><span class="slabel">${label}</span>${valueBits(k)}</li>`).join('');
+  $('page-set').insertAdjacentHTML('afterend', `<div class="page settings-page" id="page-set-${section.id}">
+    <div class="wrap" style="width:min(40rem,94vw)">
+      <div class="phead"><span>Settings</span><span>${section.label}</span></div>
+      <ul class="rows">${rows}${settingsBack}</ul>
+    </div></div>`);
+}
 
 // Single Player: the Java's maini2 choice of NFM 1 / NFM 2 career or Free Play.
 const GM = ['NFM 1', 'NFM 2', 'Free Play'];
@@ -244,8 +251,9 @@ $('ext-rows').innerHTML = EXT.map(([k, t]) =>
 // translates it and whatever is written later.
 translateDocument();
 
-const PAGE_IDS = ['menu', 'gm', 'ext', 'sp', 'opts', 'mp', 'lobby', 'set'];
+const PAGE_IDS = ['menu', 'gm', 'ext', 'sp', 'opts', 'mp', 'lobby', 'set', ...SET_SECTIONS.map(s => `set-${s.id}`)];
 const BACK = { gm: 'menu', ext: 'menu', sp: 'menu', opts: 'sp', mp: 'menu', lobby: 'mp', set: 'menu' };
+for (const section of SET_SECTIONS) BACK[`set-${section.id}`] = 'set';
 const PAGES = {};
 for (const id of PAGE_IDS) refreshItems(id);
 
@@ -267,13 +275,15 @@ const HINTS = {
   opts:  '<kbd>↑</kbd><kbd>↓</kbd> move · <kbd>←</kbd><kbd>→</kbd> change · <kbd>Esc</kbd> back',
   mp:    '<kbd>↑</kbd><kbd>↓</kbd> move · <kbd>Enter</kbd> join / host · <kbd>←</kbd><kbd>→</kbd> public–private · <kbd>Esc</kbd> back',
   lobby: '<kbd>↑</kbd><kbd>↓</kbd> move · <kbd>←</kbd><kbd>→</kbd> change · <kbd>Enter</kbd> chat / start · <kbd>Esc</kbd> leave',
-  set:   '<kbd>↑</kbd><kbd>↓</kbd> move · <kbd>←</kbd><kbd>→</kbd> change · <kbd>Esc</kbd> back',
+  set:   '<kbd>↑</kbd><kbd>↓</kbd> move · <kbd>Enter</kbd> select · <kbd>Esc</kbd> back',
 };
+for (const section of SET_SECTIONS) HINTS[`set-${section.id}`] = HINTS.opts;
 
 function draw() {
   const p = page();
   if (!p) return;
   for (const q of Object.values(PAGES)) {
+    q.root.classList.toggle('settings-open', q === p && q.root.classList.contains('settings-page'));
     q.items.forEach((el, i) => {
       const on = q === p && i === q.sel;
       el.classList.toggle('is-sel', on);
@@ -319,7 +329,7 @@ function preloadExtendedModules() {
 function goPage(name) {
   if (name === 'ext') preloadExtendedModules();
   const prev = pageName();
-  if (prev === 'set' && name !== 'set') pendingLang = null;
+  if (prev === 'set-interface' && name !== prev) pendingLang = null;
   document.body.dataset.page = name;
   if (prev !== name) {
     if (name === 'mp') startBrowsing(); else if (prev === 'mp') stopBrowsing();
@@ -954,6 +964,7 @@ function fire() {
     // Extended's race in the same shell as the base race (web/ext/race.js).
     case 'ext':   return void startRace(null, { ext: arg });
     case 'opts':  return goPage('opts');
+    case 'settings': return goPage(`set-${arg}`);
     case 'lang':  return applyLang();
     case 'back':  return goPage(BACK[pageName()]);
     case 'go':    return void startCarSelect();
