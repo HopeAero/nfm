@@ -58,8 +58,28 @@ function loadImages(xt) {
  * themselves (carselect clears control.right after acting on it), and
  * clearing on keyup drops any tap shorter than one tick.
  */
-function runScreen(control, tick, gate = {}) {
+function runScreen(control, tick, gate = {}, canvas = null) {
   control.left = control.right = control.enter = control.handb = false;
+  // The pointer, as GameSparker.java keeps it for xtGraphics: xm/ym in the 800x450
+  // game space, `moused` while held, and `mouses` 1 on a press -> 2 on the next
+  // tick -> 0 (step()), which ctachm reads as "show pressed" then "fire".
+  const mouse = { xm: 0, ym: 0, moused: false, mouses: 0,
+    step() { if (this.mouses === 2) this.mouses = 0; if (this.mouses === 1) this.mouses = 2; } };
+  const at = (e) => {
+    const b = canvas.getBoundingClientRect();
+    mouse.xm = Math.trunc((e.clientX - b.left) * 800 / b.width);
+    mouse.ym = Math.trunc((e.clientY - b.top) * 450 / b.height);
+  };
+  const onMove = (e) => at(e);
+  const onDown = (e) => {
+    if (gate.paused) return;
+    if (mouse.mouses === 0) { at(e); mouse.mouses = 1; }
+    mouse.moused = true;
+  };
+  const onUp = () => { mouse.moused = false; };
+  canvas?.addEventListener('pointermove', onMove);
+  canvas?.addEventListener('pointerdown', onDown);
+  addEventListener('pointerup', onUp);
   return new Promise((resolve) => {
     let raf = 0;
     let acc = 0;
@@ -72,6 +92,9 @@ function runScreen(control, tick, gate = {}) {
       cancelAnimationFrame(raf);
       removeEventListener('keydown', onKey, true);
       removeEventListener('keyup', onKey, true);
+      canvas?.removeEventListener('pointermove', onMove);
+      canvas?.removeEventListener('pointerdown', onDown);
+      removeEventListener('pointerup', onUp);
       resolve(result);
     };
     const onKey = (e) => {
@@ -104,7 +127,7 @@ function runScreen(control, tick, gate = {}) {
         acc -= TICK_MS;
         busy = true;
         let r;
-        try { r = await tick(); } finally { busy = false; }
+        try { r = await tick(mouse); } finally { busy = false; }
         if (r !== undefined) { done(r); return; }
         // One tick per animation frame, never a catch-up burst. Each tick draws
         // the whole stage, so on the heaviest previews (NFM 1 9/10, NFM 2 15/16:
@@ -142,12 +165,14 @@ export async function runCarSelect(canvas, slot, career = null) {
   xt.inishcarselect(models);
   xt.fase = 7;
   try {
-    return await runScreen(control, () => {
+    return await runScreen(control, (mouse) => {
       rd.begin();
-      xt.carselect(control, models, mads[0], 0, 0, false);
+      xt.carselect(control, models, mads[0], mouse.xm, mouse.ym, mouse.moused);
+      xt.ctachm(mouse.xm, mouse.ym, mouse.mouses, control);   // GameSparker fase 7
+      mouse.step();
       if (xt.fase !== 7) return xt.sc[0];
       return undefined;
-    });
+    }, {}, canvas);
   } finally {
     medium.crs = false;
     xt.rd = savedRd;
@@ -304,7 +329,7 @@ export async function runStageSelect(canvas, stage, career = null, onRivals = nu
   xt.cd.staction = 0;
   xt.fase = 2;
   try {
-    return await runScreen(control, async () => {
+    return await runScreen(control, async (mouse) => {
       // GameSparker fase 4: the locked-stage notice, alone on the screen.
       if (xt.fase === 4) {
         rd.begin();
@@ -322,6 +347,9 @@ export async function runStageSelect(canvas, stage, career = null, onRivals = nu
         xt.fase = 1;
         return undefined;
       }
+      // GameSparker fase 1: the pointer on the arrows and CONTINUAR, before the arrows are read
+      xt.ctachm(mouse.xm, mouse.ym, mouse.mouses, control);
+      mouse.step();
       // The arrows. The Java walks stages 1..27 itself (stageselect, below);
       // a custom stage (stage -2) and a Multiplayer one (28-32) have no arrows
       // there, so step through the current list here -- and in All, from
@@ -371,7 +399,7 @@ export async function runStageSelect(canvas, stage, career = null, onRivals = nu
         for (let i = 0; i < n12; ++i) placed[order[i]].d(rd);
       }
       const before = checkPoints.stage;
-      xt.stageselect(checkPoints, control, 0, 0, false);
+      xt.stageselect(checkPoints, control, mouse.xm, mouse.ym, mouse.moused);
       if (xt.fase === 2 && checkPoints.stage !== before) {
         // The Java's own arrows moved to another of the 27.
         const st = checkPoints.stage;
@@ -396,7 +424,7 @@ export async function runStageSelect(canvas, stage, career = null, onRivals = nu
       }
       if (xt.fase === 5) return typeof cur === 'string' ? cur : checkPoints.stage;
       return undefined;
-    }, gate);
+    }, gate, canvas);
   } finally {
     ui.box.remove();
     rivals?.remove();
