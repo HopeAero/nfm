@@ -33,6 +33,7 @@ trap 'rm -rf "$STAGE"' EXIT
 mkdir -p "$STAGE/web"
 cp "$SRC"/index.html "$STAGE/"
 cp "$SRC"/web/*.js "$SRC"/web/*.html "$SRC"/web/*.css "$STAGE/web/"
+cp "$SRC"/web/handbrake-icon.png "$STAGE/web/"
 rm -f "$STAGE"/web/*.test.js
 # web/vendor/ is a SUBDIRECTORY, so the glob above misses it. Leaving it out
 #404s bassoonplayer.js, and because a failed ES module import throws, boot()

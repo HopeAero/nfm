@@ -491,3 +491,5 @@ Append only; don't rewrite history. Keep it terse — details belong in
 - **2026-09-29: The global virtual-joystick touch handlers in main.js overwrite the on-screen buttons' held keys**, especially on the second finger and touchmove. Removed the competing gesture input; touch.js owns each pointer independently. Its overlay follows the rendered #stage rect (not viewport corners), keeps off-button fingers tracked for re-entry, and releases held keys on pause/blur/hide. web/tools/browser-touch.mjs exercises actual two-finger CDP gestures in Classic and Extended; CDP touchEnd takes the finger being lifted, not the remaining finger.
 
 - **2026-09-29: The upper-left touch button is arrow targeting (KeyA / a), not lookback.** It toggles Control.arrace in both engines like keyboard A; touch style retains the original gray panels and white icons.
+
+- **2026-09-29: Touch handbrake uses generated web/handbrake-icon.png**, based on the player's reference, with transparent interiors. The source is black; CSS brightness(0) invert(1) presents it white. deploy.sh explicitly copies this PNG (the existing web glob only covered JS/HTML/CSS).
