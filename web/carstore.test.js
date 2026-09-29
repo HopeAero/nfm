@@ -124,3 +124,32 @@ test('readModel: every Extended / Revised and Recharged car in the editor picker
     globalThis.fetch = saved;
   }
 });
+
+test('readModel: Revised and Recharged cars open with their raw stats and race; nfm-origins cars load', async () => {
+  const { readModel, RR_STATS, ORIGINS_MODELS } = await import('./carstore.js');
+  const { setFpath } = await import('./vfs.js');
+  const saved = globalThis.fetch;
+  globalThis.fetch = async (p) => new Response(readFileSync(new URL(p, import.meta.url)));
+  setFpath('../');
+  const race = (name, text) => new CarDefine(new Array(56).fill(null), new Medium(), new Trackers(), null).loadcar(name, 16, text);
+  try {
+    const rebound = await readModel('rr', 'Air Rebound');
+    assert.match(rebound, /\nmaxmag\(5000\)\n/);
+    assert.match(rebound, /\ncarmaker\(Ryan Albano\)\n$/);
+    // R&R models carry no 1stColor/2ndColor, which the Car Maker needs before it races
+    // a car: the two commonest face colours stand in, so the car looks the same.
+    assert.match(rebound, /\n1stColor\(\d+,\d+,\d+\)\n2ndColor\(\d+,\d+,\d+\)\n/);
+    // no stat(), no calibration: the raw stats alone make them raceable
+    for (const name of Object.keys(RR_STATS)) {
+      if (name === 'ROCKET M A S H E E N') continue;   // still refused by NFM 2's wheel rule (WORK.md)
+      assert.equal(race(name, await readModel('rr', name)), 16, name);
+    }
+    for (const name of Object.keys(ORIGINS_MODELS)) {
+      assert.equal(race(name, await readModel('origins', name)), 16, name);
+    }
+    assert.match(await readModel('origins', 'BMW M3 GTR'), /\ncarmaker\(ACVoong\)\n$/);
+    assert.doesNotMatch(await readModel('origins', 'Electro LMP'), /carmaker\(/);
+  } finally {
+    globalThis.fetch = saved;
+  }
+});

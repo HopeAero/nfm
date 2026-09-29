@@ -7,6 +7,10 @@
 import { floatArray, fr, i32, idiv, intArray, random, trunc } from '../java.js';
 import { Color } from './jawt.js';
 import { nearTrackers } from './trackgrid.js';
+// ext-patch lightbrake-state: lightBrake (3) is lightB lit at night or while its car brakes
+let brakeLit = false;
+export function setBrakeLit(v) { brakeLit = v; }
+const extLight = (p) => (p.light === 3 ? (p.m.lightson || brakeLit ? 2 : 0) : p.m.lightson ? p.light : 0);
 
 // port: the per-call arrays of d(), sortpieces() and s() come from a pool, one
 // array per call site and length, zeroed as a new one is -- fillPolygon and
@@ -871,7 +875,7 @@ export class Plane {
           }
         }
       }
-      if (this.m.lightson && (this.light === 2)) {
+      if (extLight(this) === 2) {   // ext-patch lightbrake-order
         i12 = i32(i12 - 40);
       }
       let j12 = 0;
@@ -1040,13 +1044,13 @@ export class Plane {
     let l11 = color.getRed();
     let j13 = color.getGreen();
     let k14 = color.getBlue();
-    if (this.m.lightson) {
-      if (this.light === 2) {
+    {   // ext-patch lightbrake-face
+      if (extLight(this) === 2) {
         l11 = 210;
         j13 = 0;
         k14 = 0;
       }
-      if (this.light === 1) {
+      if (extLight(this) === 1) {
         l11 = 210;
         j13 = 210;
         k14 = 210;
@@ -1083,7 +1087,7 @@ export class Plane {
       bluecol = 255;
     }
     let shadow = 255;
-    if ((shadowcar && (this.light !== 1)) && (this.light !== 2)) {
+    if ((shadowcar && (this.light !== 1)) && (this.light !== 2) && (this.light !== 3)) {   // ext-patch lightbrake-shadow
       shadow = this.m.shadowtrans;
     }
     if (floorguardian) {
@@ -1125,11 +1129,11 @@ export class Plane {
           l11 = 0;
           j13 = 0;
           k14 = 0;
-          if (this.m.lightson) {
-            if (this.light === 2) {
+          {   // ext-patch lightbrake-outline
+            if (extLight(this) === 2) {
               l11 = 100;
             }
-            if (this.light === 1) {
+            if (extLight(this) === 1) {
               l11 = 100;
               j13 = 100;
               k14 = 100;

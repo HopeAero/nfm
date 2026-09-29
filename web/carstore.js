@@ -99,23 +99,70 @@ export const RR_MODELS = {
   'The Phantom': 'phantom', 'Lightning Rod': 'lightning', 'EPIC TANK': 'epictank',
   'KILL-O-MATIC': 'killomatic', 'The Destroyer': 'destroyer', 'TRAIN of TERROR': 'train', 'A-1': 'A-1',
 };
+/**
+ * Revised and Recharged's own numbers for seven of its cars, as raw stats
+ * ("Recharged stats", CarDefine.readRawStats). Its models carry none; these come
+ * from NFM World's copies of the same cars (data/models/world/cars, author Ryan
+ * Albano), verbatim. Their enginsignature(6) is an engine NFM 2 does not have,
+ * so it is left out. Mighty Rocket Eight has numbers there but no model here.
+ */
+export const RR_STATS = {
+  'Over=Kill': 'swits(200,300,500) acelf(30.0,30.0,30.0) handb(60) airs(1.3) airc(200) turn(72) grip(75.0) bounce(1.0) simag(1.5) moment(2.0) comprad(0.25) push(3) revpush(1) lift(0) revlift(0) powerloss(2147483647) flipy(-60) msquash(1) clrad(4000) dammult(1.0) maxmag(30000) dishandle(1.0) outdam(1.0) enginsignature(1)',
+  'Air Rebound': 'swits(70,210,285) acelf(5.0,5.0,5.0) handb(17) airs(1.0) airc(64) turn(12) grip(34.0) bounce(1.4) simag(1.15) moment(2.0) comprad(0.5) push(3) revpush(1) lift(0) revlift(100) powerloss(4500000) flipy(-50) msquash(0) clrad(12000) dammult(0.501) maxmag(5000) dishandle(0.8) outdam(0.6) enginsignature(3)',
+  'Turbo Dragster': 'swits(50,200,400) acelf(22.0,14.0,10.0) handb(20) airs(1.2) airc(30) turn(14) grip(50.0) bounce(0.8) simag(0.85) moment(0.75) comprad(0.4) push(2) revpush(3) lift(30) revlift(0) powerloss(4000000) flipy(-26) msquash(3) clrad(1500) dammult(0.96) maxmag(2000) dishandle(1.0) outdam(0.35) enginsignature(1)',
+  'The Awesome Radical One': 'swits(80,200,1000) acelf(22.0,14.0,14.0) handb(60) airs(2.0) airc(100) turn(100) grip(100.0) bounce(1.1) simag(0.9) moment(1.5) comprad(0.5) push(2) revpush(2) lift(30) revlift(0) powerloss(4100000) flipy(-30) msquash(3) clrad(4000) dammult(0.8266) maxmag(4400) dishandle(1.0) outdam(0.75)',
+  'ROCKET M A S H E E N': 'swits(50,130,875) acelf(7.5,7.5,7.5) handb(12) airs(0.3) airc(0) turn(5) grip(27.0) bounce(0.8) simag(1.3) moment(3.0) comprad(0.6) push(2) revpush(2) lift(0) revlift(0) powerloss(16700000) flipy(-100) msquash(20) clrad(30000) dammult(0.176) maxmag(31000) dishandle(0.42) outdam(1.0)',
+  'DR Rocket Monstaa': 'swits(80,200,1000) acelf(12.0,12.0,12.0) handb(7) airs(1.0) airc(60) turn(6) grip(27.0) bounce(1.15) simag(1.15) moment(2.0) comprad(0.8) push(2) revpush(1) lift(0) revlift(32) powerloss(5500000) flipy(-127) msquash(8) clrad(5000) dammult(0.46) maxmag(19000) dishandle(0.95) outdam(1.0)',
+  'EL ROCKET KING': 'swits(50,160,1000) acelf(9.0,9.0,9.0) handb(10) airs(0.8) airc(10) turn(4) grip(25.0) bounce(0.8) simag(1.1) moment(2.0) comprad(1.0) push(4) revpush(1) lift(0) revlift(0) powerloss(4500000) flipy(-85) msquash(10) clrad(7000) dammult(0.5) maxmag(11700) dishandle(0.4) outdam(0.95)',
+};
+
+/**
+ * Two cars from nfm-origins (Phyrexian's C++ remake, bitbucket.org/Phyrexian/nfm-origins),
+ * plain .rad files under ext/origins/. The LMP carries raw stats and names no author;
+ * the BMW's first line credits ACVoong.
+ */
+export const ORIGINS_MODELS = { 'Electro LMP': 'lmp', 'BMW M3 GTR': 'bmw' };
+
+// [table, file (a .radq, or a directory of plain .rad), author (the pack's, or per car), raw stats per car]
 const PACKS = {
   ext: [EXT_MODELS, 'ext/data/models.radq'],
-  rr: [RR_MODELS, 'ext/recharged/models.radq', 'Ryan Albano'],
+  rr: [RR_MODELS, 'ext/recharged/models.radq', 'Ryan Albano', RR_STATS],
+  origins: [ORIGINS_MODELS, 'ext/origins/', { 'BMW M3 GTR': 'ACVoong' }],
 };
 const packs = {};
 
-/** The .rad text of a read-only game model: src is 'base', 'ext' or 'rr'. */
+/** The .rad text of a read-only game model: src is 'base', 'ext', 'rr' or 'origins'. */
 export async function readModel(src, name) {
   if (src === 'base') return readBuiltin(name);
-  const [table, path, author] = PACKS[src] || [];
+  const [table, path, authors, stats] = PACKS[src] || [];
   const entry = table && table[name];
   if (!entry) return null;
-  packs[src] ||= readRadq(path);
-  const bytes = (await packs[src]).get(`${entry}.rad`);
-  if (!bytes) return null;
-  const text = entryText(bytes);
-  return author && !/^\s*carmaker\(/m.test(text) ? `${text.trimEnd()}\n\ncarmaker(${author})\n` : text;
+  let text = null;
+  if (path.endsWith('/')) {
+    text = await readText(`${path}${entry}.rad`).catch(() => null);
+  } else {
+    packs[src] ||= readRadq(path);
+    const bytes = (await packs[src]).get(`${entry}.rad`);
+    if (bytes) text = entryText(bytes);
+  }
+  if (text === null) return null;
+  const author = typeof authors === 'string' ? authors : authors?.[name];
+  const extra = [];
+  // The Car Maker will not race a car without 1stColor/2ndColor (21 of R&R's 25 have
+  // none). The two commonest face colours stand in: faces of those colours become the
+  // recolourable ones, still drawn in the same colour, so the car looks as it did.
+  if (!/^\s*1stColor\(/m.test(text) || !/^\s*2ndColor\(/m.test(text)) {
+    const count = new Map();
+    for (const m of text.matchAll(/^\s*c\((\d+),\s*(\d+),\s*(\d+)\)/gm)) {
+      const k = `${m[1]},${m[2]},${m[3]}`;
+      count.set(k, (count.get(k) || 0) + 1);
+    }
+    const [first, second = first] = [...count].sort((a, b) => b[1] - a[1]).map(([k]) => k);
+    if (first) extra.push(`1stColor(${first})`, `2ndColor(${second})`);
+  }
+  if (stats?.[name]) extra.push('// Recharged stats (NFM World)', ...stats[name].split(' '));
+  if (author && !/^\s*carmaker\(/m.test(text)) extra.push(`carmaker(${author})`);
+  return extra.length ? `${text.trimEnd()}\n\n${extra.join('\n')}\n` : text;
 }
 
 let dbPromise = null;

@@ -111,3 +111,13 @@ test('av distance matches Java, including the negative cube term', () => {
   assert.equal(av(120, 340, 5000, -90), 4928);
   assert.equal(av(120, 340, 5000, 200), 5745);
 });
+
+test('isLit: lights glow at night; a lightBrake light (3) also whenever its car brakes', async () => {
+  const { isLit } = await import('./Plane.js');
+  assert.equal(isLit(0, true, true), false);    // not a light
+  assert.equal(isLit(1, true, false), true);    // lightF at night
+  assert.equal(isLit(2, false, true), false);   // plain lightB: night only, braking or not
+  assert.equal(isLit(3, true, false), true);    // lightBrake at night, like lightB
+  assert.equal(isLit(3, false, true), true);    // ...and by day while braking
+  assert.equal(isLit(3, false, false), false);
+});

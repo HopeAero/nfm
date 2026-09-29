@@ -15,6 +15,35 @@ import { readLines } from './vfs.js';
 import { ContO } from './ContO.js';
 import { Madness } from './Madness.js';
 
+// "Recharged stats" (DS-addons, NFM World): raw CarDefine values written in the
+// .rad. loadstat computes everything from stat()/physics() as the Java does, then
+// each raw line present replaces its value -- so a car without them loads exactly
+// as before. [name, count, float?]; ints truncate, floats round to float32.
+const RAW_STATS = [
+  ['swits', 3, false], ['acelf', 3, true], ['handb', 1, false], ['airs', 1, true], ['airc', 1, false],
+  ['turn', 1, false], ['grip', 1, true], ['bounce', 1, true], ['simag', 1, true], ['moment', 1, true],
+  ['comprad', 1, true], ['push', 1, false], ['revpush', 1, false], ['lift', 1, false], ['revlift', 1, false],
+  ['powerloss', 1, false], ['flipy', 1, false], ['msquash', 1, false], ['clrad', 1, false],
+  ['dammult', 1, true], ['maxmag', 1, false], ['dishandle', 1, true], ['outdam', 1, true],
+  ['enginsignature', 1, false],
+];
+
+/** The raw stat lines of a .rad: Map name -> number[] (only complete, finite ones). */
+export function readRawStats(text) {
+  const out = new Map();
+  for (const line of readLines(text)) {
+    const t = line.trim();
+    for (const [name, count, float] of RAW_STATS) {
+      if (!t.startsWith(name + '(')) continue;
+      const v = t.slice(name.length + 1, t.indexOf(')') < 0 ? t.length : t.indexOf(')')).split(',').map(Number);
+      if (v.length >= count && v.slice(0, count).every(Number.isFinite)) {
+        out.set(name, v.slice(0, count).map((x) => (float ? fr(x) : trunc(x))));
+      }
+    }
+  }
+  return out;
+}
+
 export class CarDefine {
   constructor(bco, m, t, gs) {
     this.swits = [
@@ -180,6 +209,14 @@ export class CarDefine {
       }
     } catch (obj) {
       console.log('Error Loading Car Stat: ' + obj);
+    }
+    // Raw stats stand in for what they replace: raw maxmag is all the crash
+    // calibration was for, and a car that carries raw stats needs no stat() line
+    // (the defaults above stand in, as NFM World's cars have none).
+    const raw = readRawStats(typeof buf === 'string' ? buf : new TextDecoder('iso-8859-1').decode(buf));
+    if (raw.size) {
+      b = true;
+      if (raw.has('maxmag')) b2 = true;
     }
     if (b && b2) {
       let l = 0;
@@ -486,6 +523,11 @@ export class CarDefine {
         this.comprad[n4] = fr(0.4);
       }
       this.simag[n4] = fr(fr((n3 - 17) * fr(0.0167)) + fr(0.85));
+      for (const [name, v] of raw) {
+        if (v.length > 1) v.forEach((x, i) => { this[name][n4][i] = x; });
+        else this[name][n4] = v[0];
+      }
+      if (this.enginsignature[n4] > 4 || this.enginsignature[n4] < 0) this.enginsignature[n4] = 0;
     } else {
       this.names[n4] = '';
     }

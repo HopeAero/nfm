@@ -12,6 +12,7 @@
 // or its habit of keeping state in AWT text fields.
 
 import { MAX_POLYS } from '../ContO.js';
+import { readRawStats } from '../CarDefine.js';
 
 const trunc = (v) => (v < 0 ? Math.ceil(v) : Math.floor(v));
 
@@ -416,16 +417,18 @@ export function problems(text, o) {
     if (o.maxR > 400) out.push(`The car is too big to race. Scale it down by about ${Math.round((o.maxR / 400 - 1) * 100)}% on the Body tab.`);
     if (o.maxR < 120 && o.maxR > 0) out.push(`The car is too small to race. Scale it up by about ${Math.round((120 / o.maxR - 1) * 100)}% on the Body tab.`);
   }
+  // Raw stats ("Recharged stats") stand in for both: CarDefine.loadstat loads a car on them.
+  const raw = readRawStats(text).size > 0;
   const stat = readStats(text);
-  if (!stat) out.push('The car has no stats yet — set them on the Stats tab.');
-  else if (classOf(stat) === -1) {
+  if (!stat && !raw) out.push('The car has no stats yet — set them on the Stats tab.');
+  else if (stat && classOf(stat) === -1) {
     out.push(`The stats add up to ${statTotal(stat)}, which is not a class budget. Pick a class on the Stats tab to fix it.`);
-  } else if (stat.some((s) => s < STAT_MIN || s > STAT_MAX)) {
+  } else if (stat && stat.some((s) => s < STAT_MIN || s > STAT_MAX)) {
     out.push('One of the stats is outside the allowed range of 16 to 200.');
   }
   const p = readPhysics(text);
-  if (!p) out.push('The car has no handling set yet — fill in the Physics tab.');
-  else if (p.phys.some((v) => v < 0 || v > 100) || p.crash.some((v) => v < 0)) {
+  if (!p && !raw) out.push('The car has no handling set yet — fill in the Physics tab.');
+  else if (p && (p.phys.some((v) => v < 0 || v > 100) || p.crash.some((v) => v < 0))) {
     out.push('One of the Physics settings is outside the allowed range of 0 to 100.');
   }
   return out;

@@ -22,3 +22,11 @@ test('a new car model casts a shadow and is set up as the base sets Car Maker ca
   assert.strictEqual(o.maxR, 130);        // the base ContO's size for this car (ScaleX/Y/Z 145)
   assert.ok(o.npl > 60);
 });
+
+test('lightBrake parses as light 3 in Extended too (ext-patch lightbrake-parse)', async () => {
+  const { ContO } = await import('./ContO.js');
+  const poly = (tag) => `<p>\nc(200,60,60)\n${tag}\np(0,0,0)\np(10,0,0)\np(0,10,0)\n</p>\n`;
+  const text = poly('lightF') + poly('lightB') + poly('lightBrake');
+  const o = new ContO(0, Int8Array.from(text, (ch) => ch.charCodeAt(0)), new Medium(), new Trackers(), null, NEW_BASE);
+  assert.deepEqual([o.p[0].light, o.p[1].light, o.p[2].light], [1, 2, 3]);
+});

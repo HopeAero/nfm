@@ -392,6 +392,45 @@ const NEWCAR_PATCHES = [
     replace: `          this.drawcs(60, 'Created by Excalibur', 246, 246, 246, 3);\n        }\n        }   // ext-patch newcar-credit-close\n` },
 ];
 
+/**
+ * DS-addons' lightBrake (light 3), as in the base port (web/Plane.js isLit): a
+ * brake light that glows at night like lightB and, by day, while its car brakes
+ * or reverses. racetick.js marks the braking cars; ContO.d hands that to Plane.
+ * Drawing only: no sim state reads a face's colour. extLight() folds 3 into 2
+ * (lit) or 0 (unlit), so every lightB site below keeps the jar's own colours.
+ */
+const LIGHTBRAKE_PATCHES = [
+  { name: 'lightbrake-parse', file: 'ContO.js',
+    find: "          if (s1.startsWith('lightB')) {\n            byte0 = 2;\n          }\n",
+    replace: "          if (s1.startsWith('lightB')) {\n            byte0 = 2;\n          }\n" +
+      "          if (s1.startsWith('lightBrake')) {   // ext-patch lightbrake-parse\n            byte0 = 3;\n          }\n" },
+  { name: 'lightbrake-import', file: 'ContO.js',
+    find: "import { Plane } from './Plane.js';\n",
+    replace: "import { Plane, setBrakeLit } from './Plane.js';   // ext-patch lightbrake-import\n" },
+  { name: 'lightbrake-draw', file: 'ContO.js',
+    find: '  d(g) {\n    if (this.dist !== 0) {\n',
+    replace: '  d(g) {\n    setBrakeLit(this.braking === true);   // ext-patch lightbrake-draw: racetick.js marks braking cars\n    if (this.dist !== 0) {\n' },
+  { name: 'lightbrake-state', file: 'Plane.js',
+    find: "import { nearTrackers } from './trackgrid.js';\n",
+    replace: "import { nearTrackers } from './trackgrid.js';\n" +
+      '// ext-patch lightbrake-state: lightBrake (3) is lightB lit at night or while its car brakes\n' +
+      'let brakeLit = false;\n' +
+      'export function setBrakeLit(v) { brakeLit = v; }\n' +
+      'const extLight = (p) => (p.light === 3 ? (p.m.lightson || brakeLit ? 2 : 0) : p.m.lightson ? p.light : 0);\n' },
+  { name: 'lightbrake-order', file: 'Plane.js',
+    find: '      if (this.m.lightson && (this.light === 2)) {\n        i12 = i32(i12 - 40);\n',
+    replace: '      if (extLight(this) === 2) {   // ext-patch lightbrake-order\n        i12 = i32(i12 - 40);\n' },
+  { name: 'lightbrake-face', file: 'Plane.js',
+    find: '    if (this.m.lightson) {\n      if (this.light === 2) {\n        l11 = 210;\n        j13 = 0;\n        k14 = 0;\n      }\n      if (this.light === 1) {\n        l11 = 210;\n',
+    replace: '    {   // ext-patch lightbrake-face\n      if (extLight(this) === 2) {\n        l11 = 210;\n        j13 = 0;\n        k14 = 0;\n      }\n      if (extLight(this) === 1) {\n        l11 = 210;\n' },
+  { name: 'lightbrake-outline', file: 'Plane.js',
+    find: '          if (this.m.lightson) {\n            if (this.light === 2) {\n              l11 = 100;\n            }\n            if (this.light === 1) {\n',
+    replace: '          {   // ext-patch lightbrake-outline\n            if (extLight(this) === 2) {\n              l11 = 100;\n            }\n            if (extLight(this) === 1) {\n' },
+  { name: 'lightbrake-shadow', file: 'Plane.js',
+    find: '    if ((shadowcar && (this.light !== 1)) && (this.light !== 2)) {\n',
+    replace: '    if ((shadowcar && (this.light !== 1)) && (this.light !== 2) && (this.light !== 3)) {   // ext-patch lightbrake-shadow\n' },
+];
+
 export const PATCHES = [
   { name: 'record-ghosts', file: 'Record.js', find: RECORD_GHOSTS_FIND, replace: RECORD_GHOSTS_REPLACE },
   { name: 'record-shift', file: 'Record.js', find: RECORD_SHIFT_FIND, replace: RECORD_SHIFT_REPLACE },
@@ -405,6 +444,7 @@ export const PATCHES = [
   ...DUST_RATE,
   ...SWEEP_PATCHES,
   ...NEWCAR_PATCHES,
+  ...LIGHTBRAKE_PATCHES,
 ];
 
 /** 'applied' | 'pending' | throws when neither form is there exactly once. */

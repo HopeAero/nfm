@@ -465,6 +465,8 @@ export class GameSparker {
     this.rebuildNewCars(medium, xtGraphics, array2, array3);
     setDrawPhase(true);
     medium.d(rd);
+    // Which cars are braking or reversing, for their lightBrake lights (drawing only).
+    for (let n = 0; n < xtGraphics.nplayers; ++n) array2[n].braking = !!this.u[n]?.down;
     let n34 = 0;
     const array16 = intArray(200);
     for (let n35 = 0; n35 < this.nob; ++n35) {

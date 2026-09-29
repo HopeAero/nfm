@@ -1158,6 +1158,10 @@ Gameplay stays separate; Extended learns to read what the editors make.
       cars) and "Revised and Recharged" (25 by Ryan Albano, `ext/recharged/models.radq`) groups, read-only like
       the base sixteen; saving makes your copy. Cars over the base 286-polygon cap preview
       truncated (WORK.md).
+- [x] **Recharged stats, R&R numbers, lightBrake, NFM Origins cars (2026-09-29)**: raw CarDefine
+      values in the .rad (`CarDefine.readRawStats`, base and Extended); seven R&R cars open with
+      NFM World's numbers and race as they are; `lightBrake` glows while braking (base + ext-patch);
+      Electro LMP and BMW M3 GTR (ACVoong) from nfm-origins in the picker (`ext/origins/`).
 - [x] **Crash calibration (2026-09-28)**: `careditor/damage.js calibrate()` (the applet's
       Save & Finish loop, moved out of tab2.js) runs on save when `actmag` is 0. Was:
       **The web Car Maker cannot calibrate the crash** (`physics()` value 16, `actmag`): only

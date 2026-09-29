@@ -18,6 +18,15 @@
 import { idiv, trunc, fr, i32, intArray, floatArray, random, RGBtoHSB, HSBtoRGB } from './java.js';
 import { Madness } from './Madness.js';
 
+// DS-addons' lightBrake (light 3): a brake light that also glows by day while
+// its car brakes or reverses. ContO.d sets this for the model it is drawing, so
+// it is drawing state only -- nothing in the simulation reads a Plane's colour.
+let brakeLit = false;
+export function setBrakeLit(v) { brakeLit = v; }
+
+/** Whether a face with this `light` value is drawn lit. */
+export const isLit = (light, lightson, braking) => (lightson && light !== 0) || (braking && light === 3);
+
 export class Plane {
   constructor(m, t, array, array2, array3, n, array4, glass, gr, fs, wx, wy, wz, disline, bfase, road, light, solo) {
     this.c = intArray(3);
@@ -555,7 +564,7 @@ export class Plane {
       }
       if (abs3 === 0 || abs4 === 0) {
         n45 = 0;
-      } else if (abs3 < 3 && abs4 < 3 && ((idiv(n8, abs3) > 15 && idiv(n8, abs4) > 15) || b) && (!this.m.lightson || this.light === 0)) {
+      } else if (abs3 < 3 && abs4 < 3 && ((idiv(n8, abs3) > 15 && idiv(n8, abs4) > 15) || b) && !isLit(this.light, this.m.lightson, brakeLit)) {
         n45 = 0;
       }
     }
@@ -588,7 +597,7 @@ export class Plane {
           }
         }
       }
-      if (this.m.lightson && this.light === 2) gr -= 40;
+      if (isLit(this.light, this.m.lightson, brakeLit) && this.light >= 2) gr -= 40;
       let n56 = array3[0];
       let n57 = array3[0];
       let n58 = array[0];
@@ -676,7 +685,7 @@ export class Plane {
       let red = (rgb >> 16) & 255;
       let green = (rgb >> 8) & 255;
       let blue = rgb & 255;
-      if (this.m.lightson && (this.light !== 0 || ((this.gr === -11 || this.gr === -12) && n8 === -1))) {
+      if (isLit(this.light, this.m.lightson, brakeLit) || (this.m.lightson && (this.gr === -11 || this.gr === -12) && n8 === -1)) {
         red = this.oc[0];
         if (red > 255) red = 255;
         if (red < 0) red = 0;
@@ -706,7 +715,7 @@ export class Plane {
             let r3 = 0;
             let g3 = 0;
             let b6 = 0;
-            if (this.m.lightson && this.light !== 0) {
+            if (isLit(this.light, this.m.lightson, brakeLit)) {
               r3 = idiv(this.oc[0], 2);
               if (r3 > 255) r3 = 255;
               if (r3 < 0) r3 = 0;

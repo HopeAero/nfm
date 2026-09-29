@@ -8,7 +8,7 @@
 
 import { floatArray, fr, i32, idiv, intArray, objArray, random, setDrawPhase, trunc } from '../java.js';
 import { Arrays, ByteArrayInputStream, Color, DataInputStream, Integer, Random, StringBuilder, System, charAt, jstr } from './jawt.js';
-import { Plane } from './Plane.js';
+import { Plane, setBrakeLit } from './Plane.js';   // ext-patch lightbrake-import
 import { nearTrackers } from './trackgrid.js';
 
 // port: Trackers' colour rows are made as slots fill (ext-patch tracker-rows), not 2 x 67000 up front
@@ -275,6 +275,9 @@ export class ContO {
           }
           if (s1.startsWith('lightB')) {
             byte0 = 2;
+          }
+          if (s1.startsWith('lightBrake')) {   // ext-patch lightbrake-parse
+            byte0 = 3;
           }
           if (s1.startsWith('noOutline')) {
             bool2 = true;
@@ -1104,6 +1107,7 @@ export class ContO {
   }
 
   d(g) {
+    setBrakeLit(this.braking === true);   // ext-patch lightbrake-draw: racetick.js marks braking cars
     if (this.dist !== 0) {
       this.dist = 0;
     }

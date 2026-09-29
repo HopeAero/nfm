@@ -17,7 +17,7 @@
 // submission order. Never reorder, batch, or hoist draw calls.
 
 import { idiv, trunc, fr, i32, intArray, floatArray, objArray, RGBtoHSB, HSBtoRGB, JavaRandom, setDrawPhase } from './java.js';
-import { Plane } from './Plane.js';
+import { Plane, setBrakeLit } from './Plane.js';
 
 // NFM 2 read up to 210 polygons, then the wheels (4 x 19 pieces): 286 in all.
 // Raised to Revised and Recharged's 1000 pieces so its big cars load whole.
@@ -222,6 +222,9 @@ export class ContO {
             }
             if (string.startsWith('lightB')) {
               n7 = 2;
+            }
+            if (string.startsWith('lightBrake')) {
+              n7 = 3;
             }
             if (string.startsWith('noOutline')) {
               b3 = true;
@@ -1256,6 +1259,7 @@ export class ContO {
 
   d(graphics2D) {
     ++graphics2D.objCalls;        // scene-shape counter; see graphics.js
+    setBrakeLit(this.braking === true);   // GameSparker.draw sets it on cars; see Plane.js
     if (this.dist !== 0) {
       this.dist = 0;
     }

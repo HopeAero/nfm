@@ -315,3 +315,56 @@ test('CarDefine loadcar returns -1 for missing text or bad stats or npl <= 60 ma
   assert.strictEqual(cd.loadcar('opile1', 18, opile1Raw), -1);
 });
 
+
+// ---- "Recharged stats": raw CarDefine values in the .rad ---------------------
+
+const RAW_FIELDS = ['swits', 'acelf', 'handb', 'airs', 'airc', 'turn', 'grip', 'bounce', 'simag', 'moment',
+  'comprad', 'push', 'revpush', 'lift', 'revlift', 'powerloss', 'flipy', 'msquash', 'clrad', 'dammult',
+  'maxmag', 'dishandle', 'outdam', 'enginsignature', 'cclass'];
+const snap = (cd, n) => Object.fromEntries(RAW_FIELDS.map((f) => [f, cd[f][n]?.length !== undefined ? Array.from(cd[f][n]) : cd[f][n]]));
+const BASE = 'stat(128,98,102,109,123)\nphysics(50,50,50,50,0,0,0,0,0,50,50,50,50,50,1,9000)\nhandling(130)\n';
+const load = (text) => {
+  const cd = new CarDefine(null, new Medium(), new Trackers(), null);
+  cd.loadstat(text, 'Raw', 150, -60, 20, 16);
+  return cd;
+};
+
+test('raw stats: a .rad without them loads exactly as before', () => {
+  // The same text with a raw line that is only a comment must change nothing.
+  assert.deepEqual(snap(load(BASE), 16), snap(load(BASE + '//maxmag(1)\n'), 16));
+});
+
+test('raw stats: each line present replaces the computed value, typed as CarDefine types it', () => {
+  const raw = 'swits(100, 210, 330)\nacelf(14,9,5)\nhandb(8)\nairs(1.0)\nairc(50)\nturn(9)\ngrip(16)\n'
+    + 'bounce(1.05)\nsimag(0.9)\nmoment(1.3)\ncomprad(0.5)\npush(2)\nrevpush(2)\nlift(0)\nrevlift(0)\n'
+    + 'powerloss(2500000)\nflipy(-50)\nmsquash(7)\nclrad(3300)\ndammult(0.75)\nmaxmag(13000)\n'
+    + 'dishandle(0.65)\noutdam(0.68)\nenginsignature(3)\n';
+  const before = snap(load(BASE), 16);
+  const cd = load(BASE + raw);
+  const s = snap(cd, 16);
+  assert.deepEqual(s.swits, [100, 210, 330]);
+  assert.deepEqual(s.acelf, [14, 9, 5]);
+  assert.equal(s.bounce, fr(1.05));
+  assert.equal(s.dammult, fr(0.75));
+  assert.equal(s.maxmag, 13000);
+  assert.equal(s.enginsignature, 3);
+  assert.equal(s.powerloss, 2500000);
+  assert.equal(cd.names[16], 'Raw');
+  assert.deepEqual(s.cclass, before.cclass);   // the class still comes from stat()
+});
+
+test('raw stats: a car with raw maxmag needs no stat() and no calibration', () => {
+  assert.equal(load('physics(50,50,50,50,0,0,0,0,0,50,50,50,50,50,1,0)\n').names[16], '');  // uncalibrated: blanked, as before
+  const cd = load('maxmag(9000)\nswits(60,150,250)\n');
+  assert.equal(cd.names[16], 'Raw');
+  assert.equal(cd.maxmag[16], 9000);
+  assert.deepEqual(Array.from(cd.swits[16]), [60, 150, 250]);
+});
+
+test('raw stats: the LMP from nfm-origins (raw stats only, no calibration needed) loads as a custom car', () => {
+  const text = readFileSync(new URL('../ext/origins/lmp.rad', import.meta.url), 'latin1');
+  const cd = new CarDefine(new Array(56).fill(null), new Medium(), new Trackers(), null);
+  assert.equal(cd.loadcar('Electro LMP', 16, text), 16);
+  assert.deepEqual(Array.from(cd.swits[16]), [100, 210, 330]);
+  assert.equal(cd.maxmag[16], 13000);
+});

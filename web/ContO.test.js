@@ -162,3 +162,12 @@ test('ContO dist 3D sum of squares wraps at int32 per §2b', () => {
 });
 
 
+
+test('lightBrake parses as its own light (3); lightB and lightF keep 2 and 1', async () => {
+  const { Medium } = await import('./Medium.js');
+  const { Trackers } = await import('./Trackers.js');
+  const poly = (tag) => `<p>\nc(200,60,60)\n${tag}\np(0,0,0)\np(10,0,0)\np(0,10,0)\n</p>\n`;
+  const m = new Medium(); m.loadnew = true;
+  const o = new ContO(new TextEncoder().encode(poly('lightF') + poly('lightB') + poly('lightBrake')), m, new Trackers());
+  assert.deepEqual([o.p[0].light, o.p[1].light, o.p[2].light], [1, 2, 3]);
+});

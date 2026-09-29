@@ -211,3 +211,10 @@ test('problems: too many pieces is counted in the text, past MAX_POLYS', () => {
   assert.equal(flagged(924), false);
   assert.equal(flagged(925), true);
 });
+
+test('problems: raw stats satisfy the stats and physics requirements', () => {
+  const car = '1stColor(1,1,1)\n2ndColor(2,2,2)\n';
+  const msgs = (t) => rad.problems(t, null).join('\n');
+  assert.match(msgs(car), /no stats yet/);
+  assert.doesNotMatch(msgs(car + 'maxmag(9000)\n'), /no stats yet|no handling/);
+});

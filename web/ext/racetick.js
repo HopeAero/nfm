@@ -75,6 +75,9 @@ export class RaceTick {
     if (medium.effect[4]) {
       medium.redrawpolys(rd);
     }
+    // Which cars are braking or reversing, for their lightBrake lights (drawing only;
+    // ext-patch lightbrake-*, web/tools/ext-patches.mjs).
+    for (let n = 0; n < xtgraphics.nplayers; n++) aconto2[n].braking = !!gs.u[n]?.down;
     let k8 = 0;
     let ai5 = intArray(200);
     let renderlimit = gs.nob;
