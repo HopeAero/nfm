@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { touchPointers, touchWanted, ACTIONS } from './touch.js';
+import { touchPointers, touchWanted, easyStuntsEnabled, ACTIONS } from './touch.js';
 
 const log = () => { const out = []; return { out, send: (type, a) => out.push(`${type}:${a}`) }; };
 
@@ -43,4 +43,25 @@ test('ACTIONS carry the base race key (code) and Extended\'s (key)', () => {
   assert.deepEqual([ACTIONS.handb.code, ACTIONS.handb.key], ['Space', ' ']);
   assert.deepEqual([ACTIONS.look.code, ACTIONS.look.key], ['ShiftLeft', 'z']);   // main.js Shift; the jar's Z
   assert.deepEqual([ACTIONS.pause.code, ACTIONS.pause.key], ['Escape', 'Escape']);
+});
+
+test('a finger can slide off and return without lifting', () => {
+  const l = log(), t = touchPointers(l.send);
+  t.down(1, 'up'); t.move(1, null); t.move(1, 'up'); t.up(1);
+  assert.deepEqual(l.out, ['keydown:up', 'keyup:up', 'keydown:up', 'keyup:up']);
+});
+test('clearing interrupted gestures releases all held actions', () => {
+  const l = log(), t = touchPointers(l.send);
+  t.down(1, 'up'); t.down(2, 'left'); t.clear(); t.move(1, 'up'); t.up(2);
+  assert.deepEqual(l.out, ['keydown:up', 'keydown:left', 'keyup:up', 'keyup:left']);
+});
+
+test('easy stunts require explicit opt-in, independent of touch detection', () => {
+  const previous = globalThis.localStorage;
+  try {
+    for (const [saved, wanted] of [[{}, false], [{touch:'on'}, false], [{touch:'off', easyStunts:true}, true], [{easyStunts:false}, false]]) {
+      globalThis.localStorage = {getItem: () => JSON.stringify(saved)};
+      assert.equal(easyStuntsEnabled(), wanted);
+    }
+  } finally { if(previous === undefined) delete globalThis.localStorage; else globalThis.localStorage = previous; }
 });

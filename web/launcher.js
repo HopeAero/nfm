@@ -37,7 +37,7 @@ const STAGE_COUNT = 32;
 const STORE_KEY = 'nfm.launcher';
 const DEFAULTS = {
   name: '', car: 'Formula 7', stage: 1, players: 7, opponents: 'stage',
-  sfxvol: 100, musicvol: 100, res: 2, interp: true, ghost: false, hud: 'auto', touch: 'auto', devmode: false, perf: 'fps',
+  sfxvol: 100, musicvol: 100, res: 2, interp: true, ghost: false, hud: 'auto', touch: 'auto', easyStunts: false, devmode: false, perf: 'fps',
   visibility: 'public', lang: 'en',
 };
 let S = { ...DEFAULTS };
@@ -135,6 +135,12 @@ const V = {
     set: (i) => { S.touch = ['auto', 'on', 'off'][i]; save(); },
     text: () => ({ auto: 'Automatic', on: 'Always', off: 'Never' })[S.touch] || 'Automatic',
   },
+  easyStunts: {
+    list: () => [false, true],
+    get: () => (S.easyStunts ? 1 : 0),
+    set: (i) => { S.easyStunts = !!i; save(); },
+    text: () => (S.easyStunts ? 'Yes' : 'No'),
+  },
   // Dark-sky HUD: the port's rim around the lettering, or the Java's boxes.
   hud: {
     list: () => ['auto', 'outline', 'boxes'],
@@ -179,7 +185,7 @@ const OPT_ROWS = [['players', 'Cars on track'], ['opponents', 'Opponents']];
 const SET_ROWS = [['sfxvol', 'Sound'], ['musicvol', 'Music'],
                   ['res', 'Resolution'], ['interp', 'Smooth frames'],
                   ['ghost', 'Replay recording'], ['hud', 'HUD on dark skies'],
-                  ['touch', 'Touch controls'],
+                  ['touch', 'Touch controls'], ['easyStunts', 'Easy stunts'],
                   ['perf', 'Show performance'],
                   ['devmode', 'Developer mode'],
                   ['lang', 'Language']];

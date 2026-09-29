@@ -37,7 +37,7 @@ import { highlightTitle, shouldPlayHighlight } from './highlight.js';
 import { saveCareer } from './career.js';
 import { perfLevel, perfLine } from './perfline.js';
 import { parseRivals, pickRivals, seededRandom } from './rivals.js';
-import { touchEnabled, mountTouchControls } from './touch.js';
+import { touchEnabled, easyStuntsEnabled, mountTouchControls } from './touch.js';
 
 const log = (msg) => {
   console.log(msg);
@@ -891,13 +891,13 @@ export async function boot(opts = {}) {
   // console or a headless test (e.g. `__nfm.xt.fase = -2` ends the race).
   if (params.get('debug') === '1') window.__nfm = { xt, checkPoints, gs, medium, record, co: array2 };
 
-  // Phones and tablets: the on-screen buttons (touch.js), and with them Re-Lit's
-  // arrow stunts on the player's own car -- not in netplay, where every client
-  // must simulate every car alike.
+  // On-screen buttons and the separate easy-stunts preference. Netplay keeps
+  // identical physics for every client.
   if (touchEnabled()) {
-    mountTouchControls();
-    if (!sync) pad.easyStunts = true;
+    mountTouchControls(() => !raceMenu.isOpen);
   }
+
+  if (!sync) pad.easyStunts = easyStuntsEnabled();
 
   // The finish screen belongs to the game, not the race menu: Esc must not
   // open a pause menu over it.
@@ -1872,92 +1872,8 @@ function installInput(u, snd, raceMenu) {
     music.unlock();
   });
 
-  // Virtual joystick for mobile touch
-  let startX = 0, startY = 0;
-  const THRESHOLD = 30; // pixels
+  // Touch driving is owned by touch.js; a second gesture handler would overwrite held keys.
 
-  addEventListener('touchstart', (e) => {
-    if (raceMenu.isOpen) return;
-    if (snd) snd.unlock();
-    music.unlock();
-    
-    // The first touch sets the anchor for the joystick and starts driving
-    if (e.touches.length === 1) {
-      startX = e.touches[0].pageX;
-      startY = e.touches[0].pageY;
-      u.up = true;
-      u.touchTrick = false;
-    } else if (e.touches.length >= 2) {
-      u.touchTrick = true;
-      const cx = (e.touches[0].pageX + e.touches[1].pageX) / 2;
-      const cy = (e.touches[0].pageY + e.touches[1].pageY) / 2;
-      startX = cx;
-      startY = cy;
-      u.touchTrickX = cx;
-      u.touchTrickY = cy;
-    }
-  }, { passive: false });
-
-  addEventListener('touchmove', (e) => {
-    if (raceMenu.isOpen) { e.preventDefault(); return; }
-    e.preventDefault(); // prevent browser scrolling
-    if (e.touches.length === 0) return;
-    
-    let currentX = 0, currentY = 0;
-    if (e.touches.length === 1) {
-      currentX = e.touches[0].pageX;
-      currentY = e.touches[0].pageY;
-      u.touchTrick = false;
-    } else if (e.touches.length >= 2) {
-      u.touchTrick = true;
-      currentX = (e.touches[0].pageX + e.touches[1].pageX) / 2;
-      currentY = (e.touches[0].pageY + e.touches[1].pageY) / 2;
-    }
-    
-    const dx = currentX - startX;
-    const dy = currentY - startY;
-
-    // Analog steering for ground (squared curve for better feel without huge deadzone)
-    const STEER_MAX = 130.0;
-    let steerNorm = Math.max(-1.0, Math.min(1.0, dx / STEER_MAX));
-    u.steer = steerNorm * Math.abs(steerNorm);
-
-    if (u.touchTrick) {
-      u.touchTrickX = currentX;
-      u.touchTrickY = currentY;
-    }
-
-    // Digital keys for braking
-    u.left = dx < -THRESHOLD;
-    u.right = dx > THRESHOLD;
-    u.up = dy <= THRESHOLD;
-    u.down = dy > 120; // Much larger deadzone for reverse to avoid accidental triggering
-  }, { passive: false });
-
-  const endTouch = (e) => {
-    if (raceMenu.isOpen) return;
-    if (e.touches.length === 0) {
-      u.up = false;
-      u.down = false;
-      u.left = false;
-      u.right = false;
-      u.handb = false;
-      u.steer = 0.0;
-      u.touchTrick = false;
-    } else if (e.touches.length === 1) {
-      u.touchTrick = false;
-      u.handb = false;
-      startX = e.touches[0].pageX;
-      startY = e.touches[0].pageY;
-    } else if (e.touches.length >= 2) {
-      u.touchTrick = true;
-      startX = (e.touches[0].pageX + e.touches[1].pageX) / 2;
-      startY = (e.touches[0].pageY + e.touches[1].pageY) / 2;
-    }
-  };
-  
-  addEventListener('touchend', endTouch);
-  addEventListener('touchcancel', endTouch);
 }
 
 // Nothing runs on import: `main.html` calls boot() with the query string, and

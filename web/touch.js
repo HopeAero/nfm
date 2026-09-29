@@ -6,8 +6,7 @@
 // releasing it the keyup. That is what lets one overlay drive both races and
 // their screens without knowing any of them -- the base race reads `e.code`
 // (main.js installInput), Extended reads `e.key` (ext/race.js javaKey), so
-// every action carries both. The race also sets `easyStunts` on the player's
-// Control while these are up (Mad.js): arrows alone start a stunt in the air.
+// every action carries both. Easy stunts are a separate launcher setting.
 
 /** What each button presses: [code for main.js, key for Extended]. Look back is
  *  Shift in the base port and Z in the jar (lookback = 1). */
@@ -38,12 +37,14 @@ export function touchPointers(send) {
     const was = held.get(id) ?? null;
     if (was === a) return;
     if (was) release(was);
-    if (a) { held.set(id, a); press(a); } else held.delete(id);
+    held.set(id, a);
+    if (a) press(a);
   };
   return {
     down: (id, a) => set(id, a),
     move: (id, a) => { if (held.has(id)) set(id, a); },
-    up: (id) => set(id, null),
+    up: (id) => { set(id, null); held.delete(id); },
+    clear: () => { for (const id of held.keys()) { set(id, null); } held.clear(); },
   };
 }
 
@@ -57,27 +58,27 @@ const ICON = {
   pause: '<rect x="12" y="13" width="24" height="4"/><rect x="12" y="22" width="24" height="4"/><rect x="12" y="31" width="24" height="4"/>',
 };
 
-// [action, CSS position]; sizes in vmin so they scale with the phone, not the game
+// [action, CSS position]; anchored to the rendered stage, including letterboxing.
 const LAYOUT = [
-  ['left', 'left:3vmin;bottom:5vmin'],
-  ['right', 'left:22vmin;bottom:5vmin'],
-  ['look', 'left:3vmin;bottom:25vmin'],
-  ['down', 'right:22vmin;bottom:5vmin'],
-  ['up', 'right:3vmin;bottom:5vmin'],
-  ['handb', 'right:3vmin;bottom:25vmin'],
-  ['pause', 'right:2vmin;top:2vmin;width:10vmin;height:10vmin'],
+  ['left', 'left:5.5%;bottom:8%'],
+  ['right', 'left:20.5%;bottom:3%'],
+  ['look', 'left:1.5%;bottom:39%'],
+  ['down', 'right:20.5%;bottom:3%'],
+  ['up', 'right:5.5%;bottom:8%'],
+  ['handb', 'right:1.5%;bottom:39%'],
+  ['pause', 'right:1%;top:1%;width:var(--pause-size);height:var(--pause-size)'],
 ];
 
 /** Put the buttons on the page, shown while `visible()` holds. Returns a function that removes them. */
 export function mountTouchControls(visible = () => true) {
   const root = document.createElement('div');
   root.id = 'touch-controls';
-  root.style.cssText = 'position:fixed;inset:0;z-index:50;pointer-events:none;user-select:none;-webkit-user-select:none;';
+  root.style.cssText = 'position:fixed;z-index:50;pointer-events:none;user-select:none;-webkit-user-select:none;';
   for (const [a, pos] of LAYOUT) {
     const b = document.createElement('div');
     b.dataset.touch = a;
-    b.style.cssText = 'position:absolute;width:17vmin;height:17vmin;box-sizing:border-box;border-radius:2.5vmin;'
-      + 'background:rgba(130,130,130,.38);border:.5vmin solid rgba(255,255,255,.45);color:rgba(255,255,255,.9);filter:drop-shadow(0 0 .4vmin rgba(0,0,0,.6));'
+    b.style.cssText = 'position:absolute;width:var(--touch-size);height:var(--touch-size);box-sizing:border-box;border-radius:6px;'
+      + 'background:rgba(95,125,95,.28);border:1px solid rgba(45,65,45,.35);color:rgba(40,65,40,.55);filter:drop-shadow(0 0 .4vmin rgba(0,0,0,.6));'
       + 'display:flex;align-items:center;justify-content:center;pointer-events:auto;touch-action:none;'
       + `-webkit-touch-callout:none;${pos}`;
     b.innerHTML = `<svg viewBox="0 0 48 48" width="62%" height="62%" fill="currentColor">${ICON[a]}</svg>`;
@@ -96,22 +97,37 @@ export function mountTouchControls(visible = () => true) {
     const a = e.target.closest?.('[data-touch]')?.dataset.touch;
     if (!a) return;
     e.preventDefault();
-    // touch pointers are captured to the first element: let a thumb slide to the next button
-    if (e.target.hasPointerCapture?.(e.pointerId)) e.target.releasePointerCapture(e.pointerId);
+    // Capture each finger independently; hit testing still allows sliding between buttons.
+    e.target.closest('[data-touch]').setPointerCapture(e.pointerId);
     fingers.down(e.pointerId, a);
   };
   const onMove = (e) => fingers.move(e.pointerId, under(e));
   const onUp = (e) => fingers.up(e.pointerId);
   let raf = 0;
-  const show = () => { root.style.display = visible() ? '' : 'none'; raf = requestAnimationFrame(show); };
+  const show = () => {
+    const shown = visible() && !document.hidden;
+    if (!shown) fingers.clear();
+    root.style.display = shown ? '' : 'none';
+    const rect = document.getElementById('stage').getBoundingClientRect();
+    Object.assign(root.style, { left: rect.left + 'px', top: rect.top + 'px', width: rect.width + 'px', height: rect.height + 'px' });
+    root.style.setProperty('--touch-size', Math.max(44, rect.height * .19) + 'px');
+    root.style.setProperty('--pause-size', rect.height * .10 + 'px');
+    raf = requestAnimationFrame(show);
+  };
   show();
   root.addEventListener('pointerdown', onDown);
   root.addEventListener('contextmenu', (e) => e.preventDefault());
+  const clear = () => fingers.clear();
+  addEventListener('blur', clear);
+  document.addEventListener('visibilitychange', clear);
   addEventListener('pointermove', onMove);
   addEventListener('pointerup', onUp);
   addEventListener('pointercancel', onUp);
   return () => {
+    fingers.clear();
     cancelAnimationFrame(raf);
+    removeEventListener('blur', clear);
+    document.removeEventListener('visibilitychange', clear);
     removeEventListener('pointermove', onMove);
     removeEventListener('pointerup', onUp);
     removeEventListener('pointercancel', onUp);
@@ -124,4 +140,10 @@ export function touchEnabled() {
   let setting = 'auto';
   try { setting = JSON.parse(localStorage.getItem('nfm.launcher') || '{}').touch || 'auto'; } catch { /* private mode */ }
   return touchWanted(setting, typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches);
+}
+
+/** Explicit opt-in, independent of device detection and on-screen controls. */
+export function easyStuntsEnabled() {
+  try { return JSON.parse(localStorage.getItem('nfm.launcher') || '{}').easyStunts === true; }
+  catch { return false; }
 }

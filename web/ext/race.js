@@ -50,7 +50,7 @@ import { listAll, readCar } from '../carstore.js';
 import { NEW_BASE, newCars, setNewCars } from './newcars.js';
 import { loadNewCars } from './newcars-stats.js';
 import { newCarModel } from './newcars-model.js';
-import { touchEnabled, mountTouchControls } from '../touch.js';
+import { touchEnabled, easyStuntsEnabled, mountTouchControls } from '../touch.js';
 
 const W = 870, H = 480;   // Extended's game space (the base game's is 800x450)
 const FONTS = [['Adventure', 'Adventure.ttf'], ['fifawelcome1.3', 'fifawelcome1.3.ttf']];
@@ -484,11 +484,12 @@ export async function bootExtended(params, log, onExit) {
   }, true);
   if (!menus) { addEventListener('keydown', keyDown); addEventListener('keyup', keyUp); }
   // Phones and tablets: the on-screen buttons while racing (fase 0) -- the jar's own
-  // screens take taps as clicks -- and Re-Lit's arrow stunts (ext-patch easystunt).
+  // screens take taps as clicks. Easy stunts are a separate preference.
   if (touchEnabled()) {
-    mountTouchControls(() => xt.fase === 0);
-    gs.u[0].easyStunts = true;
+    mountTouchControls(() => xt.fase === 0 && !raceMenu.isOpen);
   }
+
+  gs.u[0].easyStunts = easyStuntsEnabled();
 
   // ---- the race loop: the base race's (web/main.js frameBody) -------------------
   // Fixed 53 ms tick (the jar's budget: 530 ms per 10 frames); physics never at

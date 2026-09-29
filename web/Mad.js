@@ -19,7 +19,7 @@ function int2(a, b) {
 }
 
 /**
- * NFM Re-Lit's stunts, for the on-screen controls (touch.js sets
+ * NFM Re-Lit's stunts, enabled in Settings (the race sets
  * control.easyStunts on the player's Control): in the air an arrow starts the
  * stunt the way the handbrake does (loop 0 -> 1, then Mad's own loop 2 takes
  * the arrows). Only a press made in the air counts -- an arrow still held from
@@ -290,7 +290,7 @@ export class Mad {
     } else {
       this.pushed = false;
     }
-    if (control.easyStunts) easyStunt(this, control);   // touch controls only (touch.js)
+    if (control.easyStunts) easyStunt(this, control);   // player preference (touch.js)
     if (this.loop === 1) {
       const n7 = fr(fr(fr(fr(this.scy[0] + this.scy[1]) + this.scy[2]) + this.scy[3]) / 4.0);
       for (let k = 0; k < 4; ++k) {
