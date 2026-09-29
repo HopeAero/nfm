@@ -77,7 +77,10 @@ export class RaceTick {
     }
     // Which cars are braking or reversing, for their lightBrake lights (drawing only;
     // ext-patch lightbrake-*, web/tools/ext-patches.mjs).
-    for (let n = 0; n < xtgraphics.nplayers; n++) aconto2[n].braking = !!gs.u[n]?.down;
+    for (let n = 0; n < xtgraphics.nplayers; n++) {
+      aconto2[n].braking = !!gs.u[n]?.down;
+      aconto2[n].renderDistanceExempt = true; // keep Madness's dist-dependent repair/visual state intact
+    }
     let k8 = 0;
     let ai5 = intArray(200);
     let renderlimit = gs.nob;

@@ -47,3 +47,26 @@ Trasladar la proyección a shaders no es un cambio pequeño: `Plane.d` necesita 
 Tampoco conviene reintroducir un pool genérico de arrays: `WORK.md` documenta dos pruebas anteriores donde empeoró el rendimiento. La grabación y las asignaciones son candidatas a investigación, no mejoras demostradas por aparecer en el perfil.
 
 **No usar `Medium.resdown=2` como ajuste sólo gráfico:** `Mad.drive` lo consulta al aceptar trackers decorativos y puede cambiar colisiones. El renderer no tiene buffer de profundidad; cualquier cambio debe conservar el orden de envío. Este estudio no modifica física, geometría ni calidad automáticamente.
+
+## Implementación posterior: ajustes de dibujo
+
+Tras la comprobación del usuario, Chrome en su Samsung A54 mantiene la carrera fluida; las caídas repetidas se observaron en Kiwi. La caída inicial también aparece en Chrome. Esta observación centra la intervención en la introducción y permite dejar el detalle de carrera completo por defecto.
+
+En Ajustes se añaden **Introducción ligera** (Sí por defecto), **Detalle del fondo** (Completo/Reducido) y **Mostrar montañas** (Sí/No). Los cambios se guardan y se aplican al iniciar otra carrera, en Classic y Extended.
+
+La introducción conserva el recorrido y la duración originales; omite montañas, nubes y polígonos decorativos del suelo, y limita el dibujo de objetos del escenario a 4.000 unidades de profundidad de cámara más el radio del objeto. Cuando la cuenta atrás llega a 37 se recuperan las preferencias normales. El fondo reducido mantiene ese recorte en 8.000 unidades durante la carrera y omite nubes y detalle del suelo; la opción de montañas sigue siendo independiente. La pista y los obstáculos cercanos siguen dibujándose. Hay menos escenario lejano visible y puede aparecer al acercarse; ése es el intercambio visual del ajuste.
+
+Los coches siempre quedan exentos del nuevo límite. `Mad`/`Madness` leen `ContO.dist === 0` para estado de daños y reparaciones, así que recortar coches no sería una modificación sólo visual. `resdown`, `fade`, los trackers, modelos originales, cámara, cuenta atrás y orden relativo de envío se conservan.
+
+Se descartó una cámara de inicio más cercana: en una comparación del mismo estado aumentó los vértices emitidos de 44.184 a 67.542. Los polígonos mayores también pueden aumentar el relleno; acercar la cámara no prueba una reducción de trabajo.
+
+Prueba reproducible: `node web/tools/browser-render-detail.mjs`, con el servidor local. Mantiene los mismos coches/objetos cargados, sin simular entre las variantes, calienta cuatro dibujos y mide veinte. Los tiempos son una microprueba estática de dibujo y envío a WebGL en Chrome de escritorio; **no son FPS de carrera ni una predicción para el A54**. Datos en [render-detail-2026-09-29.json](perf-results/render-detail-2026-09-29.json).
+
+| Motor | Introducción original → ligera, caras | Vértices emitidos | Tiempo de dibujo estático |
+|---|---:|---:|---:|
+| Classic | 3.982 → 2.089 | 44.184 → 35.766 | 8,98 → 5,48 ms |
+| Extended | 2.500 → 1.472 | 33.387 → 29.625 | 8,60 → 4,84 ms |
+
+En la vista de carrera de esta prueba, fondo reducido sin montañas pasa de 4.087 a 2.218 caras en Classic y de 2.488 a 1.582 en Extended. Ocultar sólo montañas elimina 354/252 vértices emitidos respectivamente: aquí no son el mayor coste. No debe prometerse una ganancia grande por esa opción sola.
+
+Verificaciones de navegador: menos geometría en ambos motores, montañas apagadas/restauradas, mismos campos de posición/rotación de los objetos y misma visibilidad de los coches al cambiar detalle; también guardado de los tres ajustes mediante sus controles reales y traducción española. Capturas revisadas de la introducción, fondo reducido y Ajustes. Falta confirmar la experiencia final en el Samsung A54 del usuario.

@@ -449,6 +449,9 @@ const EASYSTUNT_PATCHES = [
 ];
 
 export const PATCHES = [
+  { name: 'render-distance', file: 'ContO.js',
+    find: '    if (((((this.xs(i32(i + (Math.imul(this.maxR, 2))), k) > 0)',
+    replace: '    if ((this.renderDistanceExempt || this.m.renderDistance == null || k < this.m.renderDistance + this.maxR) && ((((this.xs(i32(i + (Math.imul(this.maxR, 2))), k) > 0)' },
   { name: 'record-ghosts', file: 'Record.js', find: RECORD_GHOSTS_FIND, replace: RECORD_GHOSTS_REPLACE },
   { name: 'record-shift', file: 'Record.js', find: RECORD_SHIFT_FIND, replace: RECORD_SHIFT_REPLACE },
   { name: 'tracker-rows', file: 'Trackers.js', find: TRACKER_ROWS_FIND, replace: TRACKER_ROWS_REPLACE },

@@ -1,0 +1,88 @@
+[
+  {
+    "engine": "Classic",
+    "full": {
+      "name": "wide intro",
+      "msPerDraw": 8.980000007152558,
+      "submitted": 13680,
+      "emitted": 44184,
+      "faces": 3982
+    },
+    "light": {
+      "name": "light intro",
+      "msPerDraw": 5.480000007152557,
+      "submitted": 10600,
+      "emitted": 35766,
+      "faces": 2089
+    },
+    "normal": {
+      "name": "race full background",
+      "msPerDraw": 10.489999997615815,
+      "submitted": 22020,
+      "emitted": 59382,
+      "faces": 4087
+    },
+    "noMountains": {
+      "name": "race no mountains",
+      "msPerDraw": 8.764999997615813,
+      "submitted": 21832,
+      "emitted": 59028,
+      "faces": 4087
+    },
+    "low": {
+      "name": "race reduced background, no mountains",
+      "msPerDraw": 5.060000002384186,
+      "submitted": 15824,
+      "emitted": 46932,
+      "faces": 2218
+    },
+    "mountainVertices": {
+      "hidden": 0,
+      "shown": 354
+    },
+    "resdown": 0
+  },
+  {
+    "engine": "Extended",
+    "full": {
+      "name": "wide intro",
+      "msPerDraw": 8.604999995231628,
+      "submitted": 9715,
+      "emitted": 33387,
+      "faces": 2500
+    },
+    "light": {
+      "name": "light intro",
+      "msPerDraw": 4.840000009536743,
+      "submitted": 8427,
+      "emitted": 29625,
+      "faces": 1472
+    },
+    "normal": {
+      "name": "race full background",
+      "msPerDraw": 11.7,
+      "submitted": 17382,
+      "emitted": 50634,
+      "faces": 2488
+    },
+    "noMountains": {
+      "name": "race no mountains",
+      "msPerDraw": 11.210000002384186,
+      "submitted": 17250,
+      "emitted": 50382,
+      "faces": 2488
+    },
+    "low": {
+      "name": "race reduced background, no mountains",
+      "msPerDraw": 7.610000002384186,
+      "submitted": 14247,
+      "emitted": 43845,
+      "faces": 1582
+    },
+    "mountainVertices": {
+      "hidden": 0,
+      "shown": 252
+    },
+    "resdown": 0
+  }
+]

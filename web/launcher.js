@@ -39,6 +39,7 @@ const DEFAULTS = {
   name: '', car: 'Formula 7', stage: 1, players: 7, opponents: 'stage',
   sfxvol: 100, musicvol: 100, res: 2, interp: true, ghost: false, hud: 'auto', touch: 'auto', easyStunts: false, devmode: false, perf: 'fps',
   visibility: 'public', lang: 'en',
+  lightIntro: true, backgroundDetail: 'full', mountains: true,
 };
 let S = { ...DEFAULTS };
 try { S = { ...S, ...JSON.parse(localStorage.getItem(STORE_KEY) || '{}') }; } catch { /* first run */ }
@@ -141,6 +142,24 @@ const V = {
     set: (i) => { S.easyStunts = !!i; save(); },
     text: () => (S.easyStunts ? 'Yes' : 'No'),
   },
+  lightIntro: {
+    list: () => [false, true],
+    get: () => (S.lightIntro ? 1 : 0),
+    set: (i) => { S.lightIntro = !!i; save(); },
+    text: () => (S.lightIntro ? 'Yes' : 'No'),
+  },
+  backgroundDetail: {
+    list: () => ['full', 'low'],
+    get: () => (S.backgroundDetail === 'low' ? 1 : 0),
+    set: (i) => { S.backgroundDetail = i ? 'low' : 'full'; save(); },
+    text: () => (S.backgroundDetail === 'low' ? 'Reduced' : 'Full'),
+  },
+  mountains: {
+    list: () => [false, true],
+    get: () => (S.mountains ? 1 : 0),
+    set: (i) => { S.mountains = !!i; save(); },
+    text: () => (S.mountains ? 'Yes' : 'No'),
+  },
   // Dark-sky HUD: the port's rim around the lettering, or the Java's boxes.
   hud: {
     list: () => ['auto', 'outline', 'boxes'],
@@ -184,6 +203,8 @@ const MENU = ['Single Player', 'Extended Edition', 'Multiplayer', 'Car Maker', '
 const OPT_ROWS = [['players', 'Cars on track'], ['opponents', 'Opponents']];
 const SET_ROWS = [['sfxvol', 'Sound'], ['musicvol', 'Music'],
                   ['res', 'Resolution'], ['interp', 'Smooth frames'],
+                  ['lightIntro', 'Lightweight intro'], ['backgroundDetail', 'Background detail'],
+                  ['mountains', 'Show mountains'],
                   ['ghost', 'Replay recording'], ['hud', 'HUD on dark skies'],
                   ['touch', 'Touch controls'], ['easyStunts', 'Easy stunts'],
                   ['perf', 'Show performance'],

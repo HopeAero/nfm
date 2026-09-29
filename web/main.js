@@ -38,6 +38,7 @@ import { saveCareer } from './career.js';
 import { perfLevel, perfLine } from './perfline.js';
 import { parseRivals, pickRivals, seededRandom } from './rivals.js';
 import { touchEnabled, easyStuntsEnabled, mountTouchControls, installFinishTap } from './touch.js';
+import { installRenderDetail } from './render-detail.js';
 
 const log = (msg) => {
   console.log(msg);
@@ -301,6 +302,7 @@ export async function boot(opts = {}) {
   const gs = new GameSparker();
   const carDefine = new CarDefine(array, medium, trackers, gs);
   const xt = new XtGraphics(medium, carDefine, rd, gs);
+  installRenderDetail(medium, () => xt.fase === 0 && xt.starcnt >= 38);
   setFaceSortRank(params.get('facesort') === 'rank');
   const record = new Record(medium);
   // ?ghost=0 stops the replay's ghost buffer cloning car models every cycle.

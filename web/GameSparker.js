@@ -466,7 +466,10 @@ export class GameSparker {
     setDrawPhase(true);
     medium.d(rd);
     // Which cars are braking or reversing, for their lightBrake lights (drawing only).
-    for (let n = 0; n < xtGraphics.nplayers; ++n) array2[n].braking = !!this.u[n]?.down;
+    for (let n = 0; n < xtGraphics.nplayers; ++n) {
+      array2[n].braking = !!this.u[n]?.down;
+      array2[n].renderDistanceExempt = true; // Mad reads car.dist: graphics settings must not cull cars.
+    }
     let n34 = 0;
     const array16 = intArray(200);
     for (let n35 = 0; n35 < this.nob; ++n35) {

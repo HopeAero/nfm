@@ -1267,7 +1267,8 @@ export class ContO {
     const n2 = this.m.cz + trunc(fr(fr((this.x - this.m.x - this.m.cx) * this.m.sin(this.m.xz)) + fr((this.z - this.m.z - this.m.cz) * this.m.cos(this.m.xz))));
     const n3 = this.m.cz + trunc(fr(fr((this.y - this.m.y - this.m.cy) * this.m.sin(this.m.zy)) + fr((n2 - this.m.cz) * this.m.cos(this.m.zy))));
     let n4 = this.xs(n + this.maxR, n3) - this.xs(n - this.maxR, n3);
-    if (this.xs(n + this.maxR * 2, n3) > this.m.iw && this.xs(n - this.maxR * 2, n3) < this.m.w && n3 > -this.maxR && (n3 < this.m.fade[this.disline] + this.maxR || this.m.trk !== 0) && (n4 > this.disp || this.m.trk !== 0) && (!this.decor || (this.m.resdown !== 2 && this.m.trk !== 1))) {
+    // Browser detail horizon: cull geometry without changing fade/resdown or trackers.
+    if ((this.renderDistanceExempt || this.m.renderDistance == null || n3 < this.m.renderDistance + this.maxR) && this.xs(n + this.maxR * 2, n3) > this.m.iw && this.xs(n - this.maxR * 2, n3) < this.m.w && n3 > -this.maxR && (n3 < this.m.fade[this.disline] + this.maxR || this.m.trk !== 0) && (n4 > this.disp || this.m.trk !== 0) && (!this.decor || (this.m.resdown !== 2 && this.m.trk !== 1))) {
       ++graphics2D.objDrawn;
       if (this.shadow) {
         if (!this.m.crs) {

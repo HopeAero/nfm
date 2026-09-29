@@ -1115,7 +1115,7 @@ export class ContO {
     let j = i32(this.m.cz + trunc((fr((fr(fr(((i32((i32(this.x - this.m.x)) - this.m.cx)))) * this.m.sin(this.m.xz))) + (fr(fr(((i32((i32(this.z - this.m.z)) - this.m.cz)))) * this.m.cos(this.m.xz)))))));
     let k = i32(this.m.cz + trunc((fr((fr(fr(((i32((i32(this.y - this.m.y)) - this.m.cy)))) * this.m.sin(this.m.zy))) + (fr(fr(((i32(j - this.m.cz)))) * this.m.cos(this.m.zy)))))));
     let l = i32(this.xs(i32(i + this.maxR), k) - this.xs(i32(i - this.maxR), k));
-    if (((((this.xs(i32(i + (Math.imul(this.maxR, 2))), k) > 0) && (this.xs(i32(i - (Math.imul(this.maxR, 2))), k) < this.m.w)) && (k > i32(-this.maxR))) && (((k < (i32(this.m.fade[this.disline] + this.maxR))) || this.m.trk))) && (((l > this.disp) || this.m.trk))) {
+    if ((this.renderDistanceExempt || this.m.renderDistance == null || k < this.m.renderDistance + this.maxR) && ((((this.xs(i32(i + (Math.imul(this.maxR, 2))), k) > 0) && (this.xs(i32(i - (Math.imul(this.maxR, 2))), k) < this.m.w)) && (k > i32(-this.maxR))) && (((k < (i32(this.m.fade[this.disline] + this.maxR))) || this.m.trk))) && (((l > this.disp) || this.m.trk))) { // browser-patch: visual horizon only
       if (this.shadow) {
         if (!this.m.crs) {
           if (k < 2000) {

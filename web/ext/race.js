@@ -51,6 +51,7 @@ import { NEW_BASE, newCars, setNewCars } from './newcars.js';
 import { loadNewCars } from './newcars-stats.js';
 import { newCarModel } from './newcars-model.js';
 import { touchEnabled, easyStuntsEnabled, mountTouchControls, installFinishTap } from '../touch.js';
+import { installRenderDetail } from '../render-detail.js';
 
 const W = 870, H = 480;   // Extended's game space (the base game's is 800x450)
 const FONTS = [['Adventure', 'Adventure.ttf'], ['fifawelcome1.3', 'fifawelcome1.3.ttf']];
@@ -401,6 +402,7 @@ export async function bootExtended(params, log, onExit) {
   stage.style.visibility = '';
   performance.mark('nfm-ext-presenter-ready');
   const { medium } = w;
+  installRenderDetail(medium, () => xt.fase === 0 && xt.starcnt >= 38);
   const race = new RaceTick(gs, w);
   sound.attach(xt, w.aconto2[0]);  // the player's sparks scrape
   log(`stage ${checkpoints.stage}: ${checkpoints.name}`);

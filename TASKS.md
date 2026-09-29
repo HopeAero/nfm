@@ -9,6 +9,8 @@ Status key: `[x]` done · `[~]` in progress · `[ ]` not started · `[!]` blocke
 
 ## Done
 
+- [x] **Mobile drawing preferences (2026-09-29):** lightweight intro, reduced background/drawing distance and independent mountains toggle in Classic and Extended. Cars exempt; original physics inputs retained. Static same-scene geometry comparisons and browser settings persistence verified; actual A54 FPS still needs user confirmation. See `web/tools/MOBILE_PERFORMANCE.md`.
+
 - [x] Java-semantics runtime (`web/java.js`) — idiv/i32/trunc/fr, JavaRandom, Color
 - [x] VFS + zip reader (`web/vfs.js`) — fetch, `DecompressionStream`, fpath autodetect
 - [x] WebGL `Graphics2D` (`web/graphics.js`) — colour-as-attribute, one draw call, even-odd fill
