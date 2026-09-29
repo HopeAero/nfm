@@ -41,7 +41,7 @@ test('touchWanted: automatic on touch screens only; always / never override', ()
 test('ACTIONS carry the base race key (code) and Extended\'s (key)', () => {
   assert.deepEqual([ACTIONS.up.code, ACTIONS.up.key], ['ArrowUp', 'ArrowUp']);
   assert.deepEqual([ACTIONS.handb.code, ACTIONS.handb.key], ['Space', ' ']);
-  assert.deepEqual([ACTIONS.look.code, ACTIONS.look.key], ['ShiftLeft', 'z']);   // main.js Shift; the jar's Z
+  assert.deepEqual([ACTIONS.target.code, ACTIONS.target.key], ['KeyA', 'a']);   // toggle arrow target in both races
   assert.deepEqual([ACTIONS.pause.code, ACTIONS.pause.key], ['Escape', 'Escape']);
 });
 

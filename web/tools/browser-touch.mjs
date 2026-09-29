@@ -68,6 +68,14 @@ try {
     await touch('touchEnd',[]);
     assert.equal((await state()).up,false,'gas released');
     assert.equal((await state()).easy,true,'easy stunts explicitly enabled');
+    const arrowMode = await tab.evaluate('__nfm.gs.u[0].arrace');
+    await touch('touchStart',[positions.target]);
+    await sleep(400);
+    assert.equal(await tab.evaluate('__nfm.gs.u[0].arrace'),!arrowMode,'target button toggles arrow like A');
+    await touch('touchEnd',[]);
+    await touch('touchStart',[positions.target]);
+    await touch('touchEnd',[]);
+    assert.equal(await tab.evaluate('__nfm.gs.u[0].arrace'),arrowMode,'second press restores arrow mode');
     console.log(`${ext?'Extended':'Classic'}: held gas moves car, simultaneous steering, independent release, controls inside stage`);
   }
 } finally {

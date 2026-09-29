@@ -1,5 +1,5 @@
 // On-screen controls for phones and tablets, laid out like NFM Re-Lit's: steer
-// bottom left, look back above it; brake and gas bottom right, the handbrake
+// bottom left, arrow target above it; brake and gas bottom right, the handbrake
 // above the gas; pause top right.
 //
 // Each button is a KEY: pressing it dispatches the keydown the keyboard would,
@@ -8,15 +8,14 @@
 // (main.js installInput), Extended reads `e.key` (ext/race.js javaKey), so
 // every action carries both. Easy stunts are a separate launcher setting.
 
-/** What each button presses: [code for main.js, key for Extended]. Look back is
- *  Shift in the base port and Z in the jar (lookback = 1). */
+/** What each button presses: [code for main.js, key for Extended]. */
 export const ACTIONS = {
   left: { code: 'ArrowLeft', key: 'ArrowLeft' },
   right: { code: 'ArrowRight', key: 'ArrowRight' },
   up: { code: 'ArrowUp', key: 'ArrowUp' },
   down: { code: 'ArrowDown', key: 'ArrowDown' },
   handb: { code: 'Space', key: ' ' },
-  look: { code: 'ShiftLeft', key: 'z' },
+  target: { code: 'KeyA', key: 'a' },
   pause: { code: 'Escape', key: 'Escape' },
 };
 
@@ -53,8 +52,8 @@ const ICON = {
   right: '<path d="M18 12 L36 24 L18 36 Z"/><rect x="10" y="20" width="8" height="8"/>',
   up: '<path d="M12 28 L24 10 L36 28 Z"/><rect x="20" y="28" width="8" height="10"/>',
   down: '<path d="M12 20 L24 38 L36 20 Z"/><rect x="20" y="10" width="8" height="10"/>',
-  handb: '<path d="M10 34 L34 12 L38 16 L16 38 Z"/><rect x="8" y="34" width="20" height="5" rx="2"/>',
-  look: '<path d="M24 10 A14 14 0 1 1 11 19" fill="none" stroke="currentColor" stroke-width="4"/><path d="M6 12 L16 14 L10 23 Z"/><circle cx="24" cy="24" r="4"/>',
+  handb: '<path d="M9 39 L12 32 H27 L31 39 Z"/><circle cx="19" cy="30" r="5"/><path d="M20 29 L30 19" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><rect x="28" y="7" width="9" height="19" rx="4" transform="rotate(45 32.5 16.5)"/>',
+  target: '<path d="M24 10 A14 14 0 1 1 11 19" fill="none" stroke="currentColor" stroke-width="4"/><path d="M6 12 L16 14 L10 23 Z"/><circle cx="24" cy="24" r="4"/>',
   pause: '<rect x="12" y="13" width="24" height="4"/><rect x="12" y="22" width="24" height="4"/><rect x="12" y="31" width="24" height="4"/>',
 };
 
@@ -62,7 +61,7 @@ const ICON = {
 const LAYOUT = [
   ['left', 'left:5.5%;bottom:8%'],
   ['right', 'left:20.5%;bottom:3%'],
-  ['look', 'left:1.5%;bottom:39%'],
+  ['target', 'left:1.5%;bottom:39%'],
   ['down', 'right:20.5%;bottom:3%'],
   ['up', 'right:5.5%;bottom:8%'],
   ['handb', 'right:1.5%;bottom:39%'],
@@ -77,8 +76,8 @@ export function mountTouchControls(visible = () => true) {
   for (const [a, pos] of LAYOUT) {
     const b = document.createElement('div');
     b.dataset.touch = a;
-    b.style.cssText = 'position:absolute;width:var(--touch-size);height:var(--touch-size);box-sizing:border-box;border-radius:6px;'
-      + 'background:rgba(95,125,95,.28);border:1px solid rgba(45,65,45,.35);color:rgba(40,65,40,.55);filter:drop-shadow(0 0 .4vmin rgba(0,0,0,.6));'
+    b.style.cssText = 'position:absolute;width:var(--touch-size);height:var(--touch-size);box-sizing:border-box;border-radius:calc(var(--touch-size) * .14);'
+      + 'background:rgba(130,130,130,.38);border:2px solid rgba(255,255,255,.45);color:rgba(255,255,255,.9);filter:drop-shadow(0 0 .4vmin rgba(0,0,0,.6));'
       + 'display:flex;align-items:center;justify-content:center;pointer-events:auto;touch-action:none;'
       + `-webkit-touch-callout:none;${pos}`;
     b.innerHTML = `<svg viewBox="0 0 48 48" width="62%" height="62%" fill="currentColor">${ICON[a]}</svg>`;
