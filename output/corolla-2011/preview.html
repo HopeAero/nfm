@@ -1,0 +1,30 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Corolla 2011 · Need for Madness</title>
+<style>html{background:#e8e5db;color:#20252b;font:16px system-ui}body{margin:24px auto;max-width:1280px;padding:0 18px}h1{font-size:26px;margin:0}p{color:#515d66}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.view{background:#f7f6ef;border:1px solid #bec5c8;border-radius:12px;overflow:hidden}h2{margin:12px 20px 0;font-size:15px;color:#54616a}canvas{display:block;width:100%;aspect-ratio:5/3}a{color:#225779}@media(max-width:640px){.grid{grid-template-columns:1fr}}</style>
+<h1>Toyota Corolla 2011</h1><p>Modelo original en polígonos de Need for Madness · blanco · sin Blender</p>
+<div class="grid" id="views"></div><p id="status">Cargando…</p>
+<p><a href="Toyota%20Corolla%202011.rad" download>Descargar el modelo .rad</a></p>
+<script type="module">
+import {ContO} from '../../web/ContO.js';import {Medium} from '../../web/Medium.js';
+import {Trackers} from '../../web/Trackers.js';import {Graphics2D} from '../../web/graphics.js';
+import {problems} from '../../web/careditor/rad.js';import {setDrawPhase} from '../../web/java.js';
+const source=await (await fetch('./Toyota%20Corolla%202011.rad')).text();
+const poses=[['Vista delantera',210,12],['Vista trasera',30,12],['Perfil',90,0],['Vista delantera alta',210,24]];
+const info=[];
+for(const [label,yaw,pitch] of poses){
+ const box=document.createElement('section');box.className='view';box.innerHTML='<h2>'+label+'</h2>';
+ const g=document.createElement('canvas'),t=document.createElement('canvas');g.width=t.width=1200;g.height=t.height=720;box.append(g);document.getElementById('views').append(box);
+ const rd=new Graphics2D(g,t,600,360),m=new Medium();m.loadnew=true;
+ const o=new ContO(source,m,new Trackers());o.shadow=false;
+ m.w=600;m.h=360;m.cx=300;m.cy=180;m.cz=50;m.focus_point=700;
+ m.fadfrom(8000);m.ground=100000;m.iw=m.ih=m.trk=0;
+ m.cfade=[215,223,225];m.crs=false;
+ const dist=660,cp=m.cos(pitch),sp=m.sin(pitch),cy=m.cos(yaw),sy=m.sin(yaw);
+ m.xz=yaw;m.zy=pitch;m.x=-Math.round(m.cx+dist*cp*sy);
+ m.y=-Math.round(m.cy+dist*sp)-45;m.z=-Math.round(m.cz+dist*cp*cy);
+ function draw(){rd.begin();rd.setColor(247,246,239);rd.fillRect(0,0,600,360);setDrawPhase(true);try{o.d(rd);}finally{setDrawPhase(false);}rd.end();}
+ draw();requestAnimationFrame(draw);
+ info.push({label,npl:o.npl,radius:o.maxR,issues:problems(source,o),vertices:rd.count});
+}
+window.corollaInfo=info;document.getElementById('status').textContent=(info[0].npl-76)+' paneles de carrocería · 4 ruedas nativas · Clase B';
+</script></html>

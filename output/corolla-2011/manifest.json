@@ -1,0 +1,25 @@
+{
+  "name": "Toyota Corolla 2011",
+  "version": 1,
+  "authoring": "Original code-authored mesh; native NFM polygons and wheels; no Blender.",
+  "reference": "User-provided white Corolla 2011 photograph; front and side visible. Rear is an approximation.",
+  "guide": "https://docs.google.com/presentation/d/1MiJ1Lbp8c2HN3KRx5jy5fPyffyOdCrXLT5VjUF0FyKo/edit",
+  "bodyPolygons": 134,
+  "loadedPieces": 210,
+  "wheels": 4,
+  "tyreHeight": 21,
+  "radius": 206,
+  "stats": "Class B, 600-point budget. Initial game handling; not a physical vehicle simulation.",
+  "damageCalibration": {
+    "actmag": 24869,
+    "crash": [
+      115,
+      55,
+      45
+    ],
+    "maxmag": 31832,
+    "dammult": 0.5750000476837158
+  },
+  "nativeRaceLoader": "accepted at custom car slot 16",
+  "readiness": []
+}

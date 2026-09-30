@@ -34,6 +34,9 @@ mkdir -p "$STAGE/web"
 cp "$SRC"/index.html "$STAGE/"
 cp "$SRC"/web/*.js "$SRC"/web/*.html "$SRC"/web/*.css "$STAGE/web/"
 cp "$SRC"/web/handbrake-icon.png "$STAGE/web/"
+# Original custom car showcase; keep the shipped mycars/ assets untouched.
+mkdir -p "$STAGE/web/cars"
+cp "$SRC"/web/cars/*.rad "$STAGE/web/cars/"
 rm -f "$STAGE"/web/*.test.js
 # web/vendor/ is a SUBDIRECTORY, so the glob above misses it. Leaving it out
 #404s bassoonplayer.js, and because a failed ES module import throws, boot()
